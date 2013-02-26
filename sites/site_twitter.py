@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
 from basesite import basesite
+from time     import sleep
+
+BATCH_COUNT = 200 # Number of tweets per request (max)
 
 """
 	Downloads twitter albums
@@ -9,22 +12,63 @@ class twitter(basesite):
 	
 	""" Parse/strip URL to acceptable format """
 	def sanitize_url(self, url):
-		if not 'twitter.com' in url:
+		if not 'twitter.com/' in url:
 			raise Exception('')
+		if url.endswith('twitter.com/'):
+			raise Exception('No twitter username given')
 		return url
+	
+	""" Gets twitter user from URL """
+	def get_user(self, url):
+		user = url[url.find('twitter.com/')+len('twitter.com/'):]
+		if '/' in user: user = user[:user.find('/')]
+		return user
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
-		return 'twitter_%s' % aid
+		return 'twitter_%s' % self.get_user(url)
 
+	""" Returns URL request string for user from URL """
+	def get_request(self, url, max_id='0'):
+		user = self.get_user(url)
+		req  = 'https://api.twitter.com/1/statuses/user_timeline.json'
+		req += '?screen_name=%s' % user
+		req += '&include_entities=true'
+		req += '&exclude_replies=true'
+		req += '&trim_user=true'
+		req += '&include_rts=false'
+		req += '&count=%d' % BATCH_COUNT
+		if max_id != '0':
+			req += '&max_id=%s' % max_id
+		return req
+
+	""" Magic! """
 	def download(self):
-		r = self.web.get('%s' % self.url)
-		# Get images
-		links = self.web.between(r, 'img src="http://i.', '"')
-		for index, link in enumerate(links):
-			link = self.get_highest_res('http://%s' % link)
-			# Download every image
-			# Uses superclass threaded download method
-			self.download_image(link, index, total=len(links)) 
+		turl = self.get_request(self.url)
+		self.log('loading %s' % turl)
+		r = self.web.getter(turl)
+		max_id  = 0
+		while r.strip() != '[]':
+			last_id = max_id
+			max_id  = 0
+			index   = 0
+			medias  = self.web.between(r, '"media":[{', '}]')
+			for media in medias:
+				ids = self.web.between(media, '"id":', ',')
+				if len(ids) > 0: max_id = int(ids[-1]) - 1
+				urls = self.web.between(media, '"media_url":"', '"')
+				for url in urls:
+					url = url.replace('\\/', '/')
+					index += 1
+					self.download_image(url, index)
+			if max_id == 0:
+				ids = self.web.between(r, '","id":', ',')
+				if len(ids) > 0 and last_id != int(ids[-1]) - 1: 
+					max_id = int(ids[-1]) - 1
+				else: break
+			turl = self.get_request(self.url, max_id=max_id)
+			self.log('loading %s' % turl)
+			sleep(2)
+			r = self.web.getter(turl)
 		self.wait_for_threads()
 	

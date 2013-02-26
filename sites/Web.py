@@ -187,7 +187,10 @@ class Web:
 			else:
 				try_again = False
 			
-		result = handle.read()
+		try:
+			result = handle.read()
+		except IncompleteRead:
+			return ''
 		
 		return result
 	

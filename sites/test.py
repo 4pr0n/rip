@@ -19,7 +19,8 @@ from site_twitter     import twitter
 #i = deviantart('http://dreambaloon.deviantart.com/gallery/')
 #i = photobucket('http://s579.beta.photobucket.com/user/merkler/library/')
 #i = flickr('http://www.flickr.com/photos/beboastar/sets/72157630130722172/')
-i = flickr('https://secure.flickr.com/photos/peopleofplatt/sets/72157624572361792/with/6344610705/')
+#i = flickr('https://secure.flickr.com/photos/peopleofplatt/sets/72157624572361792/with/6344610705/')
+i = twitter('https://twitter.com/darrow_ashley')
 print i.working_dir
 if i.existing_zip_path() != None:
 	print 'Zip exists: %s' % i.existing_zip_path()
