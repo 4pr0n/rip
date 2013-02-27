@@ -47,25 +47,19 @@ class twitter(basesite):
 		turl = self.get_request(self.url)
 		self.log('loading %s' % turl)
 		r = self.web.getter(turl)
-		max_id  = 0
+		index = 0
 		while r.strip() != '[]':
-			last_id = max_id
-			max_id  = 0
-			index   = 0
 			medias  = self.web.between(r, '"media":[{', '}]')
 			for media in medias:
-				ids = self.web.between(media, '"id":', ',')
-				if len(ids) > 0: max_id = int(ids[-1]) - 1
 				urls = self.web.between(media, '"media_url":"', '"')
 				for url in urls:
 					url = url.replace('\\/', '/')
 					index += 1
 					self.download_image(url, index)
-			if max_id == 0:
-				ids = self.web.between(r, '","id":', ',')
-				if len(ids) > 0 and last_id != int(ids[-1]) - 1: 
-					max_id = int(ids[-1]) - 1
-				else: break
+			# Find ID of last tweet
+			ids = self.web.between(r, '","id":', ',')
+			if len(ids) > 0: max_id = int(ids[-1]) - 1
+			else: break
 			turl = self.get_request(self.url, max_id=max_id)
 			self.log('loading %s' % turl)
 			sleep(2)

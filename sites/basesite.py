@@ -45,6 +45,7 @@ class basesite(object):
 		self.max_threads = MAX_THREADS
 		self.thread_count = 0
 		self.logfile = '%s/%s' % (self.working_dir, LOG_NAME)
+		self.log('http://i.rarchives.com - file log for URL %s' % url)
 	
 	""" To be overridden """
 	def sanitize_url(self, url):
@@ -60,7 +61,7 @@ class basesite(object):
 	
 	""" Appends line to log file """
 	def log(self, text):
-		# TODO Remove the print statement!
+		# TODO Remove the stderr print statement!
 		sys.stderr.write('%s\n' % text)
 		f = open(self.logfile, 'a')
 		f.write("%s\n" % text)
@@ -86,6 +87,14 @@ class basesite(object):
 		# Strip extraneous / non FS safe characters
 		if '?' in saveas: saveas = saveas[:saveas.find('?')]
 		if ':' in saveas: saveas = saveas[:saveas.find(':')]
+		# Add a file extension if necessary
+		if not '.' in saveas:
+			m = self.web.get_meta(url)
+			ct = 'image/jpeg' # Default to jpg
+			if 'Content-Type' in m: ct = m['Content-Type']
+			ext = ct[ct.rfind('/')+1:]
+			if ext == 'jpeg': ext = 'jpg'
+			saveas = '%s.%s' % (saveas, ext)
 		# Setup subdirectory saves
 		if subdir != '': subdir = '/%s' % subdir
 		savedir = '%s%s' % (self.working_dir, subdir)
@@ -105,8 +114,10 @@ class basesite(object):
 	""" Multi-threaded download of image """
 	def download_image_thread(self, url, saveas, index, total):
 		m = self.web.get_meta(url)
-		if 'Content-Type' not in m or 'image' not in m['Content-Type']:
-			text = 'no "image" in Content-Type for URL %s' % (url)
+		if 'Content-Type' not in m or \
+			('image' not in m['Content-Type'] and \
+			'video' not in m['Content-Type']):
+			text = 'no "image"/"video" in Content-Type for URL %s' % (url)
 		else:
 			if self.web.download(url, saveas):
 				text = 'downloaded (%d' % index

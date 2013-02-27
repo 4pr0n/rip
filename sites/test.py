@@ -1,12 +1,16 @@
 #!/usr/bin/python
 
 from site_imgur       import imgur
-from site_imagefap    import imagefap
-from site_imagebam    import imagebam
 from site_deviantart  import deviantart
 from site_photobucket import photobucket
 from site_flickr      import flickr
 from site_twitter     import twitter
+from site_tumblr      import tumblr
+from site_instagram   import instagram
+from site_imagefap    import imagefap
+from site_imagebam    import imagebam
+from site_imagearn    import imagearn
+from site_xhamster    import xhamster
 
 #i = imgur('http://imgur.com/a/8vmpo/noscript')
 #i = imagefap('http://www.imagefap.com/pictures/2885204/Kentucky-Craigslist')
@@ -20,7 +24,14 @@ from site_twitter     import twitter
 #i = photobucket('http://s579.beta.photobucket.com/user/merkler/library/')
 #i = flickr('http://www.flickr.com/photos/beboastar/sets/72157630130722172/')
 #i = flickr('https://secure.flickr.com/photos/peopleofplatt/sets/72157624572361792/with/6344610705/')
-i = twitter('https://twitter.com/darrow_ashley')
+#i = twitter('https://twitter.com/darrow_ashley')
+#i = twitter('https://twitter.com/lemandicandi')
+#i = twitter('https://twitter.com/MrNMissesSmith')
+#i = tumblr('http://caramiaphotography.tumblr.com/tagged/me')
+#i = tumblr('http://1fakeyfake.tumblr.com')
+#i = instagram('http://web.stagram.com/n/glitterypubez/')
+i = imagearn('http://imagearn.com/gallery.php?id=128805')
+i = imagearn('http://imagearn.com/gallery.php?id=32488')
 print i.working_dir
 if i.existing_zip_path() != None:
 	print 'Zip exists: %s' % i.existing_zip_path()
