@@ -22,6 +22,7 @@ from site_xhamster    import xhamster
 #i = deviantart('http://dreamersintheskies.deviantart.com/gallery/') # Gets more than gmi-total
 #i = deviantart('http://dreambaloon.deviantart.com/gallery/')
 #i = photobucket('http://s579.beta.photobucket.com/user/merkler/library/')
+#i = photobucket('http://s1131.beta.photobucket.com/user/Beth_fan/library/')
 #i = flickr('http://www.flickr.com/photos/beboastar/sets/72157630130722172/')
 #i = flickr('https://secure.flickr.com/photos/peopleofplatt/sets/72157624572361792/with/6344610705/')
 #i = twitter('https://twitter.com/darrow_ashley')
@@ -30,8 +31,13 @@ from site_xhamster    import xhamster
 #i = tumblr('http://caramiaphotography.tumblr.com/tagged/me')
 #i = tumblr('http://1fakeyfake.tumblr.com')
 #i = instagram('http://web.stagram.com/n/glitterypubez/')
-i = imagearn('http://imagearn.com/gallery.php?id=128805')
-i = imagearn('http://imagearn.com/gallery.php?id=32488')
+#i = imagearn('http://imagearn.com/gallery.php?id=128805')
+#i = imagearn('http://imagearn.com/gallery.php?id=29839')
+#i = imagearn('http://imagearn.com/image.php?id=5046077')
+#i = xhamster('http://xhamster.com/photos/gallery/1306566/lovely_teen_naked_for_self_shots.html')
+#i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html')
+#i = flickr('http://www.flickr.com/photos/29809540@N04/page1/')
+i = imgur('http://scopolamina.imgur.com/')
 print i.working_dir
 if i.existing_zip_path() != None:
 	print 'Zip exists: %s' % i.existing_zip_path()
