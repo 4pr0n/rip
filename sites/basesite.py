@@ -45,7 +45,7 @@ class basesite(object):
 		self.max_threads = MAX_THREADS
 		self.thread_count = 0
 		self.logfile = '%s/%s' % (self.working_dir, LOG_NAME)
-		self.log('http://i.rarchives.com - file log for URL %s' % url)
+		self.first_log = True
 	
 	""" To be overridden """
 	def sanitize_url(self, url):
@@ -61,6 +61,9 @@ class basesite(object):
 	
 	""" Appends line to log file """
 	def log(self, text):
+		if self.first_log:
+			self.first_log = False
+			self.log('http://rip.rarchives.com - file log for URL %s' % self.url)
 		# TODO Remove the stderr print statement!
 		sys.stderr.write('%s\n' % text)
 		f = open(self.logfile, 'a')

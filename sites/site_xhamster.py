@@ -9,19 +9,33 @@ class xhamster(basesite):
 	
 	""" Parse/strip URL to acceptable format """
 	def sanitize_url(self, url):
-		if not 'xhamster.com' in url:
+		if not 'xhamster.com/' in url:
 			raise Exception('')
+		if not 'xhamster.com/photos/gallery/' in url:
+			raise Exception('Required /photos/gallery/ not found in %s' % url)
+		if '?' in url: url = url[:url.find('?')]
+		if '#' in url: url = url[:url.find('#')]
 		return url
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
+		aid = url.split('/')[-2]
 		return 'xhamster_%s' % aid
 
 	def download(self):
+		page = 1
 		r = self.web.get(self.url)
-		links = self.web.between(r, 'img src="http://i.', '"')
-		for index, link in enumerate(links):
-			link = 'http://%s' % link
-			self.download_image(link, index, total=len(links)) 
+		while True:
+			chunks = self.web.between(r, 'id=menu', 'Related Galleries')
+			if len(chunks) == 0: break
+			links = self.web.between(chunks[0], "<img align='center' src=\"", '"')
+			for index, link in enumerate(links):
+				link = link.replace('_160.', '_1000.')
+				self.download_image(link, index + 1, total=len(links)) 
+			page += 1
+			next_page = self.url.replace('.html', '-%d.html' % page)
+			if next_page in r:
+				r = self.web.get(next_page)
+			else: break
 		self.wait_for_threads()
 	

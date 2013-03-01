@@ -33,7 +33,13 @@ class photobucket(basesite):
 	def download(self):
 		'''http://s579.beta.photobucket.com/user/merkler/library/'''
 		r = self.web.get('%s' % self.url)
-		path = self.web.between(r, "currentAlbumPath: '", "'")[0]
+		paths = self.web.between(r, "currentAlbumPath: '", "'")
+		if len(paths) == 0:
+			if 'This is a Private Album' in r:
+				self.log('Private album! %s' % self.url)
+				return
+			self.log('Unable to find currentAlbumPath at %s' % url)
+			return
 		murl = self.url.replace('http://s', 'http://m').replace('.beta.', '.')
 		murl = murl[:murl.find('/user')] + path
 		'''http://m579.photobucket.com/albums/ss239/merkler'''

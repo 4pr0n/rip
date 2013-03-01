@@ -8,7 +8,8 @@ from threading import Thread
 """
 	Downloads imagearn albums
 """
-RETRIES = 3
+RETRIES = 4
+RETRY_SECOND_MULTIPLIER = 4
 class imagearn(basesite):
 	
 	""" Parse/strip URL to acceptable format """
@@ -70,7 +71,7 @@ class imagearn(basesite):
 					self.thread_count -= 1
 					return
 				self.log('unable to get image (%d/%d), retry %d/%d' % (index, total, RETRIES - retries, RETRIES))
-				sleep((RETRIES - retries) * 3) # Linear retry backoff
+				sleep((RETRIES - retries) * RETRY_SECOND_MULTIPLIER) # Linear retry backoff
 				continue
 			break
 		# Download image
