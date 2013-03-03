@@ -83,7 +83,6 @@ class imgur(basesite):
 		r = self.web.get(album)
 		covers = self.web.between(r, '<div class="cover">', '</div>')
 		for index, cover in enumerate(covers):
-			if 'scopolamina' in album and index < 68: continue
 			url = self.web.between(cover, '<a href="', '"')[0]
 			url = 'http:%s' % url
 			alt = self.web.between(cover, 'alt="', '"')[0]
@@ -103,7 +102,6 @@ class imgur(basesite):
 		# Get images
 		links = self.web.between(r, 'img src="http://i.', '"')
 		for index, link in enumerate(links):
-			if '/a/rTnyF' in album and index < 760: continue
 			link = self.get_highest_res('http://i.%s' % link)
 			# Download every image
 			# Uses superclass threaded download method

@@ -35,9 +35,9 @@ from site_xhamster    import xhamster
 #i = imagearn('http://imagearn.com/gallery.php?id=29839')
 #i = imagearn('http://imagearn.com/image.php?id=5046077')
 #i = xhamster('http://xhamster.com/photos/gallery/1306566/lovely_teen_naked_for_self_shots.html')
-#i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html')
-#i = flickr('http://www.flickr.com/photos/29809540@N04/page1/')
-i = imgur('http://scopolamina.imgur.com/')
+i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html')
+#i = flickr('http://www.flickr.com/photos/29809540@N04/')
+#i = imgur('http://scopolamina.imgur.com/')
 print i.working_dir
 if i.existing_zip_path() != None:
 	print 'Zip exists: %s' % i.existing_zip_path()

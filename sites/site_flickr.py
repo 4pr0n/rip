@@ -2,6 +2,7 @@
 
 from basesite  import basesite
 from threading import Thread
+from os import path
 import time
 
 """
@@ -33,17 +34,25 @@ class flickr(basesite):
 			while ' '  in count: count = count.replace(' ',  '')
 			while '\n' in count: count = count.replace('\n', '')
 			if count.isdigit(): total = int(count)
+		if 'class="Results">(' in r:
+			count = self.web.between(r, 'class="Results">(', ' ')[0]
+			count = count.replace(' ', '').replace('\n', '').replace(',', '')
+			if count.isdigit(): total = int(count)
 			
+		index = 0
 		while True:
 			# Get images
 			links = self.web.between(r, '><a data-track="photo-click" href="', '"')
-			for index, link in enumerate(links):
+			for link in links:
 				link = 'http://www.flickr.com%s' % link
 				# Download every image
 				# Uses superclass threaded download method
-				self.download_image(link, index + 1, total=len(links)) 
+				index += 1
+				self.download_image(link, index, total=total) 
 			if 'data-track="next" href="' in r:
 				nextpage = self.web.between(r, 'data-track="next" href="', '"')[0]
+				if not 'flickr.com' in nextpage:
+					nextpage = 'http://flickr.com%s' % nextpage
 				r = self.web.get(nextpage)
 			else:
 				break
@@ -64,7 +73,9 @@ class flickr(basesite):
 		r = self.web.get(url)
 		titles = self.web.between(r, 'title="', '"')
 		if len(titles) > 0:
-			title = self.fix_filename(titles[0])
+			title = titles[0]
+			if '|' in title: title = title[:title.find('|')].strip()
+			title = self.fix_filename(title)
 		else:
 			title = 'unknown'
 		imgs = self.web.between(r, '<img src="http://farm', '"')
@@ -74,7 +85,10 @@ class flickr(basesite):
 			img = 'http://farm%s' % imgs[0]
 			ext = img[img.rfind('.'):]
 			saveas = '%s/%03d_%s_%s%s' % (self.working_dir, index, pid, title, ext)
-			if self.web.download(img, saveas):
+			if '?' in saveas: saveas = saveas[:saveas.find('?')]
+			if path.exists(saveas):
+				self.log('%s already exists (%d/%s) (%s)' % (saveas[saveas.rfind('/')+1:], index, total, self.get_size(saveas)))
+			elif self.web.download(img, saveas):
 				self.log('downloaded (%d/%s) (%s)' % (index, total, self.get_size(saveas)))
 			else:
 				self.log('download failed (%d/%s) %s' % (index, total, img))

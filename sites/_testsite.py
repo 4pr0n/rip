@@ -22,6 +22,6 @@ class xhamster(basesite):
 		links = self.web.between(r, 'img src="http://i.', '"')
 		for index, link in enumerate(links):
 			link = 'http://%s' % link
-			self.download_image(link, index, total=len(links)) 
+			self.download_image(link, index + 1, total=len(links)) 
 		self.wait_for_threads()
 	
