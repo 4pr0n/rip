@@ -8,7 +8,7 @@ from zipfile   import ZipFile, ZIP_DEFLATED
 from Web       import Web
 
 LOG_NAME      = 'log.txt' 
-RIP_DIRECTORY = 'rips'    # Directory to store rips in
+RIP_DIRECTORY = 'rips' # Directory to store rips in
 MAX_THREADS   = 3
 
 """
@@ -58,31 +58,35 @@ class basesite(object):
 	""" To be overridden """
 	def download(self):
 		raise Exception("Method 'download' was not overridden!")
+
+	""" Checks if album is already being downloaded """
+	def is_downloading(self):
+		return os.path.exists(self.logfile)
 	
 	""" Appends line to log file """
-	def log(self, text):
+	def log(self, text, overwrite=False):
 		if self.first_log:
 			self.first_log = False
-			self.log('http://rip.rarchives.com - file log for URL %s' % self.url)
-		# TODO Remove the stderr print statement!
+			self.log('http://rip.rarchives.com - file log for URL %s' % self.url, overwrite=True)
 		sys.stderr.write('%s\n' % text)
-		f = open(self.logfile, 'a')
+		if overwrite:
+			f = open(self.logfile, 'w')
+		else:
+			f = open(self.logfile, 'a')
 		f.write("%s\n" % text)
 		f.flush()
 		f.close()
 	
-	""" Gets last line from log """
-	def get_log(self):
+	""" Gets last line(s) from log """
+	def get_log(self, tail_lines=1):
 		if not os.path.exists(self.logfile):
 			return ''
 		f = open(self.logfile, 'r')
-		r = f.read()
+		r = f.read().strip()
 		f.close()
 		while r.endswith('\n'): r = r[:-1]
-		if '\n' in r:
-			return r[r.rfind('\n')+1:]
-		else:
-			return r
+		lines = r.split('\n')
+		return lines[len(lines)-tail_lines:]
 	
 	""" Starts separate thread to download image from URL """
 	def download_image(self, url, index, total='?', subdir=''):
@@ -125,7 +129,7 @@ class basesite(object):
 			if self.web.download(url, saveas):
 				text = 'downloaded (%d' % index
 				if total != '?': text += '/%s' % total
-				text += ') (%s)' % self.get_size(saveas)
+				text += ') (%s) - %s' % (self.get_size(saveas), url)
 			else:
 				text = 'download failed (%d' % index
 				if total != '?': text += '/%s' % total
@@ -167,12 +171,13 @@ class basesite(object):
 		Returns path to zip file
 	"""
 	def zip(self):
+		self.log('zipping album...')
 		zip_filename = '%s.zip' % self.working_dir
 		z = ZipFile(zip_filename, "w", ZIP_DEFLATED)
 		for root, dirs, files in os.walk(self.working_dir):
 			# NOTE: ignore empty directories
 			for fn in files:
-				if 'log.txt' in fn: continue
+				#if 'log.txt' in fn: continue
 				absfn = os.path.join(root, fn)
 				zfn = absfn[len(self.working_dir)+len(os.sep):] #XXX: relative path
 				z.write(absfn, zfn)

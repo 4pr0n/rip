@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
-from basesite import basesite
-from os import path, remove
+from basesite  import basesite
+from threading import Thread
+from time      import sleep
+from os        import path, remove
 
 """
 	Downloads getgonewild albums
@@ -24,36 +26,56 @@ class getgonewild(basesite):
 	def download(self):
 		r = self.web.get(self.url)
 		index = 0
-		links = web.between(r, '","url":"', '"')
+		links = self.web.between(r, '","url":"', '"')
 		for link in links:
 			link = link.replace('\\/', '/')
+			if '?' in link: link = link[:link.find('?')]
 			while link.endswith('/'): link = link[:-1]
 			index += 1
+			# Direct link to image
 			if link[link.rfind('.')+1:].lower() in ['jpg', 'jpeg', 'gif', 'png']:
 				self.download_image(link, index, total=len(links)) 
-			elif 'imgur.com/a/' in url:
-				self.download_imgur_album(link, index, total=len(links))
-			elif 'imgur.com' in url:
-				self.download_imgur_image(link, index, total=len(links))
+			# Imgur album
+			elif 'imgur.com/a/' in link:
+				while self.thread_count > self.max_threads: sleep(0.1)
+				self.thread_count += 1
+				args = (link, index, len(links))
+				t = Thread(target=self.download_imgur_album, args=args)
+				t.start()
+			# Imgur image
+			elif 'imgur.com' in link:
+				while self.thread_count > self.max_threads: sleep(0.1)
+				self.thread_count += 1
+				args = (link, index, len(links))
+				t = Thread(target=self.download_imgur_image, args=args)
+				t.start()
 		self.wait_for_threads()
 	
 	def download_imgur_album(self, link, index, total):
 		r = self.web.get('%s/noscript' % link)
-		alb_index = 1
+		alb_index = 0
 		images = self.web.between(r, '<a class="zoom" href="', '"')
-		for image in images:
-			filename = '%s/%03d_%03d_%s' % (self.working_dir, index, alb_index, link[link.rfind('/')+1:])
-			self.retry_download(link, filename)
+		if len(images) == 0:
+			self.log('album not found: %s' % link)
+		else: 
+			for image in images:
+				alb_index += 1
+				filename = '%s/%03d_%03d_%s' % (self.working_dir, index, alb_index, image[image.rfind('/')+1:])
+				self.retry_download(image, filename)
+				self.log('downloaded (%d/%d) (%s)' % (index, total, self.get_size(filename)))
+		self.thread_count -= 1
 
 	def download_imgur_image(self, link, index, total):
-		r = self.web.get(url)
+		r = self.web.get(link)
 		links = self.web.between(r, '<meta name="twitter:image" value="', '"')
 		if len(links) == 0:
 			links = self.web.between(r, '<link rel="image_src" href="', '"')
 		if len(links) > 0:
-			link = links[0]
-			filename = '%s/%03d_%s' % (dir, index, link[link.rfind('/')+1:])
-			self.retry_download(link, filename)
+			image = links[0]
+			filename = '%s/%03d_%s' % (self.working_dir, index, image[image.rfind('/')+1:])
+			self.retry_download(image, filename)
+			self.log('downloaded (%d/%d) (%s)' % (index, total, self.get_size(filename)))
+		self.thread_count -= 1
 
 	def retry_download(self, url, saveas):
 		dot = url.rfind('.')
@@ -70,6 +92,7 @@ class getgonewild(basesite):
 					txt = f.read()
 					f.close()
 					if 'File not found!' in txt:
+						self.log('file not found: %s' % url)
 						remove(saveas)
 				return
 			tries -= 1

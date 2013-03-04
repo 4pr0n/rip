@@ -54,7 +54,7 @@ class imagebam(basesite):
 		r = self.web.get(url)
 		imgs = self.web.between(r, ';" src="', '"')
 		if len(imgs) == 0:
-			self.log('unable to find image @ ' % url)
+			self.log('unable to find image @ %s' % url)
 			self.thread_count -= 1
 			return
 		img = imgs[0]

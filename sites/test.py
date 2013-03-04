@@ -11,8 +11,10 @@ from site_imagefap    import imagefap
 from site_imagebam    import imagebam
 from site_imagearn    import imagearn
 from site_xhamster    import xhamster
+from site_getgonewild import getgonewild
 
 #i = imgur('http://imgur.com/a/8vmpo/noscript')
+#i = imgur('http://scopolamina.imgur.com/')
 #i = imagefap('http://www.imagefap.com/pictures/2885204/Kentucky-Craigslist')
 #i = imagebam('http://www.imagebam.com/gallery/3e4u10fk034871hs6idcil6txauu3ru6/')
 #i = imagebam('http://www.imagebam.com/image/1ca1ab109274357')
@@ -35,9 +37,10 @@ from site_xhamster    import xhamster
 #i = imagearn('http://imagearn.com/gallery.php?id=29839')
 #i = imagearn('http://imagearn.com/image.php?id=5046077')
 #i = xhamster('http://xhamster.com/photos/gallery/1306566/lovely_teen_naked_for_self_shots.html')
-i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html')
+#i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html')
 #i = flickr('http://www.flickr.com/photos/29809540@N04/')
-#i = imgur('http://scopolamina.imgur.com/')
+#i = getgonewild('http://getgonewild.com/profile/EW2d')
+i = getgonewild('http://getgonewild.com/s/miss_ginger_biscuit')
 print i.working_dir
 if i.existing_zip_path() != None:
 	print 'Zip exists: %s' % i.existing_zip_path()
