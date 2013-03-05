@@ -23,6 +23,7 @@ from site_getgonewild import getgonewild
 #i = deviantart('http://angelsfalldown1.deviantart.com/gallery/2498856')
 #i = deviantart('http://dreamersintheskies.deviantart.com/gallery/') # Gets more than gmi-total
 #i = deviantart('http://dreambaloon.deviantart.com/gallery/')
+#i = deviantart('http://easy-shutter.deviantart.com/gallery/42198389')
 #i = photobucket('http://s579.beta.photobucket.com/user/merkler/library/')
 #i = photobucket('http://s1131.beta.photobucket.com/user/Beth_fan/library/')
 #i = flickr('http://www.flickr.com/photos/beboastar/sets/72157630130722172/')
@@ -30,9 +31,11 @@ from site_getgonewild import getgonewild
 #i = twitter('https://twitter.com/darrow_ashley')
 #i = twitter('https://twitter.com/lemandicandi')
 #i = twitter('https://twitter.com/MrNMissesSmith')
+#i = twitter('https://twitter.com/PBAprilLewis')
 #i = tumblr('http://caramiaphotography.tumblr.com/tagged/me')
 #i = tumblr('http://1fakeyfake.tumblr.com')
-#i = instagram('http://web.stagram.com/n/glitterypubez/')
+#i = tumblr('http://mourning-sex.tumblr.com/tagged/me')
+i = instagram('http://web.stagram.com/n/glitterypubez/')
 #i = imagearn('http://imagearn.com/gallery.php?id=128805')
 #i = imagearn('http://imagearn.com/gallery.php?id=29839')
 #i = imagearn('http://imagearn.com/image.php?id=5046077')
@@ -40,7 +43,7 @@ from site_getgonewild import getgonewild
 #i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html')
 #i = flickr('http://www.flickr.com/photos/29809540@N04/')
 #i = getgonewild('http://getgonewild.com/profile/EW2d')
-i = getgonewild('http://getgonewild.com/s/miss_ginger_biscuit')
+#i = getgonewild('http://getgonewild.com/s/miss_ginger_biscuit')
 print i.working_dir
 if i.existing_zip_path() != None:
 	print 'Zip exists: %s' % i.existing_zip_path()

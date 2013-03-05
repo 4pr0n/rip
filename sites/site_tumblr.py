@@ -29,6 +29,7 @@ class tumblr(basesite):
 		user = url[:url.find('.')]
 		return user
 
+	""" Returns URL to retrieve content with """
 	def get_base_url(self, url, media='photo', offset=0):
 		user  = self.get_user(url)
 		turl  = 'http://api.tumblr.com/v2/blog/%s' % user
@@ -62,7 +63,6 @@ class tumblr(basesite):
 					content = media[media.find('"url":"')+len('"url":"'):-1]
 				content = content.replace('\\/', '/')
 				index += 1
-				print 'CONTENT="%s"' % content
 				self.download_image(content, index, total=total)
 		return index
 	
@@ -76,7 +76,7 @@ class tumblr(basesite):
 	def download(self):
 		index = 0
 		total = 0
-		for media in ['photo', 'video']:
+		for media in ['photo']: #, 'video']:
 			offset = 0
 			while True:
 				base_url = self.get_base_url(self.url, media=media, offset=offset)
@@ -86,12 +86,5 @@ class tumblr(basesite):
 				index = self.parse_tumblr(r, index, total, media)
 				if index == 0: break
 				sleep(2)
-		# Get images
-		links = self.web.between(r, 'img src="http://i.', '"')
-		for index, link in enumerate(links):
-			link = self.get_highest_res('http://%s' % link)
-			# Download every image
-			# Uses superclass threaded download method
-			self.download_image(link, index, total=len(links)) 
 		self.wait_for_threads()
 	

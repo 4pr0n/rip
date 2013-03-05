@@ -65,6 +65,10 @@ input.textbox {
 	letter-spacing: -0.03em;
 }
 input.textbox:hover {
+	box-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px  4px 10px rgba(150, 150, 150, 0.6),
+	             -4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px -4px 10px rgba(150, 150, 150, 0.6);
 }
 
 td.button {
@@ -81,9 +85,13 @@ input.button {
 	padding-right: 35px;
 }
 input.button:hover {
-	border: 2px solid black;
+	/*border: 2px solid black;
 	background-color: #666;
-	color: #fff;
+	color: #fff;*/
+	box-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px  4px 10px rgba(150, 150, 150, 0.6),
+	             -4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px -4px 10px rgba(150, 150, 150, 0.6);
 }
 input.button:active {
 	background-color: #000;
@@ -124,9 +132,18 @@ table.site {
 }
 td.site {
 	text-align: center;
+}
+div.site {
 	background-color: #666;
 	border-radius: 10px;
 	padding: 5px;
+}
+div.site:hover {
+	background-color: #888;
+	box-shadow:   4px  0px 10px rgba(100, 100, 100, 0.6),
+	              0px  4px 10px rgba(100, 100, 100, 0.6),
+	             -4px  0px 10px rgba(100, 100, 100, 0.6),
+	              0px -4px 10px rgba(100, 100, 100, 0.6);
 }
 
 hr {
@@ -149,4 +166,8 @@ a.box {
 a.box:hover {
 	color: #fff;
 	text-decoration: none;
+	box-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px  4px 10px rgba(150, 150, 150, 0.6),
+	             -4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px -4px 10px rgba(150, 150, 150, 0.6);
 }

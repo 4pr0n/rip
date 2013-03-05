@@ -92,7 +92,7 @@ class imgur(basesite):
 			self.working_dir += '/%03d_%s' % (index + 1, alt)
 			if not path.exists(self.working_dir):
 				mkdir(self.working_dir)
-			self.log('Downloading album (%d/%d) "%s"' % (index + 1, len(covers), alt))
+			self.log('downloading album (%d/%d) "%s"' % (index + 1, len(covers), alt))
 			self.download_album(url)
 			self.working_dir = prev_dir
 

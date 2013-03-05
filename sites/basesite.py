@@ -123,7 +123,7 @@ class basesite(object):
 		m = self.web.get_meta(url)
 		if 'Content-Type' not in m or \
 			('image' not in m['Content-Type'] and \
-			'video' not in m['Content-Type']):
+			 'video' not in m['Content-Type']):
 			text = 'no "image"/"video" in Content-Type for URL %s' % (url)
 		else:
 			if self.web.download(url, saveas):
@@ -133,7 +133,7 @@ class basesite(object):
 			else:
 				text = 'download failed (%d' % index
 				if total != '?': text += '/%s' % total
-				text += ') %s' % url
+				text += ') - %s' % url
 		self.log(text)
 		self.thread_count -= 1
 	
@@ -147,7 +147,10 @@ class basesite(object):
 	
 	""" Returns human-readable filesize for file """
 	def get_size(self, filename):
-		bytes = os.path.getsize(filename)
+		try:
+			bytes = os.path.getsize(filename)
+		except:
+			return '?b'
 		b = 1024 * 1024 * 1024
 		a = ['g','m','k','']
 		for i in a:
@@ -160,7 +163,7 @@ class basesite(object):
 	""" Returns path to zip file if it exists, otherwise None. """
 	def existing_zip_path(self):
 		zipfile = '%s.zip' % self.working_dir
-		if os.path.exists(zipfile):
+		if os.path.exists(zipfile) and not os.path.exists(self.working_dir):
 			return zipfile
 		else:
 			return None

@@ -56,13 +56,13 @@ class getgonewild(basesite):
 		alb_index = 0
 		images = self.web.between(r, '<a class="zoom" href="', '"')
 		if len(images) == 0:
-			self.log('album not found: %s' % link)
+			self.log('failed (%d/%d): album not found - %s' % (index, total, link))
 		else: 
 			for image in images:
 				alb_index += 1
 				filename = '%s/%03d_%03d_%s' % (self.working_dir, index, alb_index, image[image.rfind('/')+1:])
 				self.retry_download(image, filename)
-				self.log('downloaded (%d/%d) (%s)' % (index, total, self.get_size(filename)))
+				self.log('downloaded (%d/%d) #%d (%s) - %s' % (index, total, alb_index, self.get_size(filename), image))
 		self.thread_count -= 1
 
 	def download_imgur_image(self, link, index, total):
@@ -74,7 +74,7 @@ class getgonewild(basesite):
 			image = links[0]
 			filename = '%s/%03d_%s' % (self.working_dir, index, image[image.rfind('/')+1:])
 			self.retry_download(image, filename)
-			self.log('downloaded (%d/%d) (%s)' % (index, total, self.get_size(filename)))
+			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(filename), image))
 		self.thread_count -= 1
 
 	def retry_download(self, url, saveas):

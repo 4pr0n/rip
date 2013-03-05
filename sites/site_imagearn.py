@@ -49,7 +49,7 @@ class imagearn(basesite):
 		saveas = '%s/%03d_%s' % (self.working_dir, index, iid)
 		for ext in ['jpg', 'jpeg', 'gif', 'png']:
 			if path.exists('%s.%s' % (saveas, ext)):
-				self.log('file exists: %s.%s' % (saveas, ext))
+				self.log('file exists (%d/%d) - %s.%s' % (index, total, saveas, ext))
 				return
 		while self.thread_count > self.max_threads: sleep(0.1)
 		self.thread_count += 1
@@ -67,10 +67,10 @@ class imagearn(basesite):
 			if len(images) == 0: 
 				retries -= 1
 				if retries == 0:
-					self.log('unable to get image (%d/%d) after %d retries (%s)' % (index, total, RETRIES, url))
+					self.log('download (%d/%d) FAILED after %d retries - %s' % (index, total, RETRIES, url))
 					self.thread_count -= 1
 					return
-				self.log('unable to get image (%d/%d), retry %d/%d' % (index, total, RETRIES - retries, RETRIES))
+				self.log('download (%d/%d) failed, retrying %d/%d' % (index, total, RETRIES - retries, RETRIES))
 				sleep((RETRIES - retries) * RETRY_SECOND_MULTIPLIER) # Linear retry backoff
 				continue
 			break
@@ -81,9 +81,10 @@ class imagearn(basesite):
 		if self.web.download(image, saveas):
 			text = 'downloaded (%d/%d)' % (index, total)
 			text += ' (%s)' % self.get_size(saveas)
+			text += ' - %s' % image
 		else:
-			text = 'download failed (%d/%d)' % (index, total)
-			text += ' %s' % image
+			text = 'download (%d/%d) failed' % (index, total)
+			text += ' - %s' % image
 		self.log(text)
 		self.thread_count -= 1
 	

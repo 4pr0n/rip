@@ -52,18 +52,12 @@ class deviantart(basesite):
 			total += len(chunks)
 			for chunk in chunks:
 				link = self.web.between(chunk, 'href="', '"')[0]
-				if link in already_have:
-					self.log('already have: %s' % link)
-					continue
+				if link in already_have: continue
 				already_have.append(link)
 				self.download_image(link, len(already_have), total=total) 
 			next_page = self.get_next_page(r)
-			if next_page == None:
-				self.log('no new pages, exiting')
-				break
-			self.log('loading next page (%s?offset=%s)' % (self.url, next_page))
+			if next_page == None: break
 			r = self.web.get('%s?offset=%s' % (self.url, next_page))
-		self.log('waiting for threads to finish')
 		self.wait_for_threads()
 	
 	""" Retrive link to 'next' page in gallery. Returns None if last page """
@@ -88,6 +82,7 @@ class deviantart(basesite):
 	""" Downloads image from deviantart image page """
 	def download_image_thread(self, url, index, total):
 		r = self.web.get(url)
+		img = None
 		if 'id="download-button"' in r:
 			dl = self.web.between(r, 'id="download-button"', '<')[0]
 			imgs = self.web.between(dl, 'href="', '"')
@@ -96,7 +91,7 @@ class deviantart(basesite):
 				self.thread_count -= 1
 				return
 			img = imgs[0]
-		elif 'ResViewSizer_img"' in r:
+		if img == None and 'ResViewSizer_img"' in r:
 			sizer = self.web.between(r, 'ResViewSizer_img"', '>')[0]
 			imgs = self.web.between(sizer, 'src="', '"')
 			if len(imgs) == 0:
@@ -104,9 +99,18 @@ class deviantart(basesite):
 				self.thread_count -= 1
 				return
 			img = imgs[0]
-		elif 'name="og:image" content="' in r:
+		if img == None and 'name="og:image" content="' in r:
 			img = self.web.between(r, 'name="og:image" content="', '"')[0]
-		else:
+		if img == None and '<div class="preview"' in r:
+			chunk = self.web.between(r, '<div class="preview"', '</div>')[0]
+			imgs = self.web.between(chunk, '" data-src="', '"')
+			if len(imgs) == 0:
+				self.log('unable to download image at: %s' % url)
+				self.thread_count -= 1
+				return
+			img = imgs[0]
+			img = img.replace('://th', '://fc').replace('/150/f/', '/f/')
+		if img == None:
 			self.log('image not found at: %s' % url)
 			self.thread_count -= 1
 			return
@@ -115,8 +119,8 @@ class deviantart(basesite):
 		if os.path.exists(saveas):
 			self.log('file exists: %s' % saveas)
 		elif self.web.download(img, saveas):
-			self.log('downloaded (%d/%d) (%s)' % (index, total, self.get_size(saveas)))
+			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), img))
 		else:
-			self.log('download failed (%d/%d)' % (index, total))
+			self.log('download failed (%d/%d) - %s' % (index, total, img))
 		self.thread_count -= 1
 

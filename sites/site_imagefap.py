@@ -30,6 +30,7 @@ class imagefap(basesite):
 
 	def download(self):
 		# Get album source
+		self.log('loading album...')
 		r = self.web.get(self.url)
 		# Get images
 		links = self.web.between(r, 'x.fap.to/images/thumb/', '"')

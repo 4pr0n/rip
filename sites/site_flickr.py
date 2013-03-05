@@ -89,9 +89,9 @@ class flickr(basesite):
 			if path.exists(saveas):
 				self.log('%s already exists (%d/%s) (%s)' % (saveas[saveas.rfind('/')+1:], index, total, self.get_size(saveas)))
 			elif self.web.download(img, saveas):
-				self.log('downloaded (%d/%s) (%s)' % (index, total, self.get_size(saveas)))
+				self.log('downloaded (%d/%s) (%s) - %s' % (index, total, self.get_size(saveas), img))
 			else:
-				self.log('download failed (%d/%s) %s' % (index, total, img))
+				self.log('download failed (%d/%s) - %s' % (index, total, img))
 		self.thread_count -= 1
 	
 	""" Parses non-filename-safe characters """

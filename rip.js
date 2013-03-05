@@ -23,7 +23,7 @@ function getQueryString(start) {
 
 // Start ripping album
 function startRip() {
-	statusbar('loading...');
+	statusbar('<img src="spinner_dark.gif">&nbsp;loading...');
 	var query = getQueryString(true);
 	sendRequest(query, requestHandler);
 	setTimeout(function() { checkRip(); }, 500);
@@ -46,7 +46,13 @@ function requestHandler(req) {
 		
 	} else if (json.zip != null) {
 		// ZIPPED
-		statusbar('download rip: <a class="box" href="' + json.zip + '">' + json.zip + '</a> (' + json.size + ')');
+		var zipurl = json.zip;
+		var title  = json.zip;
+		var split_size = 15;
+		if (title.length > (split_size * 2) + 3) {
+			title = title.substr(0, split_size) + "..." + title.substr(title.length-split_size);
+		}
+		statusbar('<a class="box" href="' + zipurl + '">' + title + '</a> (' + json.size + ')');
 		
 	} else if (json.log != null) {
 		// LOGS
@@ -56,6 +62,7 @@ function requestHandler(req) {
 			if (update.indexOf(' - ') >= 0) {
 				update = update.substr(0,update.indexOf(' - '));
 			}
+			update = '<img src="spinner_dark.gif">&nbsp;' + update;
 			statusbar(update);
 		}
 		// We only get logs if the file isn't done downloading.
@@ -106,6 +113,25 @@ function sendRequest(url, handler) {
 			}
 		}
 	}
+}
+
+function setExample(site) {
+	var dic = {
+		'imgur'       : 'http://imgur.com/a/4Qflh', //'http://imgur.com/a/RdXNa',
+		'tumblr'      : 'http://mourning-sex.tumblr.com/tagged/me',
+		'twitter'     : 'https://twitter.com/PBAprilLewis',
+		'deviantart'  : 'http://geekysica.deviantart.com/gallery/40343783',
+		'flickr'      : 'https://secure.flickr.com/photos/peopleofplatt/sets/72157624572361792/with/6166517381/',
+		'photobucket' : 'http://s1069.beta.photobucket.com/user/mandymgray/library/Album%203',
+		'webstagram'  : 'http://web.stagram.com/n/glitterypubez/',
+		'imagefap'    : 'http://www.imagefap.com/pictures/2885204/Kentucky-Craigslist',
+		'imagearn'    : 'http://imagearn.com/gallery.php?id=82587',
+		'imagebam'    : 'http://www.imagebam.com/gallery/3b73c0f6ba797e77a33b46779fbfe678/',
+		'xhamster'    : 'http://xhamster.com/photos/gallery/1479233/sarah_from_glasgow.html',
+		'getgonewild' : 'http://getgonewild.com/profile/EW2d'
+	}
+	gebi('rip_text').value = dic[site];
+	return false;
 }
 
 // Call initialization function after entire JS file is parsed

@@ -54,17 +54,17 @@ class imagebam(basesite):
 		r = self.web.get(url)
 		imgs = self.web.between(r, ';" src="', '"')
 		if len(imgs) == 0:
-			self.log('unable to find image @ %s' % url)
+			self.log('unable to find image - %s' % url)
 			self.thread_count -= 1
 			return
 		img = imgs[0]
 		filename = img[img.rfind('/')+1:]
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
 		if os.path.exists(saveas):
-			self.log('file exists: %s' % saveas)
+			self.log('download (%d/%d) exists - %s' % (index, total, saveas))
 		elif self.web.download(img, saveas):
-			self.log('downloaded (%d/%d) (%s)' % (index, total, self.get_size(saveas)))
+			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), img))
 		else:
-			self.log('download failed (%d/%d)' % (index, total))
+			self.log('download (%d/%d) failed - %s' % (index, total, img))
 		self.thread_count -= 1
 
