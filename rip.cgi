@@ -3,8 +3,9 @@
 import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
-from sys import argv
-from os import remove
+from sys    import argv
+from os     import remove
+from urllib import unquote
 
 from sites.site_deviantart  import  deviantart 
 from sites.site_flickr      import      flickr
@@ -32,7 +33,7 @@ def main():
 	if not 'url' in keys:
 		print_error("Required URL field not found")
 		return
-	url = keys['url']
+	url = unquote(keys['url'])
 	try:
 		ripper = get_ripper(url)
 	except Exception, e:
