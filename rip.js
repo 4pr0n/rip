@@ -55,7 +55,7 @@ function requestHandler(req) {
 			title = title.substr(0, split_size) + "..." + title.substr(title.length-split_size);
 		}
 		if (gebi('status_bar').innerHTML.indexOf('class="box" href="') < 0) {
-			statusbar('<a class="box" href="' + zipurl + '">' + title + '</a> (' + json.size + ')');
+			statusbar('<center><a class="box" href="' + zipurl + '">' + title + '</a> (' + json.size + ')</center>');
 			slowlyShow(gebi('status_bar'), 0.0);
 		}
 		

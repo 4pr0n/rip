@@ -10,7 +10,7 @@
 
 body {
 	padding: 20px;
-	padding-top: 10px;
+	padding-top: 30px;
 	background-color: #666;
 	color: #eee;
 	font-family: Consolas, Verdana, monospace;
@@ -22,6 +22,28 @@ a {
 }
 a:hover {
 	color: #fff;
+	text-decoration: underline;
+}
+
+div#top_bar {
+	padding: 0px;
+	position: fixed;
+	display: block;
+	border-bottom: solid 2px #eee;
+	top:  0;
+	left: 0;
+	width: 100%;
+	z-index: 5;
+}
+div.top_bar_text {
+	font-size: 0.8em;
+	color: #eee;
+	background-color: #444;
+	padding: 2px;
+	padding-left: 10px;
+	z-index: 5;
+}
+a.top_bar {
 	text-decoration: underline;
 }
 
@@ -81,6 +103,7 @@ td.button {
 input.button {
 	font-size: 1.9em;
 	font-weight: bold;
+	letter-spacing: -0.03em;
 	border-radius: 10px;
 	padding: 5px;
 	padding-left: 35px;
@@ -96,8 +119,9 @@ input.button:hover {
 	              0px -4px 10px rgba(150, 150, 150, 0.6);
 }
 input.button:active {
-	background-color: #000;
-	color: #fff;
+	background-color: #fff;
+	/*background-color: #000;
+	color: #fff;*/
 }
 
 .checkbox {
