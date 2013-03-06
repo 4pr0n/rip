@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+	<head>
+		<title>imgur album downloader | rarchives.com</title>
+		<meta name="description" content="Quickly download & zip photo albums from imgur.com (and a few other sites)">
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+		<meta content="utf-8" http-equiv="encoding">
+		
+		<link href="style.css" rel="stylesheet" type="text/css">
+	</head>
+	
+	<body>
+		<table cellpadding="0" cellspacing="0" border="0">
+			<tr><td class="header">
+				<a href="/">album ripper</a>
+			</td> </tr>
+			<tr><td class="sitebar">
+				<span id="siteid">paste album url below</span>
+			</td></tr>
+			<tr><td class="urlbar">
+				<input type="text" 
+					id="album_url" 
+					value="http://imgur.com/a/RdXNa" 
+					size=30
+					onFocus="this.select();"
+					onKeyUp="urlboxKeyUp(event);" />
+			</td></tr>
+			<tr><td class="ripbar">
+				<button onclick="buttonClick();">rip &amp; zip</button>		
+			</td></tr>
+			<tr><td class="statusbar">
+				<div id="status_bar">status bar text</div>
+			</td></tr>
+		</table>
+		<br>
+		<div style="font-weight: bold">zips may be removed at any time.<br>please backup and rehost accordingly.</div>
+		<br>
+		<div>recent changes:
+			<ul>
+				<li>support for imgur filenames with more than 5 characters
+				<li>image files are numbered with leading zeros instead of spaces: <i>001</i>, <i>002</i>, etc. instead of '  1', '  2'.
+			</ul>
+		</div>
+		<script type="text/javascript" src="img.js"></script>
+	</body>
+</html>
