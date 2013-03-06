@@ -1,6 +1,8 @@
 function gebi(id)        { return document.getElementById(id);    }
 function strip(text)     { return text.replace(/^\s+|\s+$/g, ''); }
-function statusbar(text) { gebi('status_bar').innerHTML = text;   }
+function statusbar(text) { 
+	gebi('status_bar').innerHTML = text;
+}
 
 // Executes when document has loaded
 function init() {
@@ -52,7 +54,10 @@ function requestHandler(req) {
 		if (title.length > (split_size * 2) + 3) {
 			title = title.substr(0, split_size) + "..." + title.substr(title.length-split_size);
 		}
-		statusbar('<a class="box" href="' + zipurl + '">' + title + '</a> (' + json.size + ')');
+		if (gebi('status_bar').innerHTML.indexOf('class="box" href="') < 0) {
+			statusbar('<a class="box" href="' + zipurl + '">' + title + '</a> (' + json.size + ')');
+			slowlyShow(gebi('status_bar'), 0.0);
+		}
 		
 	} else if (json.log != null) {
 		// LOGS
@@ -130,8 +135,32 @@ function setExample(site) {
 		'xhamster'    : 'http://xhamster.com/photos/gallery/1479233/sarah_from_glasgow.html',
 		'getgonewild' : 'http://getgonewild.com/profile/EW2d'
 	}
-	gebi('rip_text').value = dic[site];
+	// Slow fade in
+	var r = gebi('rip_text');
+	darker(r, 0.0);
+	r.value = dic[site];
 	return false;
+}
+
+function darker(obj, alpha) {
+	obj.style.color = "rgba(0, 0, 0, " + alpha + ")";
+	alpha += 0.01;
+	if (alpha > 1) {
+		obj.style.color = "#000";
+	} else {
+		setTimeout(function() { darker(obj, alpha); } , 5);
+	}
+}
+
+function slowlyShow(obj, alpha) {
+	obj.style.opacity = alpha;
+	obj.style.filter  = "alpha(opacity=" + (alpha * 100) + ")";
+	alpha += 0.02;
+	if (alpha > 1) {
+		obj.style.opacity = "1";
+	} else {
+		setTimeout(function() { slowlyShow(obj, alpha); } , 5);
+	}
 }
 
 // Call initialization function after entire JS file is parsed
