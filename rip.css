@@ -42,6 +42,7 @@ div.top_bar_text {
 	padding: 2px;
 	padding-left: 10px;
 	z-index: 5;
+	white-space: nowrap;
 }
 a.top_bar {
 	text-decoration: underline;
@@ -131,11 +132,18 @@ input.button:active {
 	color: #fff;*/
 }
 
+input:disabled {
+	background-color: #aaa;
+	color: transparent;
+	text-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
 .checkbox {
 	font-size: 1.1em;
 	border-radius: 10px;
 	padding: 10px;
 	padding-left: 5px;
+	display: none;
 }
 .checkbox:hover {
 	color: #fff;
@@ -170,6 +178,7 @@ div.site {
 	background-color: #666;
 	border-radius: 10px;
 	padding: 5px;
+	cursor: pointer;
 }
 div.site:hover {
 	background-color: #888;
@@ -204,3 +213,4 @@ a.box:hover {
 	             -4px  0px 10px rgba(150, 150, 150, 0.6),
 	              0px -4px 10px rgba(150, 150, 150, 0.6);
 }
+

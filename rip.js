@@ -6,7 +6,11 @@ function statusbar(text) {
 
 // Executes when document has loaded
 function init() {
-	// TODO do something?
+	var url = String(window.location);
+  if (url.lastIndexOf('#') >= 0) {
+    var link = url.substring(url.lastIndexOf('#')+1);
+		gebi('rip_text').value = 'http://' + unescape(link);
+	}
 }
 
 function getQueryString(start) {
@@ -23,8 +27,25 @@ function getQueryString(start) {
 	return query;
 }
 
+function setHash(url) {
+	url = url.replace('http://', '').replace('https://', '')
+	url = escape(url).replace(/\//g, '%2F');
+	window.location = String(window.location).replace(/\#.*$/, "") + '#' + url;
+}
+
+function disableControls() {
+	gebi('rip_text').setAttribute('disabled', 'disabled');
+	gebi('rip_button').setAttribute('disabled', 'disabled');
+}
+function enableControls() {
+	gebi('rip_text').removeAttribute('disabled');
+	gebi('rip_button').removeAttribute('disabled');
+}
+
 // Start ripping album
 function startRip() {
+	disableControls();
+	setHash(gebi('rip_text').value);
 	statusbar('<img src="spinner_dark.gif">&nbsp;loading...');
 	var query = getQueryString(true);
 	sendRequest(query, requestHandler);
@@ -45,7 +66,7 @@ function requestHandler(req) {
 	if (json.error != null) {
 		// ERROR
 		statusbar('error: ' + json.error);
-		
+		enableControls();
 	} else if (json.zip != null) {
 		// ZIPPED
 		var zipurl = json.zip;
@@ -55,9 +76,13 @@ function requestHandler(req) {
 			title = title.substr(0, split_size) + "..." + title.substr(title.length-split_size);
 		}
 		if (gebi('status_bar').innerHTML.indexOf('class="box" href="') < 0) {
-			statusbar('<center><a class="box" href="' + zipurl + '">' + title + '</a> (' + json.size + ')</center>');
+			var result = '<center><a class="box" href="' + zipurl + '">';
+			result += title + '</a>';
+			result += ' (' + json.size + ')';
+			statusbar(result);
 			slowlyShow(gebi('status_bar'), 0.0);
 		}
+		enableControls();
 		
 	} else if (json.log != null) {
 		// LOGS
@@ -134,11 +159,13 @@ function setExample(site) {
 		'imagebam'    : 'http://www.imagebam.com/gallery/3b73c0f6ba797e77a33b46779fbfe678/',
 		'xhamster'    : 'http://xhamster.com/photos/gallery/1479233/sarah_from_glasgow.html',
 		'getgonewild' : 'http://getgonewild.com/profile/EW2d'
-	}
+	};
 	// Slow fade in
 	var r = gebi('rip_text');
-	darker(r, 0.0);
-	r.value = dic[site];
+	if (!r.hasAttribute('disabled')) {
+		darker(r, 0.0);
+		r.value = dic[site];
+	}
 	return false;
 }
 
