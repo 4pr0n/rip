@@ -15,6 +15,7 @@ from site_getgonewild import getgonewild
 
 #i = imgur('http://imgur.com/a/8vmpo/noscript')
 #i = imgur('http://scopolamina.imgur.com/')
+i = imgur('http://fuckmyusername.imgur.com')
 #i = imagefap('http://www.imagefap.com/pictures/2885204/Kentucky-Craigslist')
 #i = imagebam('http://www.imagebam.com/gallery/3e4u10fk034871hs6idcil6txauu3ru6/')
 #i = imagebam('http://www.imagebam.com/image/1ca1ab109274357')
@@ -26,7 +27,7 @@ from site_getgonewild import getgonewild
 #i = deviantart('http://easy-shutter.deviantart.com/gallery/42198389')
 #i = deviantart('http://garv23.deviantart.com')
 #i = photobucket('http://s579.beta.photobucket.com/user/merkler/library/')
-i = photobucket('http://s1131.beta.photobucket.com/user/Beth_fan/library/')
+#i = photobucket('http://s1131.beta.photobucket.com/user/Beth_fan/library/')
 #i = flickr('http://www.flickr.com/photos/beboastar/sets/72157630130722172/')
 #i = flickr('https://secure.flickr.com/photos/peopleofplatt/sets/72157624572361792/with/6344610705/')
 #i = twitter('https://twitter.com/darrow_ashley')

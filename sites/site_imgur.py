@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from basesite import basesite
-from os import path, mkdir
+from os import path, mkdir, listdir, rmdir
 
 """
 	Downloads imgur albums
@@ -84,8 +84,11 @@ class imgur(basesite):
 		for index, cover in enumerate(covers):
 			url = self.web.between(cover, '<a href="', '"')[0]
 			url = 'http:%s' % url
-			alt = self.web.between(cover, 'alt="', '"')[0].replace('"', '').replace('/', '').replace('\\', '')
-			if alt == '': alt = 'untitled'
+			alts = self.web.between(cover, 'alt="', '"')
+			if len(alts) > 0:
+				alt = alts[0].replace('"', '').replace('/', '').replace('\\', '')
+			else: 
+				alt = 'untitled'
 			alt = self.text_to_fs_safe(alt)
 			prev_dir = self.working_dir
 			self.working_dir += '/%03d_%s' % (index + 1, alt)
@@ -104,8 +107,12 @@ class imgur(basesite):
 			link = self.get_highest_res('http://i.%s' % link)
 			# Download every image
 			# Uses superclass threaded download method
-			self.download_image(link, index, total=len(links)) 
+			self.download_image(link, index + 1, total=len(links)) 
 		self.wait_for_threads()
+		# Remove empty albums
+		if len(listdir(self.working_dir)) == 0:
+			self.log('empty album found - %s' % album)
+			rmdir(self.working_dir)
 	
 	""" Returns highest-res image by checking if imgur has higher res """
 	def get_highest_res(self, url):
