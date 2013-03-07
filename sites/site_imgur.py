@@ -108,6 +108,8 @@ class imgur(basesite):
 		# Get images
 		links = self.web.between(r, 'img src="http://i.', '"')
 		for index, link in enumerate(links):
+			if '?' in link: link = link[:link.find('?')]
+			if '#' in link: link = link[:link.find('#')]
 			link = self.get_highest_res('http://i.%s' % link)
 			# Download every image
 			# Uses superclass threaded download method

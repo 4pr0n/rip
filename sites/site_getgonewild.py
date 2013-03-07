@@ -52,18 +52,39 @@ class getgonewild(basesite):
 		self.wait_for_threads()
 	
 	def download_imgur_album(self, link, index, total):
+		if '#' in link: link = link[:link.find('#')]
+		if '?' in link: link = link[:link.find('?')]
+		while link.endswith('/'): link = link[:-1]
+		dirs = link.replace('http://', '').split('/')
+		if len(dirs) > 3:
+			link = 'http://%s' % '/'.join(dirs[0:3])
 		r = self.web.get('%s/noscript' % link)
 		alb_index = 0
-		images = self.web.between(r, '<a class="zoom" href="', '"')
+		images = self.web.between(r, 'img src="http://i.', '"')
 		if len(images) == 0:
 			self.log('failed (%d/%d): album not found - %s' % (index, total, link))
 		else: 
 			for image in images:
 				alb_index += 1
+				image = 'http://i.%s' % image
+				if '?' in image: image = image[:image.find('?')]
+				if '#' in image: image = image[:image.find('#')]
+				image = self.get_highest_res(image)
 				filename = '%s/%03d_%03d_%s' % (self.working_dir, index, alb_index, image[image.rfind('/')+1:])
 				self.retry_download(image, filename)
 				self.log('downloaded (%d/%d) #%d (%s) - %s' % (index, total, alb_index, self.get_size(filename), image))
 		self.thread_count -= 1
+	
+	""" Returns highest-res image by checking if imgur has higher res """
+	def get_highest_res(self, url):
+		if not 'h.' in url:
+			return url
+		temp = url.replace('h.', '.')
+		m = self.web.get_meta(temp)
+		if 'Content-Type' in m and 'image' in m['Content-Type'].lower():
+			return temp
+		else:
+			return url
 
 	def download_imgur_image(self, link, index, total):
 		r = self.web.get(link)

@@ -61,6 +61,7 @@ def main():
 			ripper.download()
 		except Exception, e:
 			print_error('Error while downloading: %s' % str(e))
+			return
 		try:
 			ripper.zip()
 		except Exception, e:

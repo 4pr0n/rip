@@ -20,7 +20,8 @@ class photobucket(basesite):
 			subdir = url[url.rfind('/library/')+len('/library/'):]
 		if '/profile/' in url:
 			url = url[:url.find('/profile/'):] + '/library/'
-		return '%s%s' % (url, subdir)
+			url += subdir
+		return url
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
@@ -32,21 +33,29 @@ class photobucket(basesite):
 
 	def download(self):
 		'''http://s579.beta.photobucket.com/user/merkler/library/'''
-		r = self.web.get('%s' % self.url)
+		r = self.web.getter(self.url)
 		paths = self.web.between(r, "currentAlbumPath: '", "'")
+		if len(paths) == 0:
+			paths = self.web.between(r, "setCurrentAlbum('", '"')
 		if len(paths) == 0:
 			if 'This is a Private Album' in r:
 				self.log('Private album! %s' % self.url)
 				return
-			self.log('Unable to find currentAlbumPath at %s' % url)
+			self.log('Unable to find currentAlbumPath at %s' % self.url)
 			return
+		path = paths[0]
+		subpath = path
+		if path.count('/') >= 4:
+			subpath = '/'.join(path.split('/')[0:3])
 		murl = self.url.replace('http://s', 'http://m').replace('.beta.', '.')
+		subpath = murl[:murl.find('/user')] + subpath
+		subpath = subpath.replace(' ', '%20')
 		murl = murl[:murl.find('/user')] + path
+		murl = murl.replace(' ', '%20')
 		'''http://m579.photobucket.com/albums/ss239/merkler'''
 		r = self.web.get(murl)
 		# Root album
-		print 'MURL=%s' % murl
-		self.download_album(path, murl)
+		self.download_album(subpath, murl)
 		# Subalbums
 		albums = self.web.between(r, '<a href="/albums/', '"')
 		skip = True
@@ -59,9 +68,7 @@ class photobucket(basesite):
 				skip = True
 			if '?' in album: album = album[:album.find('?')]
 			murl = murl[:murl.find('/albums/')+len('/albums/')] + album
-			print 'MURL=%s' % murl
 			name = album.split('/')[1].replace('%20', '-')
-			print 'NAME=%s' % name
 			self.download_album(path, murl, name=name)
 			
 		self.wait_for_threads()
@@ -73,25 +80,33 @@ class photobucket(basesite):
 		while True:
 			links = self.web.between(r, '<a class="nolink" href="/albumview/', '"')
 			for link in links:
-				link = '%s/%s' % (path[1:], '/'.join(link.split('/')[2:])) #[link.rfind('/'):]
-				link = self.url[:self.url.rfind('/user')+1] + 'download-' + link
-				link = link[:link.rfind('/')+1:] + '.highres' + link[link.rfind('/'):]
-				link = link.replace('.html', '').replace('.beta.', '.')
-				if '?' in link:
-					link = link[:link.find('?')]
-				'''http://s579.photobucket.com/download-albums/ss239/merkler.highres/image.jpg'''
+				'''path=http://m1069.photobucket.com/albums/u461'''
+				'''link=albums/mandymgray/Album%203/2011-12-219514_08_46_.jpg.html'''
+				username = link.split('/')[1]
+				link = '%s/%s' % (path, '/'.join(link.split('/')[2:])) #[link.rfind('/'):]
+				if link.endswith('.html'): link = link[:-5]
+				full = self.url[:self.url.rfind('/user')+1].replace('://s', '://i').replace('.beta.', '.')
+				full += 'download-albums/'
+				dirs = link.replace('://', '').split('/')
+				full += dirs[2] + '/' + username + '/'
+				if dirs[3] != username:
+					full += '/'.join(dirs[3:])
+				else:
+					full += '/'.join(dirs[4:])
+				full = full[:full.rfind('/')+1:] + '.highres' + full[full.rfind('/'):]
+				if '?' in full:
+					full = full[:full.find('?')]
+				'''http://i579.photobucket.com/download-albums/ss239/merkler/.highres/a90a5a9d.jpg'''
 				index += 1
-				self.download_image(link, index, subdir=name)
+				self.download_image(full, index, subdir=name)
 			offset += 4
 			if 'href="?o=%d' % offset in r:
 				nexturl = murl
 				if '?' in nexturl: nexturl += '&'
 				else: nexturl += '?'
 				nexturl += 'o=%d' % offset
-				print 'loading next url: %s' % nexturl
 				r = self.web.get(nexturl)
 			else:
-				print 'no next page found'
 				break
 		
 	
