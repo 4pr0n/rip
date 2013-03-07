@@ -18,7 +18,7 @@ class imgur(basesite):
 		#   "domain": user.imgur.com
 		#   "account": user.imgur.com/album_name
 		self.album_type = None 
-		if not 'imgur.com' in url: 
+		if not 'http://imgur.com' in url and not '.imgur.com' in url:
 			raise Exception('')
 		if      '.imgur.com'    in url and \
 				not 'i.imgur.com'   in url and \
@@ -28,11 +28,15 @@ class imgur(basesite):
 			while url.endswith('/'): url = url[:-1]
 			urls = url.split('/')
 			url = '/'.join(urls[0:1]) # Only the domain & first subdir
+			if '?' in url: url = url[:url.find('?')]
+			if '#' in url: url = url[:url.find('#')]
 			return 'http://%s' % url
 		elif not '/a/' in url:
 			raise Exception("Not a valid imgur album")
 		url = url.replace('http://', '').replace('https://', '')
 		while url.count('/') > 2: url = url[:url.rfind('/')]
+		if '?' in url: url = url[:url.find('?')]
+		if '#' in url: url = url[:url.find('#')]
 		return 'http://%s' % url
 
 	""" Discover directory path based on URL """
