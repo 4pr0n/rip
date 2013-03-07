@@ -10,6 +10,7 @@ function init() {
   if (url.lastIndexOf('#') >= 0) {
     var link = url.substring(url.lastIndexOf('#')+1);
 		gebi('rip_text').value = 'http://' + unescape(link);
+		startRip();
 	}
 }
 

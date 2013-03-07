@@ -121,7 +121,7 @@ input.button:hover {
 	/*border: 2px solid black;
 	background-color: #666;
 	color: #fff;*/
-	box-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6),
+	box-shadow:   4px  0px 10px rgba(150, 150, 150, 0.6),
 	              0px  4px 10px rgba(150, 150, 150, 0.6),
 	             -4px  0px 10px rgba(150, 150, 150, 0.6),
 	              0px -4px 10px rgba(150, 150, 150, 0.6);
