@@ -79,20 +79,19 @@ class imgur(basesite):
 		return result
 	
 	def download_account(self, album):
-		print album
 		r = self.web.get(album)
 		covers = self.web.between(r, '<div class="cover">', '</div>')
 		for index, cover in enumerate(covers):
 			url = self.web.between(cover, '<a href="', '"')[0]
 			url = 'http:%s' % url
-			alt = self.web.between(cover, 'alt="', '"')[0]
+			alt = self.web.between(cover, 'alt="', '"')[0].replace('"', '').replace('/', '').replace('\\', '')
 			if alt == '': alt = 'untitled'
 			alt = self.text_to_fs_safe(alt)
 			prev_dir = self.working_dir
 			self.working_dir += '/%03d_%s' % (index + 1, alt)
 			if not path.exists(self.working_dir):
 				mkdir(self.working_dir)
-			self.log('downloading album (%d/%d) "%s"' % (index + 1, len(covers), alt))
+			self.log('downloading album (%d/%d) \\"%s\\"' % (index + 1, len(covers), alt))
 			self.download_album(url)
 			self.working_dir = prev_dir
 

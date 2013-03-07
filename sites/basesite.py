@@ -6,6 +6,7 @@ import sys
 from threading import Thread
 from zipfile   import ZipFile, ZIP_DEFLATED
 from Web       import Web
+from shutil    import rmtree
 
 LOG_NAME      = 'log.txt' 
 RIP_DIRECTORY = 'rips' # Directory to store rips in
@@ -185,9 +186,12 @@ class basesite(object):
 				zfn = absfn[len(self.working_dir)+len(os.sep):] #XXX: relative path
 				z.write(absfn, zfn)
 		z.close()
+		rmtree(self.working_dir) # Delete everything in working dir
+		"""
 		for filename in os.listdir(self.working_dir):
 			os.remove('%s%s%s' % (self.working_dir, os.sep, filename))
 		os.rmdir(self.working_dir)
+		"""
 		return zip_filename
 		
 

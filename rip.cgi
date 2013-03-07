@@ -65,6 +65,7 @@ def main():
 			ripper.zip()
 		except Exception, e:
 			print_error('Error while zipping: %s' % str(e))
+			return
 		print '{'
 		print '"zip":"%s",' % ripper.existing_zip_path()
 		print '"size":"%s"' % ripper.get_size(ripper.existing_zip_path())
