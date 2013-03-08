@@ -116,6 +116,7 @@ input.button {
 	padding: 5px;
 	padding-left: 35px;
 	padding-right: 35px;
+	cursor: pointer;
 }
 input.button:hover {
 	/*border: 2px solid black;
@@ -158,6 +159,14 @@ div#status_bar {
 	padding: 5px;
 	padding-bottom: 0px;
 	text-align: left;
+}
+div.error {
+	color: #f77;
+	text-shadow:  4px  0px 10px rgba(190, 90, 90, 0.6),
+	              0px  4px 10px rgba(190, 90, 90, 0.6),
+	             -4px  0px 10px rgba(190, 90, 90, 0.6),
+	              0px -4px 10px rgba(190, 90, 90, 0.6);
+	cursor: default;
 }
 
 div.sites_header {

@@ -66,7 +66,7 @@ function requestHandler(req) {
 	
 	if (json.error != null) {
 		// ERROR
-		statusbar('error: ' + json.error);
+		statusbar('<div class="error">error: ' + json.error + '</div>');
 		enableControls();
 	} else if (json.zip != null) {
 		// ZIPPED
