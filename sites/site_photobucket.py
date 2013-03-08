@@ -26,6 +26,7 @@ class photobucket(basesite):
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
 		user = self.web.between(url, '/user/', '/')[0]
+		subdir = ''
 		if '/library/' in url:
 			subdir = url[url.rfind('/library/')+len('/library/'):]
 			if subdir != '': subdir = '_%s' % subdir
@@ -43,6 +44,11 @@ class photobucket(basesite):
 				return
 			self.log('Unable to find currentAlbumPath at %s' % self.url)
 			return
+		totals = self.web.between(r, '"albumStats":{"images":{"count":', ',')
+		if len(totals) == 0:
+			total = '?'
+		else:
+			total = totals[0]
 		path = paths[0]
 		subpath = path
 		if path.count('/') >= 4:
@@ -55,7 +61,7 @@ class photobucket(basesite):
 		'''http://m579.photobucket.com/albums/ss239/merkler'''
 		r = self.web.get(murl)
 		# Root album
-		self.download_album(subpath, murl)
+		self.download_album(subpath, murl, total=total)
 		# Subalbums
 		albums = self.web.between(r, '<a href="/albums/', '"')
 		skip = True
@@ -73,7 +79,7 @@ class photobucket(basesite):
 			
 		self.wait_for_threads()
 	
-	def download_album(self, path, murl, name=''):
+	def download_album(self, path, murl, name='', total='?'):
 		offset = 0
 		index  = 0
 		r = self.web.get(murl)
@@ -98,7 +104,7 @@ class photobucket(basesite):
 					full = full[:full.find('?')]
 				'''http://i579.photobucket.com/download-albums/ss239/merkler/.highres/a90a5a9d.jpg'''
 				index += 1
-				self.download_image(full, index, subdir=name)
+				self.download_image(full, index, subdir=name, total=total)
 			offset += 4
 			if 'href="?o=%d' % offset in r:
 				nexturl = murl
