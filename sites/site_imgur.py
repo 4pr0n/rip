@@ -122,7 +122,7 @@ class imgur(basesite):
 		self.wait_for_threads()
 		# Remove empty albums
 		if len(listdir(self.working_dir)) == 0:
-			self.log('empty album found - %s' % album)
+			#self.log('empty album found - %s' % album)
 			rmdir(self.working_dir)
 	
 	""" Returns highest-res image by checking if imgur has higher res """

@@ -60,7 +60,7 @@ def main():
 		try:
 			ripper.download()
 		except Exception, e:
-			print_error('error while downloading: %s' % str(e))
+			print_error('unable to download: %s' % str(e))
 			return
 		if not path.exists(ripper.working_dir):
 			print_error('unable to download album (404?)')
@@ -68,7 +68,7 @@ def main():
 		try:
 			ripper.zip()
 		except Exception, e:
-			print_error('error while zipping: %s' % str(e))
+			print_error('unable to zip: %s' % str(e))
 			return
 		print '{'
 		print '"zip":"%s",' % ripper.existing_zip_path()

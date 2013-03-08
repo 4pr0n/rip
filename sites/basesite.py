@@ -1,6 +1,6 @@
 #!usr/bin/python
 
-import os   # File exists, mkdir
+import os   # fs: exists, mkdir, listdir, rmdir
 import time # Sleep
 import sys
 from threading import Thread
@@ -143,6 +143,11 @@ class basesite(object):
 	def wait_for_threads(self):
 		while self.thread_count > 0:
 			time.sleep(0.1)
+		if os.path.exists(self.working_dir):
+			if len(os.listdir(self.working_dir)) <= 1:
+				if os.path.exists(self.logfile):
+					os.remove(self.logfile)
+				os.rmdir(self.working_dir)
 	
 	""" Deconstructor, waits for threads to finish """
 	def __del__(self):

@@ -46,7 +46,6 @@ class twitter(basesite):
 	""" Magic! """
 	def download(self):
 		turl = self.get_request(self.url)
-		self.log('loading tweets... - %s' % turl)
 		r = self.web.getter(turl)
 		index = 0
 		while r.strip() != '[]':
@@ -69,6 +68,8 @@ class twitter(basesite):
 			urls = self.web.between(media, '"media_url":"', '"')
 			for url in urls:
 				url = url.replace('\\/', '/')
+				if '.twimg.com/' in url:
+					url += ':large'
 				index += 1
 				self.download_image(url, index)
 		return index

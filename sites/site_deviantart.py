@@ -16,7 +16,7 @@ class deviantart(basesite):
 		Return 'sanitized' URL (if needed).
 	"""
 	def sanitize_url(self, url):
-		if not 'deviantart.com' in url: 
+		if not '.deviantart.com' in url: 
 			raise Exception('')
 		if not url.lower().startswith('http'): url = 'http://%s' % url
 		user = self.web.between(url, '//', '.')[0]
