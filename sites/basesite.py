@@ -122,10 +122,12 @@ class basesite(object):
 	""" Multi-threaded download of image """
 	def download_image_thread(self, url, saveas, index, total):
 		m = self.web.get_meta(url)
-		if 'Content-Type' not in m or \
-			('image' not in m['Content-Type'] and \
-			 'video' not in m['Content-Type']):
-			text = 'no "image"/"video" in Content-Type for URL %s' % (url)
+		if 'Content-Type' not in m:
+			text = 'no Content-Type found at URL %s' % (url)
+		elif ('image' not in m['Content-Type'] and \
+			 'video' not in m['Content-Type'] and \
+			 'octet-stream' not in m['Content-Type']):
+			text = 'no "image"/"video"/"octet-stream" in Content-Type (found "%s") for URL %s' % (m['Content-Type'], url)
 		else:
 			if self.web.download(url, saveas):
 				text = 'downloaded (%d' % index

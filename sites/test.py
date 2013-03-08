@@ -44,10 +44,11 @@ from site_getgonewild import getgonewild
 #i = imagearn('http://imagearn.com/image.php?id=5046077')
 #i = xhamster('http://xhamster.com/photos/gallery/1306566/lovely_teen_naked_for_self_shots.html')
 #i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html')
+i = imagefap('http://www.imagefap.com/pictures/3958759/Busty-Selfshooter')
 #i = flickr('http://www.flickr.com/photos/29809540@N04/')
 #i = getgonewild('http://getgonewild.com/profile/EW2d')
 #i = getgonewild('http://getgonewild.com/s/miss_ginger_biscuit')
-i = getgonewild('http://getgonewild.com/profile/yaymuffinss')
+#i = getgonewild('http://getgonewild.com/profile/yaymuffinss')
 try:
 	print i.working_dir
 	if i.existing_zip_path() != None:

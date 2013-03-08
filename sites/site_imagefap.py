@@ -6,7 +6,6 @@ from basesite import basesite
 	Downloads imagefap albums
 """
 class imagefap(basesite):
-	
 	"""
 		Ensure URL is relevant to this ripper.
 		Return 'sanitized' URL (if needed).
@@ -36,8 +35,8 @@ class imagefap(basesite):
 		links = self.web.between(r, 'x.fap.to/images/thumb/', '"')
 		for index, link in enumerate(links):
 			if index == 0: continue # Skip first URL (user image?)
-			link = 'http://x.fap.to/images/full/%s' % link
+			link = 'http://fap.to/images/full/%s' % link
 			# Download every image
 			# Uses superclass threaded download method
-			self.download_image(link, index, total=len(links)) 
+			self.download_image(link, index, total=len(links) - 1) 
 		self.wait_for_threads()
