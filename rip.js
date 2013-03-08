@@ -98,7 +98,9 @@ function requestHandler(req) {
 		}
 		// We only get logs if the file isn't done downloading.
 		// Restart the 'check rip' function
-		setTimeout(function() { checkRip(); }, 500);
+		if (gebi('rip_button').hasAttribute('disabled')) {
+			setTimeout(function() { checkRip(); }, 500);
+		}
 	}
 }
 

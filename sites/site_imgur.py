@@ -107,6 +107,11 @@ class imgur(basesite):
 		r = self.web.get('%s/noscript' % album)
 		# Get images
 		links = self.web.between(r, 'img src="http://i.', '"')
+		if len(links) == 0:
+			# No files to download (empty album).
+			# Deleting directory tells ripper it can't download it.
+			rmdir(self.working_dir)
+			return
 		for index, link in enumerate(links):
 			if '?' in link: link = link[:link.find('?')]
 			if '#' in link: link = link[:link.find('#')]

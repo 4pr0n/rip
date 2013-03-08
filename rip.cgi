@@ -4,7 +4,7 @@ import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from sys    import argv
-from os     import remove
+from os     import remove, path
 from urllib import unquote
 
 from sites.site_deviantart  import  deviantart 
@@ -60,12 +60,15 @@ def main():
 		try:
 			ripper.download()
 		except Exception, e:
-			print_error('Error while downloading: %s' % str(e))
+			print_error('error while downloading: %s' % str(e))
+			return
+		if not path.exists(ripper.working_dir):
+			print_error('unable to download album (404?)')
 			return
 		try:
 			ripper.zip()
 		except Exception, e:
-			print_error('Error while zipping: %s' % str(e))
+			print_error('error while zipping: %s' % str(e))
 			return
 		print '{'
 		print '"zip":"%s",' % ripper.existing_zip_path()
@@ -78,7 +81,7 @@ def main():
 		print '"log":"%s"' % '\\n'.join(lines)
 		print '}'
 	else:
-		print_error('No status or start parameters found')
+		print_error('no status or start parameters found')
 
 def get_ripper(url):
 	sites = [        \
