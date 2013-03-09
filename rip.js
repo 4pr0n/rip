@@ -79,7 +79,14 @@ function requestHandler(req) {
 		if (gebi('status_bar').innerHTML.indexOf('class="box" href="') < 0) {
 			var result = '<center><a class="box" href="' + zipurl + '">';
 			result += title + '</a>';
-			result += ' (' + json.size + ')';
+			if (json['image_count'] != null) {
+				result += ' (' + json['image_count'] + ' pics @ ' + json.size + ')';
+			} else {
+				result += ' (' + json.size + ')';
+			}
+			if (json.limit != null) {
+				result += '<br><div class="error" style="padding-top: 5px;">rip was capped at ' + json.limit + ' images</div>';
+			}
 			statusbar(result);
 			slowlyShow(gebi('status_bar'), 0.0);
 		}

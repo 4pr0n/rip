@@ -50,6 +50,7 @@ class getgonewild(basesite):
 				args = (link, index, len(links))
 				t = Thread(target=self.download_imgur_image, args=args)
 				t.start()
+			if self.hit_image_limit(): break
 		self.wait_for_threads()
 	
 	def download_imgur_album(self, link, index, total):
@@ -122,7 +123,10 @@ class getgonewild(basesite):
 					if 'File not found!' in txt:
 						self.log('file not found: %s' % url)
 						remove(saveas)
-				return
+						return False
+				self.image_count += 1
+				return True
 			tries -= 1
 		remove(saveas)
+		return False
 	

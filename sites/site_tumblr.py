@@ -62,6 +62,7 @@ class tumblr(basesite):
 					if not '"url":"' in media: continue
 					content = media[media.find('"url":"')+len('"url":"'):-1]
 				content = content.replace('\\/', '/')
+				if self.hit_image_limit(): return 0
 				index += 1
 				self.download_image(content, index, total=total)
 		return index
@@ -87,5 +88,6 @@ class tumblr(basesite):
 				index = self.parse_tumblr(r, index, total, media)
 				if index == 0: break
 				sleep(2)
+			if self.hit_image_limit(): break
 		self.wait_for_threads()
 	

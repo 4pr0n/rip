@@ -15,16 +15,15 @@ class flickr(basesite):
 		if not 'flickr.com' in url:
 			raise Exception('')
 		if not '/photos/' in url:
-			raise Exception('Required /photos/ not found in URL')
+			raise Exception('required /photos/ not found in URL')
+		users = self.web.between(url, '/photos/', '/')
+		if len(users) == 0 or users[0] == 'tags':
+			raise Exception('invalid flickr album URL')
 		return url
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
-		user = 'unknown'
-		if '/photos/' in url:
-			users = self.web.between(url, '/photos/', '/')
-			if len(users) > 0: user = users[0]
-		return 'flickr_%s' % user
+		return 'flickr_%s' % self.web.between(url, '/photos/', '/')[0]
 
 	def download(self):
 		self.init_dir()
@@ -50,6 +49,8 @@ class flickr(basesite):
 				# Uses superclass threaded download method
 				index += 1
 				self.download_image(link, index, total=total) 
+				if self.hit_image_limit(): break
+			if self.hit_image_limit(): break
 			if 'data-track="next" href="' in r:
 				nextpage = self.web.between(r, 'data-track="next" href="', '"')[0]
 				if not 'flickr.com' in nextpage:
@@ -88,8 +89,10 @@ class flickr(basesite):
 			saveas = '%s/%03d_%s_%s%s' % (self.working_dir, index, pid, title, ext)
 			if '?' in saveas: saveas = saveas[:saveas.find('?')]
 			if path.exists(saveas):
+				self.image_count += 1
 				self.log('%s already exists (%d/%s) (%s)' % (saveas[saveas.rfind('/')+1:], index, total, self.get_size(saveas)))
 			elif self.web.download(img, saveas):
+				self.image_count += 1
 				self.log('downloaded (%d/%s) (%s) - %s' % (index, total, self.get_size(saveas), img))
 			else:
 				self.log('download failed (%d/%s) - %s' % (index, total, img))

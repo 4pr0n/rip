@@ -190,7 +190,7 @@ function buttonClick() {
 	var request = makeHttpObject();
 	var waitingInterval;
 	waitingInterval = setInterval('checkRip()', 500);
-	request.open("GET", document.location.pathname + 'grab.cgi' + url, true);
+	request.open("GET", 'grab.cgi' + url, true);
 	request.send(null);
 	request.onreadystatechange = function() {
 		if (request.readyState == 4) { 
@@ -209,7 +209,7 @@ function checkRip() {
 	var url = '?url=' + escape(gebi("album_url").value);
 	var request = makeHttpObject();
 	var waitingInterval;
-	request.open("GET", document.location.pathname + 'status.cgi' + url, true);
+	request.open("GET", 'status.cgi' + url, true);
 	request.send(null);
 	request.onreadystatechange = function() {
 		if (request.readyState == 4) { 

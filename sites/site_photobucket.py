@@ -106,6 +106,8 @@ class photobucket(basesite):
 				'''http://i579.photobucket.com/download-albums/ss239/merkler/.highres/a90a5a9d.jpg'''
 				index += 1
 				self.download_image(full, index, subdir=name, total=total)
+				if self.hit_image_limit(): break
+			if self.hit_image_limit(): break
 			offset += 4
 			if 'href="?o=%d' % offset in r:
 				nexturl = murl

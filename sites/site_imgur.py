@@ -103,6 +103,7 @@ class imgur(basesite):
 			self.log('downloading album (%d/%d) \\"%s\\"' % (index + 1, len(covers), alt))
 			self.download_album(url)
 			self.working_dir = prev_dir
+			if self.hit_image_limit(): break
 
 	def download_album(self, album):
 		# Get album source
@@ -116,6 +117,7 @@ class imgur(basesite):
 			# Download every image
 			# Uses superclass threaded download method
 			self.download_image(link, index + 1, total=len(links)) 
+			if self.hit_image_limit(): break
 		self.wait_for_threads()
 	
 	""" Returns highest-res image by checking if imgur has higher res """

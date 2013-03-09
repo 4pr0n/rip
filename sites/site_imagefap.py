@@ -35,4 +35,5 @@ class imagefap(basesite):
 			if index == 0: continue # Skip first URL (user image?)
 			link = 'http://fap.to/images/full/%s' % link
 			self.download_image(link, index, total=len(links) - 1) 
+			if self.hit_image_limit(): break
 		self.wait_for_threads()

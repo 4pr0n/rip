@@ -71,8 +71,11 @@ def main():
 			print_error('unable to zip: %s' % str(e))
 			return
 		print '{'
-		print '"zip":"%s",' % ripper.existing_zip_path()
-		print '"size":"%s"' % ripper.get_size(ripper.existing_zip_path())
+		print '"zip":"%s",' % ripper.existing_zip_path().replace('"', '\\"')
+		print '"size":"%s",' % ripper.get_size(ripper.existing_zip_path())
+		print '"image_count":%d' % ripper.image_count
+		if ripper.hit_image_limit():
+			print ',"limit":%d' % ripper.max_images
 		print '}'
 	# Check status of album download
 	elif 'check' in keys:

@@ -57,6 +57,7 @@ class twitter(basesite):
 			if len(ids) > 0: max_id = int(ids[-1]) - 1
 			else: break
 			turl = self.get_request(self.url, max_id=max_id)
+			if self.hit_image_limit(): break
 			self.log('loading tweets... - %s' % turl)
 			sleep(2)
 			r = self.web.getter(turl)

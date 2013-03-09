@@ -11,6 +11,7 @@ from shutil    import rmtree
 LOG_NAME      = 'log.txt' 
 RIP_DIRECTORY = 'rips' # Directory to store rips in
 MAX_THREADS   = 3
+MAX_IMAGES    = 500
 
 """
 	Abstract Python 'interface' for a site ripper.
@@ -39,11 +40,13 @@ class basesite(object):
 			os.mkdir(self.base_dir)
 		self.url = self.sanitize_url(url)
 		# Directory to store images in
-		self.working_dir = '%s%s%s' % (self.base_dir, os.sep, self.get_dir(url))
-		self.max_threads = MAX_THREADS
+		self.working_dir  = '%s%s%s' % (self.base_dir, os.sep, self.get_dir(url))
+		self.max_threads  = MAX_THREADS
 		self.thread_count = 0
-		self.logfile = '%s%s%s' % (self.working_dir, os.sep, LOG_NAME)
-		self.first_log = True
+		self.image_count  = 0
+		self.max_images   = MAX_IMAGES
+		self.logfile      = '%s%s%s' % (self.working_dir, os.sep, LOG_NAME)
+		self.first_log    = True
 	
 	""" To be overridden """
 	def sanitize_url(self, url):
@@ -53,10 +56,15 @@ class basesite(object):
 	def get_dir(self, url):
 		raise Exception("Method 'get_dir' was not overridden!")
 	
+	""" Creates working dir if zip does not exist """
 	def init_dir(self):
 		if not os.path.exists(self.working_dir) and \
 		       self.existing_zip_path() == None:
 			os.mkdir(self.working_dir)
+	
+	""" Returns true if we hit the image limit, false otherwise """
+	def hit_image_limit(self):
+		return self.image_count >= self.max_images
 	
 	""" To be overridden """
 	def download(self):
@@ -114,6 +122,7 @@ class basesite(object):
 		saveas = '%s/%03d_%s' % (savedir, index, saveas)
 		if os.path.exists(saveas):
 			self.log('file exists: %s' % saveas)
+			self.image_count += 1
 		else:
 			while self.thread_count > self.max_threads:
 				time.sleep(0.1)
@@ -133,6 +142,7 @@ class basesite(object):
 			text = 'no "image"/"video"/"octet-stream" in Content-Type (found "%s") for URL %s' % (m['Content-Type'], url)
 		else:
 			if self.web.download(url, saveas):
+				self.image_count += 1
 				text = 'downloaded (%d' % index
 				if total != '?': text += '/%s' % total
 				text += ') (%s) - %s' % (self.get_size(saveas), url)

@@ -37,6 +37,8 @@ class instagram(basesite):
 				
 				index += 1
 				self.download_image(img, index, total=total) 
+				if self.hit_image_limit(): break
+			if self.hit_image_limit(): break
 			earliers = self.web.between(r, ' [ <a href="/n/', '"')
 			if len(earliers) != 2: break
 			r = self.web.get('http://web.stagram.com/n/%s' % earliers[0])

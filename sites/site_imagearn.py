@@ -41,6 +41,7 @@ class imagearn(basesite):
 		for index, link in enumerate(links):
 			link = 'http://imagearn.com/image.php?id=%s' % link
 			self.download_image(link, index + 1, total=len(links)) 
+			if self.hit_image_limit(): break
 		self.wait_for_threads()
 
 	""" Checks if file exists, launches downloader thread """
@@ -80,6 +81,7 @@ class imagearn(basesite):
 		extension = image[image.rfind('.'):]
 		saveas += extension
 		if self.web.download(image, saveas):
+			self.image_count += 1
 			text = 'downloaded (%d/%d)' % (index, total)
 			text += ' (%s)' % self.get_size(saveas)
 			text += ' - %s' % image

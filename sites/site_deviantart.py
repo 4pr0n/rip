@@ -55,7 +55,9 @@ class deviantart(basesite):
 				link = self.web.between(chunk, 'href="', '"')[0]
 				if link in already_have: continue
 				already_have.append(link)
+				if self.hit_image_limit(): break
 				self.download_image(link, len(already_have), total=total) 
+			if self.hit_image_limit(): break
 			next_page = self.get_next_page(r)
 			if next_page == None: break
 			r = self.web.getter('%s?offset=%s' % (self.url, next_page))
@@ -118,8 +120,10 @@ class deviantart(basesite):
 		filename = img[img.rfind('/')+1:]
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
 		if os.path.exists(saveas):
+			self.image_count += 1
 			self.log('file exists: %s' % saveas)
 		elif self.web.download(img, saveas):
+			self.image_count += 1
 			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), img))
 		else:
 			self.log('download failed (%d/%d) - %s' % (index, total, img))
