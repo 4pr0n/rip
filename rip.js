@@ -13,10 +13,10 @@ function init() {
 		startRip();
 	}
 	if (getCookie('cache_enabled') == 'true') {
-		gebi('rip_cached').style.display = 'inline-block';
+		gebi('rip_cached').style.display =   'inline-block';
 		gebi('label_cached').style.display = 'inline-block';
 	} else {
-		gebi('rip_cached').style.display = 'none';
+		gebi('rip_cached').style.display =   'none';
 		gebi('label_cached').style.display = 'none';
 	}
 

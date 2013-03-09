@@ -14,18 +14,18 @@ class imagefap(basesite):
 		if not 'imagefap.com/' in url: 
 			raise Exception('')
 		if not 'imagefap.com/pictures/' in url:
-			raise Exception("Required '/pictures/' not found")
+			raise Exception("required '/pictures/' not found")
 		if '?' in url: url = url[:url.find('?')]
+		if not url.endswith('/'): url += '/'
+		gids = self.web.between(url, '/pictures/', '/')
+		if len(gids) == 0:
+			raise Exception("required gallery ID /pictures/X/ not found")
 		return '%s?view=2' % url
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
-		u = self.url
-		u = u[:u.find('?')]
-		while u.endswith('/'): u = u[:-1]
-		name = u[u.rfind('/', u.rfind('/') - 2) + 1:]
-		name = name.replace('/', '_')
-		return 'imagefap_%s' % name
+		gid = self.web.between(url, '/pictures/', '/')[0]
+		return 'imagefap_%s' % gid
 
 	def download(self):
 		self.init_dir()
