@@ -12,6 +12,28 @@ function init() {
 		gebi('rip_text').value = 'http://' + unescape(link);
 		startRip();
 	}
+	if (getCookie('cache_enabled') == 'true') {
+		gebi('rip_cached').style.display = 'inline-block';
+		gebi('label_cached').style.display = 'inline-block';
+	} else {
+		gebi('rip_cached').style.display = 'none';
+		gebi('label_cached').style.display = 'none';
+	}
+
+}
+
+// Retrieves cookie
+function getCookie(key) {
+  var cookies = document.cookie.split(';');
+  for (var i in cookies) {
+		if (cookies[i].charAt(0) == ' ') {
+			cookies[i] = cookies[i].substr(1);
+		}
+    var pair = cookies[i].split('=');
+    if (pair[0] == key)
+      return pair[1];
+  }
+  return "";
 }
 
 function getQueryString(start) {
@@ -35,10 +57,14 @@ function setHash(url) {
 }
 
 function disableControls() {
+	window.onbeforeunload = function() {
+		return "Exiting during a rip may cause the archive to become corrupted. Are you sure you want to leave this page?";
+	}
 	gebi('rip_text').setAttribute('disabled', 'disabled');
 	gebi('rip_button').setAttribute('disabled', 'disabled');
 }
 function enableControls() {
+	window.onbeforeunload = null;
 	gebi('rip_text').removeAttribute('disabled');
 	gebi('rip_button').removeAttribute('disabled');
 }

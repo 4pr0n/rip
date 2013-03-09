@@ -67,6 +67,7 @@ class imgur(basesite):
 
 	def download(self):
 		self.init_dir()
+		self.max_images = 5000
 		if  self.album_type == 'direct' or \
 				self.album_type == 'domain':
 			# Single album

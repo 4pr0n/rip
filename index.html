@@ -43,14 +43,13 @@
 							value="rip &amp; zip"
 							onClick="startRip();" />
 					</td><td>
-						<label class="checkbox">
+						<label id="label_cached" class="checkbox">
 							<input class="checkbox"
 								type="checkbox"
 								id="rip_cached"
-								checked="checked"
-								disabled="disabled" />
+								checked="checked">
 								use cache
-						</label>
+							</label>
 					</td></tr></table>
 				</center>
 			</td></tr>
@@ -84,6 +83,37 @@
 				</center>
 			</td></tr>
 		</table>
+		<div style="padding-top: 30px;"></div>
+		<table class="page" style="padding-bottom: 10px;">
+			<tr><td class="updates_header">
+					latest news
+			</td></tr>
+			<tr><td class="updates">
+				<ul style="padding-left: 20px;">
+					<li> due to abuse, rips are now capped at 500 pics per rip
+					<ul>
+						<li> except imgur, of course
+						<li> for tumblr rips, please use <i>/tagged/</i> URLs
+					</ul>
+					<li> new features:
+					<ul>
+						<li> clicking 'rip &amp; zip' sets auto-loading URL
+						<ul>
+							<li> example: <a style="font-weight: bold; text-decoration: underline" href="/#imgur.com%2Fa%2F4Qflh">rip.rarchives.com/#imgur.com%2Fa%2F4Qflh</a>
+							<li> <i>please link to this instead of directly to the .zips!</i>
+						</ul>
+						<li> exit warning displays if ripper is still running
+					</ul>
+					<li> bug fixes:
+					<ul>
+						<li> fixed bug that caused ripper to get stuck at "loading"
+						<li> fixed photobucket ripper (still buggy)
+					</ul>
+					<li> send bug reports and feature requests to <a class="box" href="http://www.reddit.com/message/compose/?to=4_pr0n&subject=about%20rip.rarchives.com&message=I%20have%20a%20%3Cbug%20report%2C%20feature%20request%3E%3A">4_pr0n</a>
+				</ul>
+			</td></tr>
+		</table>
+
 		
 		<div class="footer">
 			questions? comments? suggestions? <br><br>
