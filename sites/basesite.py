@@ -40,9 +40,6 @@ class basesite(object):
 		self.url = self.sanitize_url(url)
 		# Directory to store images in
 		self.working_dir = '%s%s%s' % (self.base_dir, os.sep, self.get_dir(url))
-		if not os.path.exists(self.working_dir) and \
-		       self.existing_zip_path() == None:
-			os.mkdir(self.working_dir)
 		self.max_threads = MAX_THREADS
 		self.thread_count = 0
 		self.logfile = '%s%s%s' % (self.working_dir, os.sep, LOG_NAME)
@@ -55,6 +52,11 @@ class basesite(object):
 	""" Return directory name to store photos in """
 	def get_dir(self, url):
 		raise Exception("Method 'get_dir' was not overridden!")
+	
+	def init_dir(self):
+		if not os.path.exists(self.working_dir) and \
+		       self.existing_zip_path() == None:
+			os.mkdir(self.working_dir)
 	
 	""" To be overridden """
 	def download(self):
@@ -146,9 +148,7 @@ class basesite(object):
 			time.sleep(0.1)
 		if os.path.exists(self.working_dir):
 			if len(os.listdir(self.working_dir)) <= 1:
-				if os.path.exists(self.logfile):
-					os.remove(self.logfile)
-				os.rmdir(self.working_dir)
+				rmtree(self.working_dir) # Delete everything in working dir
 	
 	""" Returns human-readable filesize for file """
 	def get_size(self, filename):

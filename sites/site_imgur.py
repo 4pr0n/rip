@@ -34,6 +34,7 @@ class imgur(basesite):
 		elif not '/a/' in url:
 			raise Exception("Not a valid imgur album")
 		url = url.replace('http://', '').replace('https://', '')
+		while url.endswith('/'): url = url[:-1]
 		while url.count('/') > 2: url = url[:url.rfind('/')]
 		if '?' in url: url = url[:url.find('?')]
 		if '#' in url: url = url[:url.find('#')]
@@ -65,13 +66,14 @@ class imgur(basesite):
 			return 'imgur_%s_%s' % (user, slashes[-1])
 
 	def download(self):
+		self.init_dir()
 		if  self.album_type == 'direct' or \
 				self.album_type == 'domain':
 			# Single album
 			self.download_album(self.url)
-			return
-		# Account-level album
-		self.download_account(self.url)
+		else:
+			# Account-level album
+			self.download_account(self.url)
 	
 	def text_to_fs_safe(self, text):
 		safe = 'abcdefghijklmnopqrstuvwxyz0123456789-_ &'
@@ -107,11 +109,6 @@ class imgur(basesite):
 		r = self.web.get('%s/noscript' % album)
 		# Get images
 		links = self.web.between(r, 'img src="http://i.', '"')
-		if len(links) == 0:
-			# No files to download (empty album).
-			# Deleting directory tells ripper it can't download it.
-			rmdir(self.working_dir)
-			return
 		for index, link in enumerate(links):
 			if '?' in link: link = link[:link.find('?')]
 			if '#' in link: link = link[:link.find('#')]
@@ -120,10 +117,6 @@ class imgur(basesite):
 			# Uses superclass threaded download method
 			self.download_image(link, index + 1, total=len(links)) 
 		self.wait_for_threads()
-		# Remove empty albums
-		if len(listdir(self.working_dir)) == 0:
-			#self.log('empty album found - %s' % album)
-			rmdir(self.working_dir)
 	
 	""" Returns highest-res image by checking if imgur has higher res """
 	def get_highest_res(self, url):

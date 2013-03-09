@@ -28,6 +28,7 @@ class imagefap(basesite):
 		return 'imagefap_%s' % name
 
 	def download(self):
+		self.init_dir()
 		r = self.web.get(self.url)
 		links = self.web.between(r, 'x.fap.to/images/thumb/', '"')
 		for (index, link) in enumerate(links):

@@ -32,13 +32,11 @@ class imagebam(basesite):
 		return 'imagebam_%s' % name
 
 	def download(self):
-		# Get album source
+		self.init_dir()
 		r = self.web.get(self.url)
-		# Get images
 		links = self.web.between(r, "href='http://www.imagebam.com/image/", "'")
 		for index, link in enumerate(links):
 			link = "http://www.imagebam.com/image/%s" % link
-			# Download every image
 			self.download_image(link, index + 1, total=len(links)) 
 		self.wait_for_threads()
 	

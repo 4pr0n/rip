@@ -33,6 +33,7 @@ class photobucket(basesite):
 		return 'photobucket_%s%s' % (user, subdir)
 
 	def download(self):
+		self.init_dir()
 		'''http://s579.beta.photobucket.com/user/merkler/library/'''
 		r = self.web.getter(self.url)
 		paths = self.web.between(r, "currentAlbumPath: '", "'")

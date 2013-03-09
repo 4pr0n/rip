@@ -45,6 +45,7 @@ class twitter(basesite):
 
 	""" Magic! """
 	def download(self):
+		self.init_dir()
 		turl = self.get_request(self.url)
 		r = self.web.getter(turl)
 		index = 0

@@ -22,6 +22,7 @@ class instagram(basesite):
 		return 'instagram_%s' % user
 
 	def download(self):
+		self.init_dir()
 		r = self.web.get(self.url)
 		totals = self.web.between(r, 'font-size:123.1%;">', '<')
 		if len(totals) > 0: total = int(totals[1])

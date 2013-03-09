@@ -23,6 +23,7 @@ class xhamster(basesite):
 		return 'xhamster_%s' % aid
 
 	def download(self):
+		self.init_dir()
 		page = 1
 		r = self.web.get(self.url)
 		while True:

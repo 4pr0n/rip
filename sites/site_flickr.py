@@ -27,6 +27,7 @@ class flickr(basesite):
 		return 'flickr_%s' % user
 
 	def download(self):
+		self.init_dir()
 		r = self.web.get(self.url)
 		total = '?'
 		if '<div class="vsNumbers">' in r:

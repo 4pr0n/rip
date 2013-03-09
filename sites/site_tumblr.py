@@ -74,6 +74,7 @@ class tumblr(basesite):
 
 	""" Mystery! """
 	def download(self):
+		self.init_dir()
 		index = 0
 		total = 0
 		for media in ['photo']: #, 'video']:

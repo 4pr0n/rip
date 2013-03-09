@@ -44,6 +44,7 @@ class deviantart(basesite):
 		return 'deviantart_%s' % user
 
 	def download(self):
+		self.init_dir()
 		r = self.web.getter(self.url)
 		total = 0
 		already_have = [] # List of images already parsed

@@ -24,6 +24,7 @@ class getgonewild(basesite):
 		return 'getgonewild_%s' % user
 
 	def download(self):
+		self.init_dir()
 		r = self.web.get(self.url)
 		index = 0
 		links = self.web.between(r, '","url":"', '"')

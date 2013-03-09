@@ -34,6 +34,7 @@ class imagearn(basesite):
 		return 'imagearn_%s' % aid
 
 	def download(self):
+		self.init_dir()
 		r = self.web.get(self.url)
 		# Get images
 		links = self.web.between(r, '<a href="image.php?id=', '"')
