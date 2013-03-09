@@ -26,14 +26,14 @@ class Web:
 		"""
 		self.urlopen = urllib2.urlopen
 		self.Request = urllib2.Request
-		self.cj			= cookielib.LWPCookieJar()
-		self.opener	= urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
+		self.cj      = cookielib.LWPCookieJar()
+		self.opener  = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
 		urllib2.install_opener(self.opener)
 		
 		if user_agent != None:
 			self.user_agent = user_agent
 		else:
-			self.user_agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.186 Safari/535.1'
+			self.user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:19.0) Gecko/20100101 Firefox/19.0'
 	
 	def raise_timeout(self, signum, frame):
 		raise Exception("Timeout")
@@ -260,10 +260,4 @@ class Web:
 			j = source.find(finish, i + len(start) + 1)
 		
 		return result
-	
-	
-if __name__ == "__main__":
-	web = Web()
-	url = "http://www.mp3-center.org/mp3song.php?name=Eric_Clapton_-_Layla.mp3&url=t62XabuWw8iblM9kmtChxtGRkqmPhqzZuquGqoLOgPGfy424u6qY6GNHaM21d4_MtZiChK7lmGql1YfisImC"
-	print web.unshorten(url)
 

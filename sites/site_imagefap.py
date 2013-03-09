@@ -28,15 +28,10 @@ class imagefap(basesite):
 		return 'imagefap_%s' % name
 
 	def download(self):
-		# Get album source
-		self.log('loading album...')
 		r = self.web.get(self.url)
-		# Get images
 		links = self.web.between(r, 'x.fap.to/images/thumb/', '"')
-		for index, link in enumerate(links):
+		for (index, link) in enumerate(links):
 			if index == 0: continue # Skip first URL (user image?)
 			link = 'http://fap.to/images/full/%s' % link
-			# Download every image
-			# Uses superclass threaded download method
 			self.download_image(link, index, total=len(links) - 1) 
 		self.wait_for_threads()

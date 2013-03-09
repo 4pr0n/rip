@@ -125,8 +125,5 @@ def get_keys():
 if __name__ == '__main__':
 	print "Content-Type: application/json"
 	print ""
-	#try:
 	main()
-	#except Exception, e:
-	#print '{"error":"%s"}' % str(e)
 	print "\n"

@@ -45,7 +45,7 @@ class basesite(object):
 			os.mkdir(self.working_dir)
 		self.max_threads = MAX_THREADS
 		self.thread_count = 0
-		self.logfile = '%s/%s' % (self.working_dir, LOG_NAME)
+		self.logfile = '%s%s%s' % (self.working_dir, os.sep, LOG_NAME)
 		self.first_log = True
 	
 	""" To be overridden """
@@ -69,6 +69,7 @@ class basesite(object):
 		if self.first_log:
 			self.first_log = False
 			self.log('http://rip.rarchives.com - file log for URL %s' % self.url, overwrite=True)
+		text = text.replace('"', '\\"')
 		sys.stderr.write('%s\n' % text)
 		if overwrite:
 			f = open(self.logfile, 'w')
@@ -148,10 +149,6 @@ class basesite(object):
 				if os.path.exists(self.logfile):
 					os.remove(self.logfile)
 				os.rmdir(self.working_dir)
-	
-	""" Deconstructor, waits for threads to finish """
-	def __del__(self):
-		self.wait_for_threads()
 	
 	""" Returns human-readable filesize for file """
 	def get_size(self, filename):

@@ -44,7 +44,7 @@ class deviantart(basesite):
 		return 'deviantart_%s' % user
 
 	def download(self):
-		r = self.web.get(self.url)
+		r = self.web.getter(self.url)
 		total = 0
 		already_have = [] # List of images already parsed
 		while True:
@@ -57,7 +57,7 @@ class deviantart(basesite):
 				self.download_image(link, len(already_have), total=total) 
 			next_page = self.get_next_page(r)
 			if next_page == None: break
-			r = self.web.get('%s?offset=%s' % (self.url, next_page))
+			r = self.web.getter('%s?offset=%s' % (self.url, next_page))
 		self.wait_for_threads()
 	
 	""" Retrive link to 'next' page in gallery. Returns None if last page """
@@ -81,7 +81,7 @@ class deviantart(basesite):
 	
 	""" Downloads image from deviantart image page """
 	def download_image_thread(self, url, index, total):
-		r = self.web.get(url)
+		r = self.web.getter(url)
 		img = None
 		if 'id="download-button"' in r:
 			dl = self.web.between(r, 'id="download-button"', '<')[0]

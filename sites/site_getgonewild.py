@@ -67,10 +67,12 @@ class getgonewild(basesite):
 			for image in images:
 				alb_index += 1
 				image = 'http://i.%s' % image
-				if '?' in image: image = image[:image.find('?')]
-				if '#' in image: image = image[:image.find('#')]
 				image = self.get_highest_res(image)
-				filename = '%s/%03d_%03d_%s' % (self.working_dir, index, alb_index, image[image.rfind('/')+1:])
+				filename = image[image.rfind('/')+1:]
+				if '?' in filename: filename = filename[:filename.find('?')]
+				if '#' in filename: filename = filename[:filename.find('#')]
+				if ':' in filename: filename = filename[:filename.find(':')]
+				filename = '%s/%03d_%03d_%s' % (self.working_dir, index, alb_index, filename)
 				self.retry_download(image, filename)
 				self.log('downloaded (%d/%d) #%d (%s) - %s' % (index, total, alb_index, self.get_size(filename), image))
 		self.thread_count -= 1
@@ -93,7 +95,11 @@ class getgonewild(basesite):
 			links = self.web.between(r, '<link rel="image_src" href="', '"')
 		if len(links) > 0:
 			image = links[0]
-			filename = '%s/%03d_%s' % (self.working_dir, index, image[image.rfind('/')+1:])
+			filename = image[image.rfind('/')+1:]
+			if '?' in filename: filename = filename[:filename.find('?')]
+			if '#' in filename: filename = filename[:filename.find('#')]
+			if ':' in filename: filename = filename[:filename.find(':')]
+			filename = '%s/%03d_%s' % (self.working_dir, index, filename)
 			self.retry_download(image, filename)
 			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(filename), image))
 		self.thread_count -= 1
