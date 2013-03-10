@@ -19,6 +19,8 @@ from sites.site_tumblr      import      tumblr
 from sites.site_twitter     import     twitter
 from sites.site_xhamster    import    xhamster
 from sites.site_getgonewild import getgonewild
+from sites.site_anonib      import      anonib
+from sites.site_motherless  import  motherless
 
 """ Print error in JSON format """
 def print_error(text):
@@ -33,7 +35,7 @@ def main():
 	if not 'url' in keys:
 		print_error("Required URL field not found")
 		return
-	url = unquote(keys['url'])
+	url = unquote(keys['url']).replace(' ', '+')
 	try:
 		ripper = get_ripper(url)
 	except Exception, e:
@@ -99,7 +101,9 @@ def get_ripper(url):
 			tumblr,      \
 			twitter,     \
 			xhamster,    \
-			getgonewild]
+			getgonewild, \
+			anonib,      \
+			motherless]
 	for site in sites:
 		try:
 			ripper = site(url)
@@ -118,6 +122,7 @@ def get_keys():
 		keys[key] = form[key].value
 	if not 'url' in keys and len(argv) > 1:
 		keys['url'] = argv[1]
+		keys['start'] = 'true'
 	return keys
 
 """

@@ -40,7 +40,7 @@ class basesite(object):
 			os.mkdir(self.base_dir)
 		self.url = self.sanitize_url(url)
 		# Directory to store images in
-		self.working_dir  = '%s%s%s' % (self.base_dir, os.sep, self.get_dir(url))
+		self.working_dir  = '%s%s%s' % (self.base_dir, os.sep, self.get_dir(self.url))
 		self.max_threads  = MAX_THREADS
 		self.thread_count = 0
 		self.image_count  = 0

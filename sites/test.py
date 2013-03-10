@@ -12,12 +12,14 @@ from site_imagebam    import imagebam
 from site_imagearn    import imagearn
 from site_xhamster    import xhamster
 from site_getgonewild import getgonewild
+from site_anonib      import anonib
+from site_motherless  import motherless
 
 #i = imgur('http://imgur.com/a/8vmpo/noscript')
 #i = imgur('http://scopolamina.imgur.com/')
 #i = imgur('http://fuckmyusername.imgur.com')
 #i = imgur('http://imgur.com/a/brixs')
-i = imgur('http://imgur.com/a/nvE9y')
+#i = imgur('http://imgur.com/a/nvE9y')
 #i = imagefap('http://www.imagefap.com/pictures/2885204/Kentucky-Craigslist')
 #i = imagefap('http://www.imagefap.com/pictures/3958759/Busty-Selfshooter')
 #i = imagefap('http://www.imagefap.com/pictures/3960306/teen-fun/')
@@ -41,12 +43,12 @@ i = imgur('http://imgur.com/a/nvE9y')
 #i = twitter('https://twitter.com/darrow_ashley')
 #i = twitter('https://twitter.com/lemandicandi')
 #i = twitter('https://twitter.com/MrNMissesSmith')
-#i = twitter('https://twitter.com/PBAprilLewis')
-#i = twitter('https://twitter.com/EversSecrets')
+#i = twitter('https://twitter.com/PBAprilLewis') # GONE
+#i = twitter('https://twitter.com/EversSecrets') # GONE
 #i = tumblr('http://caramiaphotography.tumblr.com/tagged/me')
 #i = tumblr('http://1fakeyfake.tumblr.com')
 #i = tumblr('http://mourning-sex.tumblr.com/tagged/me')
-i = tumblr('http://i-was-masturbating-when-i.tumblr.com/')
+#i = tumblr('http://i-was-masturbating-when-i.tumblr.com/')
 #i = instagram('http://web.stagram.com/n/glitterypubez/')
 #i = imagearn('http://imagearn.com/gallery.php?id=128805')
 #i = imagearn('http://imagearn.com/gallery.php?id=29839')
@@ -57,16 +59,26 @@ i = tumblr('http://i-was-masturbating-when-i.tumblr.com/')
 #i = getgonewild('http://getgonewild.com/profile/EW2d')
 #i = getgonewild('http://getgonewild.com/s/miss_ginger_biscuit')
 #i = getgonewild('http://getgonewild.com/profile/yaymuffinss')
+#i = anonib('http://www.anonib.com/t/res/1780.html')
+#i = anonib('http://www.anonib.com/t/res/5019.html')
+#i = anonib('http://www.anonib.com/tblr/res/12475.html')
+#i = anonib('http://www.anonib.com/t/res/1780+50.html')
+i = anonib('http://www.anonib.com/tblr/res/12475+50.html')
+#i = motherless('http://motherless.com/GI39ADA2C')
+#i = motherless('http://motherless.com/GABDCF08')
+#i = motherless('http://motherless.com/G7DC1B74')
 try:
 	print i.working_dir
+	print i.url
 	if i.existing_zip_path() != None:
 		print 'Zip exists: %s' % i.existing_zip_path()
 	else:
 		print 'downloading...'
 		i.download()
-		#print 'checking for zip'
-		#print str(i.existing_zip_path())
-		#print 'zipping'
-		#print i.zip()
+		print 'checking for zip'
+		print str(i.existing_zip_path())
+		print i.zip()
+		print 'checking for zip'
+		print str(i.existing_zip_path())
 except KeyboardInterrupt:
 	print 'interrupted'

@@ -81,8 +81,8 @@ class twitter(basesite):
 		urls = self.web.between(json, '"expanded_url":"', '"')
 		for url in urls:
 			url = url.replace('\\/', '/')
-			if  'twitpic.com/'       in url or \
-					'someothersite.com/' in url:
+			if  'twitpic.com/' in url or \
+					'tumblr.com/'  in url:
 				index += 1
 				while self.thread_count > self.max_threads: sleep(0.1)
 				self.thread_count += 1
@@ -98,6 +98,8 @@ class twitter(basesite):
 		else:
 			r = self.web.get(url)
 			imgs = self.web.between(r, '<meta name="twitter:image" value="', '"')
+			if len(imgs) == 0:
+				imgs = self.web.between(r, '<meta name="twitter:image" content="', '"')
 		if len(imgs) > 0:
 			img = imgs[0]
 			if '?' in img: img = img[:img.find('?')]

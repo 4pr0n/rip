@@ -187,7 +187,7 @@ function setExample(site) {
 	var dic = {
 		'imgur'       : 'http://imgur.com/a/4Qflh', //'http://imgur.com/a/RdXNa',
 		'tumblr'      : 'http://mourning-sex.tumblr.com/tagged/me',
-		'twitter'     : 'https://twitter.com/PBAprilLewis',
+		'twitter'     : 'https://twitter.com/MrNMissesSmith',
 		'deviantart'  : 'http://geekysica.deviantart.com/gallery/40343783',
 		'flickr'      : 'https://secure.flickr.com/photos/peopleofplatt/sets/72157624572361792/with/6166517381/',
 		'photobucket' : 'http://s1069.beta.photobucket.com/user/mandymgray/library/Album%203',
