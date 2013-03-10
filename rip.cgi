@@ -55,12 +55,12 @@ def main():
 	# Start album download
 	if 'start' in keys:
 		if ripper.is_downloading():
-			print_error("album rip is in progress; check back later")
+			print_error("album rip is in progress. check back later")
 			return
 		try:
 			ripper.download()
 		except Exception, e:
-			print_error('unable to download: %s' % str(e))
+			print_error('download failed: %s' % str(e))
 			return
 		if not path.exists(ripper.working_dir):
 			print_error('unable to download album (404?)')
@@ -68,7 +68,7 @@ def main():
 		try:
 			ripper.zip()
 		except Exception, e:
-			print_error('unable to zip: %s' % str(e))
+			print_error('zip failed: %s' % str(e))
 			return
 		print '{'
 		print '"zip":"%s",' % ripper.existing_zip_path().replace('"', '\\"')

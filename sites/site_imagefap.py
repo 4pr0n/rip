@@ -20,7 +20,8 @@ class imagefap(basesite):
 		gids = self.web.between(url, '/pictures/', '/')
 		if len(gids) == 0:
 			raise Exception("required gallery ID /pictures/X/ not found")
-		return '%s?view=2' % url
+		gid = gids[0]
+		return '%s?gid=%s&view=2' % (url, gid)
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):

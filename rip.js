@@ -105,11 +105,13 @@ function requestHandler(req) {
 		if (gebi('status_bar').innerHTML.indexOf('class="box" href="') < 0) {
 			var result = '<center><a class="box" href="' + zipurl + '">';
 			result += title + '</a>';
+			result += '<span style="font-size: 0.8em">';
 			if (json['image_count'] != null) {
-				result += ' (' + json['image_count'] + ' pics @ ' + json.size + ')';
+				result += ' (' + json['image_count'] + ' pics, ' + json.size + ')';
 			} else {
 				result += ' (' + json.size + ')';
 			}
+			result += '</span>';
 			if (json.limit != null) {
 				result += '<br><div class="error" style="padding-top: 5px;">rip was capped at ' + json.limit + ' images</div>';
 			}
@@ -122,7 +124,7 @@ function requestHandler(req) {
 		// LOGS
 		var update = json.log;
 		update = update.replace(/\n/g, '');
-		if (update !== '') {
+		if (update !== '' && gebi('rip_button').hasAttribute('disabled')) {
 			if (update.indexOf(' - ') >= 0) {
 				update = update.substr(0,update.indexOf(' - '));
 			}
