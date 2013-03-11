@@ -15,6 +15,8 @@ class motherless(basesite):
 		u = url.replace('http://', '')
 		dirs = u.split('/')[1:]
 		gid = dirs[0]
+		if len(gid) == 9:
+			gid = gid[0] + gid[2:]
 		if len(gid) not in [7, 8]:
 			raise Exception('gallery ID length: %d, expected 7 or 8' % len(gid))
 		if len(gid) == 8: gid = gid[1:]
