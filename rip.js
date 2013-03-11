@@ -196,7 +196,11 @@ function setExample(site) {
 		'imagearn'    : 'http://imagearn.com/gallery.php?id=82587',
 		'imagebam'    : 'http://www.imagebam.com/gallery/3b73c0f6ba797e77a33b46779fbfe678/',
 		'xhamster'    : 'http://xhamster.com/photos/gallery/1479233/sarah_from_glasgow.html',
-		'getgonewild' : 'http://getgonewild.com/profile/EW2d'
+		'getgonewild' : 'http://getgonewild.com/profile/EW2d',
+		'anonib'      : 'http://www.anonib.com/azn/res/74347.html',
+		'oneclickchicks' : 'http://forum.oneclickchicks.com/album.php?albumid=12510',
+		'4chan'       : 'http://boards.4chan.org/s/res/14020907',
+		'motherless'  : 'http://motherless.com/GC1FEFF5'
 	};
 	// Slow fade in
 	var r = gebi('rip_text');
