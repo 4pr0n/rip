@@ -107,7 +107,7 @@ function requestHandler(req) {
 			result += title + '</a>';
 			result += '<span style="font-size: 0.8em">';
 			if (json['image_count'] != null) {
-				result += ' (' + json['image_count'] + ' pics, ' + json.size + ')';
+				result += '&nbsp;(' + json['image_count'] + '&nbsp;pics,&nbsp;' + json.size + ')';
 			} else {
 				result += ' (' + json.size + ')';
 			}
@@ -200,7 +200,8 @@ function setExample(site) {
 		'anonib'      : 'http://www.anonib.com/azn/res/74347.html',
 		'oneclickchicks' : 'http://forum.oneclickchicks.com/album.php?albumid=12510',
 		'4chan'       : 'http://boards.4chan.org/s/res/14020907',
-		'motherless'  : 'http://motherless.com/GC1FEFF5'
+		'motherless'  : 'http://motherless.com/GC1FEFF5',
+		'minus'       : 'http://nappingdoneright.minus.com/mu6fuBNNdfPG0'
 	};
 	// Slow fade in
 	var r = gebi('rip_text');

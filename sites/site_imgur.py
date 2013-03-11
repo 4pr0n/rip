@@ -105,6 +105,7 @@ class imgur(basesite):
 			self.download_album(url)
 			self.working_dir = prev_dir
 			if self.hit_image_limit(): break
+		self.wait_for_threads()
 
 	def download_album(self, album):
 		# Get album source

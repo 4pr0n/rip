@@ -23,6 +23,7 @@ from sites.site_anonib      import      anonib
 from sites.site_motherless  import  motherless
 from sites.site_4chan       import    fourchan
 from sites.site_occ         import         occ
+from sites.site_minus       import       minus
 
 """ Print error in JSON format """
 def print_error(text):
@@ -67,7 +68,7 @@ def main():
 			print_error('download failed: %s' % str(e))
 			return
 		if not path.exists(ripper.working_dir):
-			print_error('unable to download album (404?)')
+			print_error('unable to download album (empty? 404?)')
 			return
 		try:
 			ripper.zip()
@@ -107,7 +108,8 @@ def get_ripper(url):
 			anonib,      \
 			motherless,  \
 			fourchan,    \
-			occ]
+			occ,         \
+			minus]
 	for site in sites:
 		try:
 			ripper = site(url)

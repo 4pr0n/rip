@@ -16,64 +16,93 @@ from site_anonib      import anonib
 from site_motherless  import motherless
 from site_4chan       import fourchan
 from site_occ         import occ
+from site_minus       import minus
 
-#i = imgur('http://imgur.com/a/8vmpo/noscript')
-#i = imgur('http://scopolamina.imgur.com/')
-#i = imgur('http://fuckmyusername.imgur.com')
-#i = imgur('http://imgur.com/a/brixs')
-#i = imgur('http://imgur.com/a/nvE9y')
-#i = imagefap('http://www.imagefap.com/pictures/2885204/Kentucky-Craigslist')
-#i = imagefap('http://www.imagefap.com/pictures/3958759/Busty-Selfshooter')
-#i = imagefap('http://www.imagefap.com/pictures/3960306/teen-fun/')
-#i = imagebam('http://www.imagebam.com/gallery/3e4u10fk034871hs6idcil6txauu3ru6/')
-#i = imagebam('http://www.imagebam.com/image/1ca1ab109274357')
-#i = imagebam('http://www.imagebam.com/gallery/g23rwux1oz1g6n9gzjqw2k4e6yblqxdu')
-#i = deviantart('http://angelsfalldown1.deviantart.com/gallery/2498849')
-#i = deviantart('http://angelsfalldown1.deviantart.com/gallery/2498856')
-#i = deviantart('http://dreamersintheskies.deviantart.com/gallery/') # Gets more than gmi-total
-#i = deviantart('http://dreambaloon.deviantart.com/gallery/')
-#i = deviantart('http://easy-shutter.deviantart.com/gallery/42198389')
-#i = deviantart('http://garv23.deviantart.com')
-#i = deviantart('http://wrouinr.deviantart.com/')
-#i = photobucket('http://s579.beta.photobucket.com/user/merkler/library/')
-#i = photobucket('http://s1131.beta.photobucket.com/user/Beth_fan/library/')
-#i = photobucket('http://s1069.beta.photobucket.com/user/mandymgray/library/Album%203')
-#i = photobucket('http://s1216.beta.photobucket.com/user/Liebe_Dich/profile/')
-#i = flickr('http://www.flickr.com/photos/beboastar/sets/72157630130722172/')
-#i = flickr('https://secure.flickr.com/photos/peopleofplatt/sets/72157624572361792/with/6344610705/')
-#i = flickr('http://www.flickr.com/photos/rphotoit/sets/72157631879138251/with/8525941976/')
-#i = twitter('https://twitter.com/darrow_ashley')
-#i = twitter('https://twitter.com/lemandicandi')
-#i = twitter('https://twitter.com/MrNMissesSmith')
-#i = twitter('https://twitter.com/PBAprilLewis') # GONE
-#i = twitter('https://twitter.com/EversSecrets') # GONE
-#i = tumblr('http://caramiaphotography.tumblr.com/tagged/me')
-#i = tumblr('http://1fakeyfake.tumblr.com')
-#i = tumblr('http://mourning-sex.tumblr.com/tagged/me')
-#i = tumblr('http://i-was-masturbating-when-i.tumblr.com/')
-#i = instagram('http://web.stagram.com/n/glitterypubez/')
-#i = imagearn('http://imagearn.com/gallery.php?id=128805')
-#i = imagearn('http://imagearn.com/gallery.php?id=29839')
-#i = imagearn('http://imagearn.com/image.php?id=5046077')
-#i = xhamster('http://xhamster.com/photos/gallery/1306566/lovely_teen_naked_for_self_shots.html')
-#i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html')
-#i = flickr('http://www.flickr.com/photos/29809540@N04/')
-#i = getgonewild('http://getgonewild.com/profile/EW2d')
-#i = getgonewild('http://getgonewild.com/s/miss_ginger_biscuit')
-#i = getgonewild('http://getgonewild.com/profile/yaymuffinss')
-#i = anonib('http://www.anonib.com/t/res/1780.html')
-#i = anonib('http://www.anonib.com/t/res/5019.html')
-#i = anonib('http://www.anonib.com/tblr/res/12475.html')
-#i = anonib('http://www.anonib.com/t/res/1780+50.html')
-#i = anonib('http://www.anonib.com/tblr/res/12475+50.html')
-#i = motherless('http://motherless.com/GI39ADA2C')
-#i = motherless('http://motherless.com/GABDCF08')
-#i = motherless('http://motherless.com/G7DC1B74')
-#i = fourchan('http://boards.4chan.org/s/res/14035564')
-#i = occ('http://forum.oneclickchicks.com/showthread.php?t=137808')
-#i = occ('http://forum.oneclickchicks.com/showthread.php?t=102994')
-i = occ('http://forum.oneclickchicks.com/album.php?albumid=12579')
 try:
+	#i = imgur('http://imgur.com/a/8vmpo/noscript')
+	#i = imgur('http://scopolamina.imgur.com/')
+	#i = imgur('http://fuckmyusername.imgur.com')
+	#i = imgur('http://imgur.com/a/brixs')
+	#i = imgur('http://imgur.com/a/nvE9y')
+	#i = imgur('http://spicymustard.imgur.com/') # empty user acct
+
+	#i = imagefap('http://www.imagefap.com/pictures/2885204/Kentucky-Craigslist')
+	#i = imagefap('http://www.imagefap.com/pictures/3958759/Busty-Selfshooter')
+	#i = imagefap('http://www.imagefap.com/pictures/3960306/teen-fun/')
+
+	#i = imagebam('http://www.imagebam.com/gallery/3e4u10fk034871hs6idcil6txauu3ru6/')
+	#i = imagebam('http://www.imagebam.com/image/1ca1ab109274357')
+	#i = imagebam('http://www.imagebam.com/gallery/g23rwux1oz1g6n9gzjqw2k4e6yblqxdu')
+
+	#i = deviantart('http://angelsfalldown1.deviantart.com/gallery/2498849')
+	#i = deviantart('http://angelsfalldown1.deviantart.com/gallery/2498856')
+	#i = deviantart('http://dreamersintheskies.deviantart.com/gallery/') # Gets more than gmi-total
+	#i = deviantart('http://dreambaloon.deviantart.com/gallery/')
+	#i = deviantart('http://easy-shutter.deviantart.com/gallery/42198389')
+	#i = deviantart('http://garv23.deviantart.com')
+	#i = deviantart('http://wrouinr.deviantart.com/')
+
+	#i = photobucket('http://s579.beta.photobucket.com/user/merkler/library/')
+	#i = photobucket('http://s1131.beta.photobucket.com/user/Beth_fan/library/')
+	#i = photobucket('http://s1069.beta.photobucket.com/user/mandymgray/library/Album%203')
+	#i = photobucket('http://s1216.beta.photobucket.com/user/Liebe_Dich/profile/')
+
+	#i = flickr('http://www.flickr.com/photos/beboastar/sets/72157630130722172/')
+	#i = flickr('https://secure.flickr.com/photos/peopleofplatt/sets/72157624572361792/with/6344610705/')
+	#i = flickr('http://www.flickr.com/photos/rphotoit/sets/72157631879138251/with/8525941976/')
+	#i = flickr('http://www.flickr.com/photos/29809540@N04/')
+
+	#i = twitter('https://twitter.com/darrow_ashley')
+	#i = twitter('https://twitter.com/lemandicandi')
+	#i = twitter('https://twitter.com/MrNMissesSmith')
+	#i = twitter('https://twitter.com/PBAprilLewis') # GONE
+	#i = twitter('https://twitter.com/EversSecrets') # GONE
+
+	#i = tumblr('http://caramiaphotography.tumblr.com/tagged/me')
+	#i = tumblr('http://1fakeyfake.tumblr.com')
+	#i = tumblr('http://mourning-sex.tumblr.com/tagged/me')
+	#i = tumblr('http://i-was-masturbating-when-i.tumblr.com/')
+
+	#i = instagram('http://web.stagram.com/n/glitterypubez/')
+
+	#i = imagearn('http://imagearn.com/gallery.php?id=128805')
+	#i = imagearn('http://imagearn.com/gallery.php?id=29839')
+	#i = imagearn('http://imagearn.com/image.php?id=5046077')
+
+	#i = xhamster('http://xhamster.com/photos/gallery/1306566/lovely_teen_naked_for_self_shots.html')
+	#i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html')
+
+	#i = getgonewild('http://getgonewild.com/profile/EW2d')
+	#i = getgonewild('http://getgonewild.com/s/miss_ginger_biscuit')
+	#i = getgonewild('http://getgonewild.com/profile/yaymuffinss')
+
+	#i = anonib('http://www.anonib.com/t/res/1780.html')
+	#i = anonib('http://www.anonib.com/t/res/5019.html')
+	#i = anonib('http://www.anonib.com/tblr/res/12475.html')
+	#i = anonib('http://www.anonib.com/t/res/1780+50.html')
+	#i = anonib('http://www.anonib.com/tblr/res/12475+50.html')
+
+	#i = motherless('http://motherless.com/GI39ADA2C')
+	#i = motherless('http://motherless.com/GABDCF08')
+	#i = motherless('http://motherless.com/G7DC1B74')
+
+	#i = fourchan('http://boards.4chan.org/s/res/14035564')
+
+	#i = occ('http://forum.oneclickchicks.com/showthread.php?t=137808')
+	#i = occ('http://forum.oneclickchicks.com/showthread.php?t=102994')
+	#i = occ('http://forum.oneclickchicks.com/album.php?albumid=12579')
+
+	#i = minus('http://minus.com')
+	#i = minus('http://.minus.com')
+	#i = minus('http://i.minus.com')
+	#i = minus('http://www.minus.com')
+	#i = minus('http://zuzahgaming.minus.com/mF31aoo7kNdiM')
+	#i = minus('https://nappingdoneright.minus.com/mu6fuBNNdfPG0')
+	#i = minus('http://nappingdoneright.minus.com/mu6fuBNNdfPG0')
+	i = minus('https://nappingdoneright.minus.com/')
+	#i = minus('https://nappingdoneright.minus.com')
+	#i = minus('https://nappingdoneright.minus.com/uploads')
+	
 	print i.working_dir
 	print i.url
 	if i.existing_zip_path() != None:
@@ -89,4 +118,6 @@ try:
 		print str(i.existing_zip_path())
 		'''
 except KeyboardInterrupt:
-	print 'interrupted'
+	print '\ninterrupted'
+except Exception, e:
+	print "\nEXCEPTION: %s" % str(e)
