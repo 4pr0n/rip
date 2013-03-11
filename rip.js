@@ -94,6 +94,7 @@ function requestHandler(req) {
 		// ERROR
 		statusbar('<div class="error">error: ' + json.error + '</div>');
 		enableControls();
+		setProgress(0);
 	} else if (json.zip != null) {
 		// ZIPPED
 		var zipurl = json.zip;
@@ -119,6 +120,7 @@ function requestHandler(req) {
 			slowlyShow(gebi('status_bar'), 0.0);
 		}
 		enableControls();
+		setProgress(0);
 		
 	} else if (json.log != null) {
 		// LOGS
@@ -128,7 +130,16 @@ function requestHandler(req) {
 			if (update.indexOf(' - ') >= 0) {
 				update = update.substr(0,update.indexOf(' - '));
 			}
-			update = '<img src="spinner_dark.gif">&nbsp;' + update;
+			i = update.indexOf('(');
+			j = update.indexOf(')', i);
+			k = update.indexOf('/', i);
+			if (i >= 0 && j >= 0 && k >= 0 && k < j) {
+				var num = parseFloat(update.substr(i+1, k));
+				var denom = parseFloat(update.substr(k+1, j));
+				setProgress(num / denom);
+			}
+
+			update = '&nbsp;<img src="spinner_dark.gif">&nbsp;' + update;
 			statusbar(update);
 		}
 		// We only get logs if the file isn't done downloading.
@@ -230,6 +241,23 @@ function slowlyShow(obj, alpha) {
 		obj.style.opacity = "1";
 	} else {
 		setTimeout(function() { slowlyShow(obj, alpha); } , 5);
+	}
+}
+
+function setProgress(perc) {
+	var value;
+	if (perc > 1) {
+		value = "100";
+	} else if (perc < 0) {
+		value = "0";
+	} else {
+		value = "" + (100 * perc);
+	}
+	if (value == "0") {
+		gebi('progress_bar_div').style.display = "none";
+	} else {
+		gebi('progress_bar_div').style.display = "inline-block";
+		gebi('progress_bar').value = value;
 	}
 }
 
