@@ -85,6 +85,7 @@ try:
 	#i = motherless('http://motherless.com/GI39ADA2C')
 	#i = motherless('http://motherless.com/GABDCF08')
 	#i = motherless('http://motherless.com/G7DC1B74')
+	i = motherless('http://motherless.com/GV9719092')
 
 	#i = fourchan('http://boards.4chan.org/s/res/14035564')
 
@@ -99,7 +100,7 @@ try:
 	#i = minus('http://zuzahgaming.minus.com/mF31aoo7kNdiM')
 	#i = minus('https://nappingdoneright.minus.com/mu6fuBNNdfPG0')
 	#i = minus('http://nappingdoneright.minus.com/mu6fuBNNdfPG0')
-	i = minus('https://nappingdoneright.minus.com/')
+	#i = minus('https://nappingdoneright.minus.com/')
 	#i = minus('https://nappingdoneright.minus.com')
 	#i = minus('https://nappingdoneright.minus.com/uploads')
 	
@@ -119,5 +120,5 @@ try:
 		'''
 except KeyboardInterrupt:
 	print '\ninterrupted'
-except Exception, e:
-	print "\nEXCEPTION: %s" % str(e)
+#except Exception, e:
+	#print "\nEXCEPTION: %s" % str(e)

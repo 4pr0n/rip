@@ -3,6 +3,7 @@
 from basesite  import basesite
 from time      import sleep
 from threading import Thread
+from os        import path
 
 class motherless(basesite):
 	
@@ -17,10 +18,9 @@ class motherless(basesite):
 		gid = dirs[0]
 		if len(gid) == 9:
 			gid = gid[0] + gid[2:]
-		if len(gid) not in [7, 8]:
+		if len(gid) != 8:
 			raise Exception('gallery ID length: %d, expected 7 or 8' % len(gid))
-		if len(gid) == 8: gid = gid[1:]
-		return 'http://motherless.com/GI%s' % gid
+		return 'http://motherless.com/GI%s' % gid[1:]
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
@@ -44,6 +44,7 @@ class motherless(basesite):
 			if '?page=%d' % page in r:
 				r = self.web.getter('%s?page=%d' % (self.url, page))
 			else: break
+		self.download_videos()
 		self.wait_for_threads()
 	
 	def download_image(self, url, index, total):
@@ -74,3 +75,37 @@ class motherless(basesite):
 		self.log(text)
 		self.thread_count -= 1
 
+	def download_videos(self):
+		url = self.url.replace('.com/GI', '.com/GV')
+		r = self.web.get(url)
+		page  = 1
+		while True:
+			for thumb in self.web.between(r, 'thumbnail mediatype_video" rel="', '"'):
+				self.log(thumb)
+				self.download_video('%s/%s' % (url.replace('.com/GV', '.com/G'), thumb))
+			page += 1
+			if '?page=%d' % page in r:
+				r = self.web.getter('%s?page=%d' % (url, page))
+			else: break
+		self.wait_for_threads()
+		
+	def download_video(self, url):
+		while self.thread_count > self.max_threads: sleep(0.1)
+		self.thread_count += 1
+		t = Thread(target=self.download_video_thread, args=(url,))
+		t.start()
+	
+	def download_video_thread(self, url):
+		r = self.web.get(url)
+		videolog = '%s/videos.txt' % self.working_dir
+		log_text = ''
+		if not path.exists(videolog):
+			log_text = 'http://i.rarchives.com - video links for motherless gallery %s\n' % self.url
+		if not "__fileurl = '" in r:
+			log_text += 'no video found @ %s' % url
+		else:
+			log_text += self.web.between(r, "__fileurl = '", "'")[0]
+		f = open('%s/videos.txt' % self.working_dir, 'a')
+		f.write('%s\n' % log_text)
+		f.close()
+		self.thread_count -= 1
