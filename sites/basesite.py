@@ -79,8 +79,8 @@ class basesite(object):
 		if self.first_log:
 			self.first_log = False
 			self.log('http://rip.rarchives.com - file log for URL %s' % self.url, overwrite=True)
-		text = text.replace('"', '\\"')
 		sys.stderr.write('%s\n' % text)
+		text = text.replace('"', '\\"')
 		if overwrite:
 			f = open(self.logfile, 'w')
 		else:
@@ -101,11 +101,12 @@ class basesite(object):
 		return lines[len(lines)-tail_lines:]
 	
 	""" Starts separate thread to download image from URL """
-	def download_image(self, url, index, total='?', subdir=''):
-		saveas = url[url.rfind('/')+1:]
-		# Strip extraneous / non FS safe characters
-		if '?' in saveas: saveas = saveas[:saveas.find('?')]
-		if ':' in saveas: saveas = saveas[:saveas.find(':')]
+	def download_image(self, url, index, total='?', subdir='', saveas=None):
+		if saveas == None:
+			saveas = url[url.rfind('/')+1:]
+			# Strip extraneous / non FS safe characters
+			if '?' in saveas: saveas = saveas[:saveas.find('?')]
+			if ':' in saveas: saveas = saveas[:saveas.find(':')]
 		# Add a file extension if necessary
 		if not '.' in saveas:
 			m = self.web.get_meta(url)

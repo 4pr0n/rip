@@ -21,6 +21,8 @@ from sites.site_xhamster    import    xhamster
 from sites.site_getgonewild import getgonewild
 from sites.site_anonib      import      anonib
 from sites.site_motherless  import  motherless
+from sites.site_4chan       import    fourchan
+from sites.site_occ         import         occ
 
 """ Print error in JSON format """
 def print_error(text):
@@ -103,7 +105,9 @@ def get_ripper(url):
 			xhamster,    \
 			getgonewild, \
 			anonib,      \
-			motherless]
+			motherless,  \
+			fourchan,    \
+			occ]
 	for site in sites:
 		try:
 			ripper = site(url)

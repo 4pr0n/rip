@@ -24,11 +24,10 @@ class Web:
 		"""
 			Sets this class's user agent.
 		"""
-		self.urlopen = urllib2.urlopen
-		self.Request = urllib2.Request
-		self.cj      = cookielib.LWPCookieJar()
+		self.cj      = cookielib.CookieJar()
 		self.opener  = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
-		urllib2.install_opener(self.opener)
+		self.Request = urllib2.Request
+		self.urlopen = self.opener.open
 		
 		if user_agent != None:
 			self.user_agent = user_agent
@@ -41,10 +40,12 @@ class Web:
 	def get_meta(self, url):
 		""" Reads file info (content type, length, etc) without downloading
 		    Times out after 10 seconds (5 to unshorten, 5 to get meta) """
-		previous = ''
 		url = self.unshorten(url)
 		try:
-			site = urllib.urlopen(url)
+			headers = {'User-agent' : self.user_agent}
+			req = urllib2.Request(url, headers=headers)
+			site = self.urlopen(req)
+			#site = self.urlopen(url)
 		except Exception:
 			return {'content-type': 'unknown', 'content-length': '0'}
 		return site.info()
@@ -52,7 +53,9 @@ class Web:
 	def unshorten(self, url):
 		""" Unshortens URL. Follows until no more redirects. Times out after 5 seconds """
 		try:
-			site = urllib2.urlopen(url)
+			headers = {'User-agent' : self.user_agent}
+			req = urllib2.Request(url, headers=headers)
+			site = self.urlopen(req)
 		except urllib2.HTTPError:
 			return url
 		except Exception:
@@ -82,7 +85,7 @@ class Web:
 		try_again = True
 		while try_again:
 			try:
-				req = self.Request(url, headers=headers)
+				req = urllib2.Request(url, headers=headers)
 				handle = self.urlopen(req)
 				
 			except IOError, e:
@@ -119,7 +122,7 @@ class Web:
 		"""
 		headers = { 'User-agent' : self.user_agent }
 		try:
-			req = self.Request(url, headers=headers)
+			req = urllib2.Request(url, headers=headers)
 			handle = self.urlopen(req)
 		except Exception:
 			return ''
@@ -169,7 +172,7 @@ class Web:
 		try_again = True
 		while try_again:
 			try:
-				req = self.Request(url, data, headers)
+				req = urllib2.Request(url, data, headers)
 				handle = self.urlopen(req)
 				
 			except IOError, e:
@@ -205,7 +208,9 @@ class Web:
 		output = open(save_as, "wb")
 		
 		try:
-			file_on_web = self.urlopen(url)
+			headers = {'User-agent' : self.user_agent}
+			req = urllib2.Request(url, headers=headers)
+			file_on_web = self.urlopen(req)
 			while True:
 				buf = file_on_web.read(65536)
 				if len(buf) == 0:

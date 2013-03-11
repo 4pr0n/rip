@@ -14,6 +14,8 @@ from site_xhamster    import xhamster
 from site_getgonewild import getgonewild
 from site_anonib      import anonib
 from site_motherless  import motherless
+from site_4chan       import fourchan
+from site_occ         import occ
 
 #i = imgur('http://imgur.com/a/8vmpo/noscript')
 #i = imgur('http://scopolamina.imgur.com/')
@@ -63,10 +65,13 @@ from site_motherless  import motherless
 #i = anonib('http://www.anonib.com/t/res/5019.html')
 #i = anonib('http://www.anonib.com/tblr/res/12475.html')
 #i = anonib('http://www.anonib.com/t/res/1780+50.html')
-i = anonib('http://www.anonib.com/tblr/res/12475+50.html')
+#i = anonib('http://www.anonib.com/tblr/res/12475+50.html')
 #i = motherless('http://motherless.com/GI39ADA2C')
 #i = motherless('http://motherless.com/GABDCF08')
 #i = motherless('http://motherless.com/G7DC1B74')
+#i = fourchan('http://boards.4chan.org/s/res/14035564')
+#i = occ('http://forum.oneclickchicks.com/showthread.php?t=137808')
+i = occ('http://forum.oneclickchicks.com/showthread.php?t=102994')
 try:
 	print i.working_dir
 	print i.url
@@ -75,10 +80,12 @@ try:
 	else:
 		print 'downloading...'
 		i.download()
+		'''
 		print 'checking for zip'
 		print str(i.existing_zip_path())
 		print i.zip()
 		print 'checking for zip'
 		print str(i.existing_zip_path())
+		'''
 except KeyboardInterrupt:
 	print 'interrupted'
