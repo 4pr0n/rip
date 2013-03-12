@@ -201,7 +201,7 @@ function setExample(site) {
 		'twitter'     : 'https://twitter.com/MrNMissesSmith',
 		'deviantart'  : 'http://geekysica.deviantart.com/gallery/40343783',
 		'flickr'      : 'https://secure.flickr.com/photos/peopleofplatt/sets/72157624572361792/with/6166517381/',
-		'photobucket' : 'http://s1069.beta.photobucket.com/user/mandymgray/library/Album%203',
+		'photobucket' : 'http://s1216.beta.photobucket.com/user/Liebe_Dich/profile/',
 		'webstagram'  : 'http://web.stagram.com/n/glitterypubez/',
 		'imagefap'    : 'http://www.imagefap.com/pictures/2885204/Kentucky-Craigslist',
 		'imagearn'    : 'http://imagearn.com/gallery.php?id=82587',

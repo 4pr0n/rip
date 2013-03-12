@@ -4,7 +4,9 @@ import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from sys    import argv
-from os     import remove, path
+from os     import remove, path, stat, utime
+from stat   import ST_ATIME, ST_MTIME
+from time   import strftime
 from urllib import unquote
 
 from sites.site_deviantart  import  deviantart 
@@ -51,6 +53,7 @@ def main():
 		if 'cached' in keys and keys['cached'] == 'false':
 			remove(ripper.existing_zip_path())
 		else:
+			update_file_modified(ripper.existing_zip_path())
 			print '{'
 			print '"zip":"%s",' % ripper.existing_zip_path()
 			print '"size":"%s"' % ripper.get_size(ripper.existing_zip_path())
@@ -119,6 +122,13 @@ def get_ripper(url):
 			if error == '': continue
 			raise e
 	raise Exception('Ripper can not rip given URL')
+
+""" Updates system 'modified time' for file to current time. """
+def update_file_modified(f):
+	st = stat(f)
+	atime = st[ST_ATIME]
+	mtime = int(strftime('%s'))
+	utime(f, (atime, mtime))
 
 """ Retrieves key/value pairs from query, puts in dict """
 def get_keys():
