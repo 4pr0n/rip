@@ -126,7 +126,7 @@ def get_ripper(url):
 """ Updates system 'modified time' for file to current time. """
 def update_file_modified(f):
 	st = stat(f)
-	atime = st[ST_ATIME]
+	atime = int(strftime('%s'))
 	mtime = int(strftime('%s'))
 	utime(f, (atime, mtime))
 
