@@ -98,21 +98,21 @@ function requestHandler(req) {
 	} else if (json.zip != null) {
 		// ZIPPED
 		var zipurl = json.zip;
-		var title  = json.zip;
+		var title  = json.zip.replace("rips/", "");
 		var split_size = 15;
 		if (title.length > (split_size * 2) + 3) {
 			title = title.substr(0, split_size) + "..." + title.substr(title.length-split_size);
 		}
-		if (gebi('status_bar').innerHTML.indexOf('class="box" href="') < 0) {
-			var result = '<center><a class="box" href="' + zipurl + '">';
-			result += title + '</a>';
-			result += '<span style="font-size: 0.8em">';
+		if (gebi('status_bar').innerHTML.indexOf('class="download_box" href="') < 0) {
+			var result = '<center><a class="download_box" href="' + zipurl + '">';
+			result += title;
+			result += '<span style="font-size: 0.8em;">';
 			if (json['image_count'] != null) {
 				result += '&nbsp;(' + json['image_count'] + '&nbsp;pics,&nbsp;' + json.size + ')';
 			} else {
 				result += ' (' + json.size + ')';
 			}
-			result += '</span>';
+			result += '</span></a>';
 			if (json.limit != null) {
 				result += '<br><div class="error" style="padding-top: 5px;">rip was capped at ' + json.limit + ' images</div>';
 			}
