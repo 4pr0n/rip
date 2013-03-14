@@ -53,9 +53,7 @@ class minus(basesite):
 		albumid = url[url.rfind('/')+1:]
 		r = self.web.get(url)
 		if not '"items": [' in r:
-			f = open('wtf.txt', 'w')
-			f.write(r)
-			f.close()
+			self.wait_for_threads()
 			raise Exception('could not find items in minus album - %s' % url)
 		json = self.web.between(r, '"items": [', ']')[0]
 		chunks = self.web.between(json, '{', '}')

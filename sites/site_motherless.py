@@ -14,6 +14,7 @@ class motherless(basesite):
 		if not 'motherless.com/G' in url:
 			raise Exception('motherless.com/G gallery URL required')
 		u = url.replace('http://', '')
+		if '?' in u: u = u[:u.find('?')]
 		dirs = u.split('/')[1:]
 		gid = dirs[0]
 		if len(gid) == 9:
