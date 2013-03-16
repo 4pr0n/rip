@@ -15,6 +15,8 @@ class photobucket(basesite):
 			raise Exception('URL must contain /user/')
 		url = url.replace('https://', 'http://')
 		if not url.startswith('http://'): url = 'http://%s' % url
+		if '?' in url: url = url[:url.find('?')]
+		if '#' in url: url = url[:url.find('#')]
 		subdir = ''
 		if '/library/' in url:
 			subdir = url[url.rfind('/library/')+len('/library/'):]
