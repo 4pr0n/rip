@@ -15,6 +15,9 @@ class xhamster(basesite):
 			raise Exception('Required /photos/gallery/ not found in %s' % url)
 		if '?' in url: url = url[:url.find('?')]
 		if '#' in url: url = url[:url.find('#')]
+		if '.html' in url and url[url.find('.html')-2] == '-':
+			i = url.find('.html')
+			url = url[:i-2] + url[i:]
 		return url
 
 	""" Discover directory path based on URL """

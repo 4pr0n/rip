@@ -71,6 +71,7 @@ try:
 
 	#i = xhamster('http://xhamster.com/photos/gallery/1306566/lovely_teen_naked_for_self_shots.html')
 	#i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html')
+	i = xhamster('http://xhamster.com/photos/gallery/1742221/amateur_black_girls_volume_4-2.html')
 
 	#i = getgonewild('http://getgonewild.com/profile/EW2d')
 	#i = getgonewild('http://getgonewild.com/s/miss_ginger_biscuit')
@@ -92,7 +93,7 @@ try:
 	#i = occ('http://forum.oneclickchicks.com/showthread.php?t=137808')
 	#i = occ('http://forum.oneclickchicks.com/showthread.php?t=102994')
 	#i = occ('http://forum.oneclickchicks.com/album.php?albumid=12579')
-	i = occ('http://forum.oneclickchicks.com/showthread.php?t=146037')
+	#i = occ('http://forum.oneclickchicks.com/showthread.php?t=146037')
 
 	#i = minus('http://minus.com')
 	#i = minus('http://.minus.com')
