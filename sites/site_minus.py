@@ -12,7 +12,7 @@ class minus(basesite):
 				'i.minus.com' in url or \
 				'/.minus.com' in url or \
 				'www.minus.com' in url:
-			raise Exception('required <user>.minus.com not found in URL')
+			raise Exception('required <b>http://&lt;user&gt;.minus.com/</b> not found in URL')
 		return url
 
 	""" Discover directory path based on URL """

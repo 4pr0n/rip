@@ -117,6 +117,12 @@ class deviantart(basesite):
 			self.log('image not found at: %s' % url)
 			self.thread_count -= 1
 			return
+		if '/i/' in img:
+			splits = img.split('/')
+			i = splits.index('i')
+			if i == 5:
+				splits.pop(i - 1)
+				img = '/'.join(splits)
 		filename = img[img.rfind('/')+1:]
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
 		if os.path.exists(saveas):
