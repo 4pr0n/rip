@@ -1,1 +1,5 @@
 IndexIgnore *
+# Prevent hotlinking
+RewriteEngine on
+RewriteCond %{HTTP_REFERER} !^http(s)?://rip.rarchives.com [NC]
+RewriteRule \.(zip)$ - [NC,F,L]
