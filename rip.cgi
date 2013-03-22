@@ -26,6 +26,7 @@ from sites.site_motherless  import  motherless
 from sites.site_4chan       import    fourchan
 from sites.site_occ         import         occ
 from sites.site_minus       import       minus
+from sites.site_gifyo       import       gifyo
 
 """ Print error in JSON format """
 def print_error(text):
@@ -112,7 +113,8 @@ def get_ripper(url):
 			motherless,  \
 			fourchan,    \
 			occ,         \
-			minus]
+			minus,       \
+			gifyo]
 	for site in sites:
 		try:
 			ripper = site(url)

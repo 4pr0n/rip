@@ -17,6 +17,7 @@ from site_motherless  import motherless
 from site_4chan       import fourchan
 from site_occ         import occ
 from site_minus       import minus
+from site_gifyo       import gifyo
 
 try:
 	#i = imgur('http://imgur.com/a/8vmpo/noscript')
@@ -71,7 +72,7 @@ try:
 
 	#i = xhamster('http://xhamster.com/photos/gallery/1306566/lovely_teen_naked_for_self_shots.html')
 	#i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html')
-	i = xhamster('http://xhamster.com/photos/gallery/1742221/amateur_black_girls_volume_4-2.html')
+	#i = xhamster('http://xhamster.com/photos/gallery/1742221/amateur_black_girls_volume_4-2.html')
 
 	#i = getgonewild('http://getgonewild.com/profile/EW2d')
 	#i = getgonewild('http://getgonewild.com/s/miss_ginger_biscuit')
@@ -105,6 +106,9 @@ try:
 	#i = minus('https://nappingdoneright.minus.com/')
 	#i = minus('https://nappingdoneright.minus.com')
 	#i = minus('https://nappingdoneright.minus.com/uploads')
+
+	i = gifyo('http://gifyo.com/ccrystallinee/')
+	#i = gifyo('http://gifyo.com/deanandhepburn/') # private
 	
 	print i.working_dir
 	print i.url
