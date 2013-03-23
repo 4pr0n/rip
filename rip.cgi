@@ -41,7 +41,8 @@ def main():
 	if not 'url' in keys:
 		print_error("Required URL field not found")
 		return
-	url = unquote(keys['url']).replace(' ', '+')
+	
+	url = unquote(keys['url']).replace(' ', '%20')
 	try:
 		ripper = get_ripper(url)
 	except Exception, e:
