@@ -4,7 +4,9 @@ from basesite import basesite
 from time     import sleep
 
 # Key for querying tumblr's API
-API_KEY = 'v5kUqGQXUtmF7K0itri1DGtgTs0VQpbSEbh1jxYgj9d2Sq18F8'
+f = open('tumblr_api.key', 'r')
+API_KEY = f.read().replace('\n', '').strip()
+f.close()
 
 """
 	Downloads tumblr albums

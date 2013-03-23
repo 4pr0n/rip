@@ -26,13 +26,16 @@ class occ(basesite):
 		return 'oneclickchicks_%s' % (gid)
 
 	def login(self):
+		f = open('occ.key', 'r')
+		lines = f.read().split('\n')
+		f.close()
 		d = {}
-		d['vb_login_username'] = '1fakeyfake'
-		d['vb_login_password'] = 'fakers'
+		d['vb_login_username'] = lines[0]
+		d['vb_login_password'] = lines[1]
 		d['do'] = 'login'
 		r = self.web.post('http://forum.oneclickchicks.com/login.php?do=login', postdict=d)
 		if not 'redirecting' in r.lower():
-			raise Exception('could not log in to oneclickchicks; tell 4_pr0n')
+			raise Exception('could not log in to oneclickchicks')
 
 	def download(self):
 		self.init_dir()
