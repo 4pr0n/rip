@@ -112,7 +112,8 @@ try:
 	#i = gifyo('http://gifyo.com/deanandhepburn/') # private
 
 	#i = imgsrc('http://imgsrc.ru/main/pic.php?ad=774665')
-	i = imgsrc('http://imgsrc.ru/jp101091/26666184.html?pwd=&lang=en#')
+	#i = imgsrc('http://imgsrc.ru/jp101091/26666184.html?pwd=&lang=en#')
+	i = imgsrc('http://imgsrc.ru/hugo004/21447611.html')
 	#i = imgsrc('http://imgsrc.ru/fotoivanov/a661729.html')
 	
 	print i.working_dir

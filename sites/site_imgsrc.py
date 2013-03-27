@@ -36,6 +36,8 @@ class imgsrc(basesite):
 			verify = 'http://imgsrc.ru/main/warn.php%s' % verify
 			self.web.get(verify)
 			r = self.web.get(self.url)
+		if 'Please enter album\'s password' in r:
+			raise Exception('album is password protected')
 		if not "href='/main/pic_tape.php?ad=" in r:
 			raise Exception('could not find "view all images" link')
 		skip_amount = 12
