@@ -18,6 +18,7 @@ from site_4chan       import fourchan
 from site_occ         import occ
 from site_minus       import minus
 from site_gifyo       import gifyo
+from site_imgsrc      import imgsrc
 
 try:
 	#i = imgur('http://imgur.com/a/8vmpo/noscript')
@@ -107,8 +108,12 @@ try:
 	#i = minus('https://nappingdoneright.minus.com')
 	#i = minus('https://nappingdoneright.minus.com/uploads')
 
-	i = gifyo('http://gifyo.com/ccrystallinee/')
+	#i = gifyo('http://gifyo.com/ccrystallinee/')
 	#i = gifyo('http://gifyo.com/deanandhepburn/') # private
+
+	#i = imgsrc('http://imgsrc.ru/main/pic.php?ad=774665')
+	i = imgsrc('http://imgsrc.ru/jp101091/26666184.html?pwd=&lang=en#')
+	#i = imgsrc('http://imgsrc.ru/fotoivanov/a661729.html')
 	
 	print i.working_dir
 	print i.url

@@ -27,6 +27,7 @@ from sites.site_4chan       import    fourchan
 from sites.site_occ         import         occ
 from sites.site_minus       import       minus
 from sites.site_gifyo       import       gifyo
+from sites.site_imgsrc      import      imgsrc
 
 """ Print error in JSON format """
 def print_error(text):
@@ -115,7 +116,8 @@ def get_ripper(url):
 			fourchan,    \
 			occ,         \
 			minus,       \
-			gifyo]
+			gifyo,       \
+			imgsrc]
 	for site in sites:
 		try:
 			ripper = site(url)

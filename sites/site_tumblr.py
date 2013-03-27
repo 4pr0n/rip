@@ -2,9 +2,15 @@
 
 from basesite import basesite
 from time     import sleep
+from os       import path
 
 # Key for querying tumblr's API
-f = open('tumblr_api.key', 'r')
+if path.exists('tumblr_api.key'):
+	f = open('tumblr_api.key', 'r')
+elif path.exists('sites/tumblr_api.key'):
+	f = open('sites/tumblr_api.key', 'r')
+else:
+	raise Exception('no tumblr API key found!')
 API_KEY = f.read().replace('\n', '').strip()
 f.close()
 
