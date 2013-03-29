@@ -37,8 +37,10 @@ class imgsrc(basesite):
 			self.web.get(verify)
 			r = self.web.get(self.url)
 		if 'Please enter album\'s password' in r:
+			self.wait_for_threads()
 			raise Exception('album is password protected')
 		if not "href='/main/pic_tape.php?ad=" in r:
+			self.wait_for_threads()
 			raise Exception('could not find "view all images" link')
 		skip_amount = 12
 		current     = 0
