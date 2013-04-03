@@ -31,10 +31,10 @@ class imagefap(basesite):
 	def download(self):
 		self.init_dir()
 		r = self.web.get(self.url)
+		r = r[r.find('showMoreGalleries'):] # To ignore user icon
 		links = self.web.between(r, 'x.fap.to/images/thumb/', '"')
 		for (index, link) in enumerate(links):
-			if index == 0: continue # Skip first URL (user image?)
 			link = 'http://fap.to/images/full/%s' % link
-			self.download_image(link, index, total=len(links) - 1) 
+			self.download_image(link, index + 1, total=len(links))
 			if self.hit_image_limit(): break
 		self.wait_for_threads()

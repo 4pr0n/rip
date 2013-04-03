@@ -113,8 +113,12 @@ try:
 
 	#i = imgsrc('http://imgsrc.ru/main/pic.php?ad=774665')
 	#i = imgsrc('http://imgsrc.ru/jp101091/26666184.html?pwd=&lang=en#')
-	i = imgsrc('http://imgsrc.ru/hugo004/21447611.html')
+	#i = imgsrc('http://imgsrc.ru/hugo004/21447611.html')
 	#i = imgsrc('http://imgsrc.ru/fotoivanov/a661729.html')
+
+	i = imagefap('http://www.imagefap.com/pictures/1561127/young-porn-girlie-masterbating')
+	#i = imagefap('http://www.imagefap.com/pictures/3883233/Maya-Black-Hot-Ts-2013')
+	#i = xhamster('http://xhamster.com/photos/gallery/635024/kira_the_beautiful_busty_redhead_xxx.html')
 	
 	print i.working_dir
 	print i.url

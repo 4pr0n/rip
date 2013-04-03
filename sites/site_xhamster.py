@@ -30,11 +30,11 @@ class xhamster(basesite):
 		page = 1
 		r = self.web.get(self.url)
 		while True:
-			chunks = self.web.between(r, 'id=menu', 'Related Galleries')
+			chunks = self.web.between(r, "class='slideTool'", 'Related Galleries')
 			if len(chunks) == 0: break
-			links = self.web.between(chunks[0], "<img align='center' src=\"", '"')
+			links = self.web.between(chunks[0], "' src='", "'")
 			for index, link in enumerate(links):
-				link = link.replace('_160.', '_1000.')
+				link = link.replace('_160.', '_1000.').replace('http://p2.', 'http://up.')
 				self.download_image(link, index + 1, total=len(links)) 
 				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
