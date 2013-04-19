@@ -23,12 +23,12 @@ class deviantart(basesite):
 		if user == 'www' or user == 'deviantart':
 			raise Exception('DeviantArt ID not found')
 		if not '.com/gallery/' in url:
-			url = 'http://%s.deviantart.com/gallery' % user
+			url = 'http://%s.deviantart.com/gallery/?catpath=/' % user
 		else:
 			num = url[url.find('.com/gallery/')+len('.com/gallery/'):]
 			if '/' in num: num = num[:num.find('/')]
 			if len(num) == 0 or not num.isdigit():
-				url = 'http://%s.deviantart.com/gallery' % user
+				url = 'http://%s.deviantart.com/?catpath=/' % user
 			else:
 				url = 'http://%s.deviantart.com/gallery/%s' % (user, num)
 		return url
@@ -39,6 +39,7 @@ class deviantart(basesite):
 		while url.endswith('/'): url = url[:-1]
 		if '/gallery/' in url and not url.endswith('/gallery/'):
 			num = url[url.rfind('/')+1:]
+			if '/' in num: num = num[:num.find('/')]
 			if len(num) > 0 and num.isdigit():
 				return 'deviantart_%s_%s' % (user, num)
 		return 'deviantart_%s' % user
@@ -60,7 +61,9 @@ class deviantart(basesite):
 			if self.hit_image_limit(): break
 			next_page = self.get_next_page(r)
 			if next_page == None: break
-			r = self.web.getter('%s?offset=%s' % (self.url, next_page))
+			if   '?' in self.url: next_page = '&offset=%s' % next_page
+			else: next_page = '?offset=%s' % next_page
+			r = self.web.getter('%s%s' % (self.url, next_page))
 		self.wait_for_threads()
 	
 	""" Retrive link to 'next' page in gallery. Returns None if last page """
@@ -69,9 +72,9 @@ class deviantart(basesite):
 		if len(lis) == 0 or not 'href="' in lis[0]: return None
 		
 		hrefs = self.web.between(lis[0], 'href="', '"')
-		if len(hrefs) == 0 or not '?offset=' in hrefs[0]: return None
+		if len(hrefs) == 0 or not 'offset=' in hrefs[0]: return None
 		
-		return hrefs[0][hrefs[0].rfind('?offset=')+len('?offset='):]
+		return hrefs[0][hrefs[0].rfind('offset=')+len('offset='):]
 	
 	""" Launches thread to download image """
 	def download_image(self, url, index, total):

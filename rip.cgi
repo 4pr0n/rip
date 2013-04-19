@@ -30,7 +30,7 @@ from sites.site_minus       import       minus
 from sites.site_gifyo       import       gifyo
 from sites.site_imgsrc      import      imgsrc
 from sites.site_five00px    import    five00px
-from sites.site_chickupoad  import chickupload
+from sites.site_chickupload import chickupload
 
 """ Print error in JSON format """
 def print_error(text):
