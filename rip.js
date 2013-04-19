@@ -8,8 +8,11 @@ function statusbar(text) {
 function init() {
 	var url = String(window.location);
   if (url.lastIndexOf('#') >= 0) {
-    var link = url.substring(url.lastIndexOf('#')+1);
-		gebi('rip_text').value = 'http://' + unescape(link);
+    var link = unescape(url.substring(url.lastIndexOf('#')+1));
+		if (link.indexOf('http://') != 0) {
+			link = 'http://' + link;
+		}
+		gebi('rip_text').value = link;
 		startRip();
 	}
 	if (getCookie('cache_enabled') == 'true') {
@@ -19,7 +22,42 @@ function init() {
 		gebi('rip_cached').style.display =   'none';
 		gebi('label_cached').style.display = 'none';
 	}
+	sendRequest('rip.cgi?recent=y', recentHandler);
+}
 
+function recentHandler(req) {
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		console.log('unable to parse response:\n' + req.responseText);
+		throw new Error('unable to parse response:\n' + req.responseText);
+		return;
+	}
+	var rec = json['recent'];
+	var output = new Array();
+	output.push('<ul style="padding-left: 30px;">');
+	for (var i = 0; i < rec.length; i++) {
+		output.push('<li class="recent">');
+		output.push('<input class="download_box" type="button" onclick=loadAlbum(');
+		output.push("'");
+		output.push(rec[i].replace('http://', ''));
+		output.push("'");
+		output.push('); value="download" /> ');
+		output.push(' <a href="');
+		output.push(rec[i]);
+		output.push('">');
+		output.push(truncate(rec[i].replace('http://www.', '').replace('http://', ''), 16));
+		output.push('</a>');
+	}
+	output.push('</ul>');
+	gebi('recent').innerHTML = output.join('');
+}
+
+// Loads URL in hash and refreshes page
+function loadAlbum(url) {
+	window.location.href = window.location.pathname + '#' + url;
+	window.location.reload(true);
 }
 
 // Retrieves cookie
@@ -98,11 +136,7 @@ function requestHandler(req) {
 	} else if (json.zip != null) {
 		// ZIPPED
 		var zipurl = json.zip;
-		var title  = json.zip.replace("rips/", "");
-		var split_size = 15;
-		if (title.length > (split_size * 2) + 3) {
-			title = title.substr(0, split_size) + "..." + title.substr(title.length-split_size);
-		}
+		var title  = truncate(json.zip.replace("rips/", ""), 15);
 		if (gebi('status_bar').innerHTML.indexOf('class="download_box" href="') < 0) {
 			var result = '<center><a class="download_box" href="' + zipurl + '">';
 			result += title;
@@ -148,6 +182,14 @@ function requestHandler(req) {
 			setTimeout(function() { checkRip(); }, 500);
 		}
 	}
+}
+
+// Removes middle section of long text, replaces with '...'
+function truncate(text, split_size) {
+	if (text.length > (split_size * 2) + 3) {
+		text = text.substr(0, split_size) + "..." + text.substr(text.length-split_size);
+	}
+	return text;
 }
 
 // Check the status of the currently-ripping album
@@ -214,12 +256,15 @@ function setExample(site) {
 		'motherless'  : 'http://motherless.com/GC1FEFF5',
 		'minus'       : 'http://nappingdoneright.minus.com/mu6fuBNNdfPG0'
 	};
+	loadAlbum(dic[site].replace('http://', ''));
+	/*
 	// Slow fade in
 	var r = gebi('rip_text');
 	if (!r.hasAttribute('disabled')) {
 		darker(r, 0.0);
 		r.value = dic[site];
 	}
+	*/
 	return false;
 }
 

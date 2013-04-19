@@ -29,7 +29,15 @@ class tumblr(basesite):
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
-		return 'tumblr_%s' % self.get_user(url)
+		user = self.get_user(url)
+		if '/tagged/' in url:
+			tag = url[url.find('/tagged/')+len('/tagged/'):]
+			if '/' in tag: tag = tag[:tag.find('/')]
+			if '?' in tag: tag = tag[:tag.find('?')]
+			if '#' in tag: tag = tag[:tag.find('#')]
+			return 'tumblr_%s_%s' % (user, tag)
+		else:
+			return 'tumblr_%s' % user
 	
 	""" Returns tumblr user from URL """
 	def get_user(self, url):

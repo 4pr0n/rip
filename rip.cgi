@@ -4,10 +4,11 @@ import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from sys    import argv
-from os     import remove, path, stat, utime
+from os     import remove, path, stat, utime, SEEK_END
 from stat   import ST_ATIME, ST_MTIME
 from time   import strftime
 from urllib import unquote
+from json   import dumps
 
 from sites.site_deviantart  import  deviantart 
 from sites.site_flickr      import      flickr
@@ -28,23 +29,48 @@ from sites.site_occ         import         occ
 from sites.site_minus       import       minus
 from sites.site_gifyo       import       gifyo
 from sites.site_imgsrc      import      imgsrc
+from sites.site_five00px    import    five00px
+from sites.site_chickupoad  import chickupload
 
 """ Print error in JSON format """
 def print_error(text):
-	print '{"error":"%s"}' % text
+	print dumps( { 'error' : text } )
 
 """
 	Where the magic happens.
-	Exceptions are raised if download/status fails.
+	Prints JSON response to query.
 """
 def main():
+	# Keys are the query that's passed to the rip script, ex:
+	#   ./rip.cgi?url=http://x.com&start=true&cached=false
+	# The dict would be { url : http://x.com, start: true, cached: false }
 	keys = get_keys()
-	if not 'url' in keys:
-		print_error("Required URL field not found")
-		return
+	if  'start' in keys and \
+			'url'   in keys:
+		
+		cached = True # Default to cached
+		if 'cached' in keys and keys['cached'] == 'false':
+			cached = False
+		rip(keys['url'], cached)
+		
+	elif 'check' in keys and \
+			 'url'   in keys:
+		check(keys['url'])
+		
+	elif 'recent' in keys:
+		lines = 10
+		if 'lines' in keys:
+			lines = int(keys['lines'])
+		recent(lines)
 	
-	url = unquote(keys['url']).replace(' ', '%20')
+	else:
+		print_error('invalid request')
+		
+""" Gets ripper, checks for existing rip, rips and zips as needed. """
+def rip(url, cached):
+	url = unquote(url).replace(' ', '%20')
 	try:
+		# Get domain-specific ripper for URL
 		ripper = get_ripper(url)
 	except Exception, e:
 		print_error(str(e))
@@ -53,50 +79,80 @@ def main():
 	# Check if there's already a zip for the album
 	if ripper.existing_zip_path() != None:
 		# If user specified the uncached version, remove the zip
-		if 'cached' in keys and keys['cached'] == 'false':
+		if not cached:
 			remove(ripper.existing_zip_path())
 		else:
+			# Mark the file as recently-accessed (top of FIFO queue)
 			update_file_modified(ripper.existing_zip_path())
-			print '{'
-			print '"zip":"%s",' % ripper.existing_zip_path()
-			print '"size":"%s"' % ripper.get_size(ripper.existing_zip_path())
-			print '}'
+			#add_recent(url)
+			print dumps( {
+				'zip'  : ripper.existing_zip_path(),
+				'size' : ripper.get_size(ripper.existing_zip_path())
+				} )
 			return
 
-	# Start album download
-	if 'start' in keys:
-		if ripper.is_downloading():
-			print_error("album rip is in progress. check back later")
-			return
-		try:
-			ripper.download()
-		except Exception, e:
-			print_error('download failed: %s' % str(e))
-			return
-		if not path.exists(ripper.working_dir):
-			print_error('unable to download album (empty? 404?)')
-			return
-		try:
-			ripper.zip()
-		except Exception, e:
-			print_error('zip failed: %s' % str(e))
-			return
-		print '{'
-		print '"zip":"%s",' % ripper.existing_zip_path().replace('"', '\\"')
-		print '"size":"%s",' % ripper.get_size(ripper.existing_zip_path())
-		print '"image_count":%d' % ripper.image_count
-		if ripper.hit_image_limit():
-			print ',"limit":%d' % ripper.max_images
-		print '}'
-	# Check status of album download
-	elif 'check' in keys:
-		lines = ripper.get_log(tail_lines=1)
-		print '{'
-		print '"log":"%s"' % '\\n'.join(lines)
-		print '}'
+	if ripper.is_downloading():
+		print_error("album rip is in progress. check back later")
+		return
+	
+	# Rip it
+	try:
+		ripper.download()
+	except Exception, e:
+		print_error('download failed: %s' % str(e))
+		return
+	
+	# If ripper fails silently, it will remove the directory of images
+	if not path.exists(ripper.working_dir):
+		print_error('unable to download album (empty? 404?)')
+		return
+	
+	# Zip it
+	try:
+		ripper.zip()
+	except Exception, e:
+		print_error('zip failed: %s' % str(e))
+		return
+	
+	# Add to recently-downloaded list
+	add_recent(url)
+	
+	# Print it
+	response = {}
+	response['zip']         = ripper.existing_zip_path()
+	response['size']        = ripper.get_size(ripper.existing_zip_path())
+	response['image_count'] = ripper.image_count
+	if ripper.hit_image_limit():
+		response['limit']     = ripper.max_images
+	print dumps(response)
+
+"""
+	Checks status of rip. Returns zip/size if finished, otherwise
+	returns the last log line from the rip.
+"""
+def check(url):
+	url = unquote(url).replace(' ', '%20')
+	try:
+		ripper = get_ripper(url)
+	except Exception, e:
+		print_error(str(e))
+		return
+
+	# Check if there's already a zip for the album
+	if ripper.existing_zip_path() != None:
+		# Return link to zip
+		print dumps( {
+			'zip'  : ripper.existing_zip_path(),
+			'size' : ripper.get_size(ripper.existing_zip_path())
+			} )
 	else:
-		print_error('no status or start parameters found')
+		# Print last log line ("status")
+		lines = ripper.get_log(tail_lines=1)
+		print dumps( { 
+			'log' : '\\n'.join(lines)
+			} )
 
+""" Returns an appropriate ripper for a URL, or throws exception """
 def get_ripper(url):
 	sites = [        \
 			deviantart,  \
@@ -117,14 +173,18 @@ def get_ripper(url):
 			occ,         \
 			minus,       \
 			gifyo,       \
-			imgsrc]
+			imgsrc,      \
+			five00px,    \
+			chickupload]
 	for site in sites:
 		try:
 			ripper = site(url)
 			return ripper
 		except Exception, e:
+			# Rippers that aren't made for the URL throw blank Exception
 			error = str(e)
 			if error == '': continue
+			# If Exception isn't blank, then it's the right ripper but an error occurred
 			raise e
 	raise Exception('Ripper can not rip given URL')
 
@@ -147,10 +207,53 @@ def get_keys():
 	return keys
 
 """
-	Print leading/trailing characters,
-	attempts to execute main(),
-	prints JSON error & reason if exception is caught.
+	Returns recently-downloaded zips
 """
+def recent(lines):
+	recents = []
+	try:
+		f = open('recent_rips.lst', 'r')
+		recents = tail(f, lines=lines)
+		f.close()
+	except:  pass
+	
+	print dumps( { 
+		'recent' : recents
+		} )
+
+""" Tail a file and get X lines from the end """
+def tail(f, lines=1, _buffer=4098):
+	lines_found = []
+	block_counter = -1
+	while len(lines_found) < lines:
+			try:
+					f.seek(block_counter * _buffer, SEEK_END)
+			except IOError:  # either file is too small, or too many lines requested
+					f.seek(0)
+					lines_found = f.readlines()
+					break
+			lines_found = f.readlines()
+			if len(lines_found) > lines:
+					break
+			block_counter -= 1
+	result = [word.strip() for word in lines_found[-lines:]]
+	result.reverse()
+	return result
+
+""" Adds url to list of recently-downloaded albums """
+def add_recent(url):
+	if path.exists('recent_rips.lst'):
+		already_added = False
+		f = open('recent_rips.lst', 'r')
+		if url in tail(f, lines=10): already_added = True
+		f.close()
+		if already_added: return
+	
+	f = open('recent_rips.lst', 'a')
+	f.write('%s\n' % url)
+	f.close()
+
+""" Entry point. Print leading/trailing characters, executes main() """
 if __name__ == '__main__':
 	print "Content-Type: application/json"
 	print ""

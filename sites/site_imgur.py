@@ -17,6 +17,7 @@ class imgur(basesite):
 		#   "direct": imgur.com/a/XXXXX
 		#   "domain": user.imgur.com
 		#   "account": user.imgur.com/album_name
+		#   "subreddit": imgur.com/r/subreddit
 		self.album_type = None 
 		if not 'http://imgur.com' in url and not '.imgur.com' in url:
 			raise Exception('')
@@ -31,31 +32,57 @@ class imgur(basesite):
 			if '?' in url: url = url[:url.find('?')]
 			if '#' in url: url = url[:url.find('#')]
 			return 'http://%s' % url
+		elif 'imgur.com/r/' in url:
+			# Subreddit
+			sub = url[url.find('imgur.com/r/')+len('imgur.com/r/'):]
+			if sub.strip() == '':
+				raise Exception("Not a valid imgur subreddit")
+			while sub.endswith('/'): sub = sub[:-1]
+			splits = sub.split('/')
+			if len(splits) == 1:
+				return 'http://imgur.com/r/%s/new/day' % splits[0]
+			if splits[1] not in ['new', 'top']:
+				raise Exception('Unexpected imgur subreddit sort order: %s' % splits[1])
+			if len(splits) == 2:
+				return 'http://imgur.com/r/%s/%s/all' % (splits[0], splits[1])
+			if splits[2] not in ['day', 'month', 'year', 'all']:
+				raise Exception('Unexpected imgur subreddit sort time: %s' % splits[2])
+			return 'http://imgur.com/r/%s/%s/%s' % (splits[0], splits[1], splits[2])
+			
 		elif not '/a/' in url:
 			raise Exception("Not a valid imgur album")
-		url = url.replace('http://', '').replace('https://', '')
-		while url.endswith('/'): url = url[:-1]
-		while url.count('/') > 2: url = url[:url.rfind('/')]
-		if '?' in url: url = url[:url.find('?')]
-		if '#' in url: url = url[:url.find('#')]
-		return 'http://%s' % url
+		else:
+			url = url.replace('http://', '').replace('https://', '')
+			while url.endswith('/'): url = url[:-1]
+			while url.count('/') > 2: url = url[:url.rfind('/')]
+			if '?' in url: url = url[:url.find('?')]
+			if '#' in url: url = url[:url.find('#')]
+			return 'http://%s' % url
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
 		u = self.url
 		u = u.replace('/all', '')
-		if '/a/' in u:
+		if 'imgur.com/r/' in u:
+			# Subreddit
+			self.album_type = 'subreddit'
+			trail = u[u.find('imgur.com/r/')+len('imgur.com/r/'):]
+			return 'imgur_r_%s' % trail.replace('/', '_')
+		
+		elif '/a/' in u:
 			# Album
 			self.album_type = 'direct'
 			aid = u[u.find('/a/')+len('/a/'):]
 			if '/' in aid: aid = aid[:aid.find('/')]
 			return 'imgur_%s' % aid
+			
 		elif u.replace('/', '').endswith('imgur.com'):
 			# Domain-level full account URL (Multiple albums)
 			self.album_type = 'account'
 			user = u[u.find('//')+2:]
 			user = user[:user.find('.')]
 			return 'imgur_%s' % user
+			
 		else:
 			# Domain-level album
 			self.album_type = 'domain'
@@ -72,6 +99,9 @@ class imgur(basesite):
 				self.album_type == 'domain':
 			# Single album
 			self.download_album(self.url)
+		elif self.album_type == 'subreddit':
+			# Subreddit
+			self.download_subreddit(self.url)
 		else:
 			# Account-level album
 			self.download_account(self.url)
@@ -121,6 +151,50 @@ class imgur(basesite):
 			self.download_image(link, index + 1, total=len(links)) 
 			if self.hit_image_limit(): break
 		self.wait_for_threads()
+		
+	def download_subreddit(self, album):
+		self.max_images = 500
+		index = 0
+		total = 0
+		page  = 0
+		first_links = []
+		stop = False
+		while True:
+			r = self.web.get('%s/page/%d' % (album, page))
+			# Get images
+			links = self.web.between(r, ' src="http://i.', '"')
+			if len(links) == 0: break
+			if len(first_links) == 0:
+				first_links = links[:]
+			else:
+				for link in links:
+					stop = link in first_links
+			if stop: break
+			total += len(links)
+			for link in links:
+				link = 'http://i.%s' % link.replace('b.jpg', '.jpg')
+				ext = self.get_filetype(link)
+				link = link.replace('.jpg', '.%s' % ext)
+				if '?' in link: link = link[:link.find('?')]
+				if '#' in link: link = link[:link.find('#')]
+				link = self.get_highest_res(link)
+				# Download every image
+				# Uses superclass threaded download method
+				index += 1
+				self.download_image(link, index, total=total) 
+				if self.hit_image_limit(): break
+			if self.hit_image_limit(): break
+			page += 1
+		self.wait_for_threads()
+	
+	def get_filetype(self, url):
+		m = self.web.get_meta(url)
+		if 'Content-Type' in m:
+			ct = m['Content-Type']
+			ext = ct[ct.find('/')+1:]
+			if ext.lower() == 'jpeg': ext = 'jpg'
+			return ext
+		return 'jpg'
 	
 	""" Returns highest-res image by checking if imgur has higher res """
 	def get_highest_res(self, url):

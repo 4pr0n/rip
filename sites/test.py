@@ -19,6 +19,8 @@ from site_occ         import occ
 from site_minus       import minus
 from site_gifyo       import gifyo
 from site_imgsrc      import imgsrc
+from site_five00px    import five00px
+from site_chickupload import chickupload
 
 try:
 	#i = imgur('http://imgur.com/a/8vmpo/noscript')
@@ -116,10 +118,16 @@ try:
 	#i = imgsrc('http://imgsrc.ru/hugo004/21447611.html')
 	#i = imgsrc('http://imgsrc.ru/fotoivanov/a661729.html')
 
-	i = imagefap('http://www.imagefap.com/pictures/1561127/young-porn-girlie-masterbating')
+	#i = imagefap('http://www.imagefap.com/pictures/1561127/young-porn-girlie-masterbating')
 	#i = imagefap('http://www.imagefap.com/pictures/3883233/Maya-Black-Hot-Ts-2013')
 	#i = xhamster('http://xhamster.com/photos/gallery/635024/kira_the_beautiful_busty_redhead_xxx.html')
+
+	#i = five00px('http://500px.com/xxxsweetxxx')
 	
+	#i = imgur('http://imgur.com/r/realgirls/new/day/')
+	#i = imgur('http://imgur.com/r/amateurarchives/top/all/')
+	i = chickupload('http://chickupload.com/gallery/106023/Z64FYY7Q')
+
 	print i.working_dir
 	print i.url
 	if i.existing_zip_path() != None:

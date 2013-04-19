@@ -4,6 +4,7 @@ from basesite import basesite
 
 class minus(basesite):
 	
+	# http://minus.com/mdRxu5e95V6ZA
 	""" Parse/strip URL to acceptable format """
 	def sanitize_url(self, url):
 		if not 'minus.com' in url:
