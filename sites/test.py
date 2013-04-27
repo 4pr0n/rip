@@ -126,7 +126,8 @@ try:
 	
 	#i = imgur('http://imgur.com/r/realgirls/new/day/')
 	#i = imgur('http://imgur.com/r/amateurarchives/top/all/')
-	i = chickupload('http://chickupload.com/gallery/106023/Z64FYY7Q')
+	#i = chickupload('http://chickupload.com/gallery/106023/Z64FYY7Q')
+	i = deviantart('http://depingo.deviantart.com/gallery/')
 
 	print i.working_dir
 	print i.url

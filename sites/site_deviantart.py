@@ -28,7 +28,7 @@ class deviantart(basesite):
 			num = url[url.find('.com/gallery/')+len('.com/gallery/'):]
 			if '/' in num: num = num[:num.find('/')]
 			if len(num) == 0 or not num.isdigit():
-				url = 'http://%s.deviantart.com/?catpath=/' % user
+				url = 'http://%s.deviantart.com/gallery/?catpath=/' % user
 			else:
 				url = 'http://%s.deviantart.com/gallery/%s' % (user, num)
 		return url
@@ -46,7 +46,7 @@ class deviantart(basesite):
 
 	def download(self):
 		self.init_dir()
-		r = self.web.getter(self.url)
+		r = self.web.get(self.url)
 		total = 0
 		already_have = [] # List of images already parsed
 		while True:
@@ -126,7 +126,9 @@ class deviantart(basesite):
 			if i == 5:
 				splits.pop(i - 1)
 				img = '/'.join(splits)
+		if '&amp;' in img: img = img.replace('&amp;', '&')
 		filename = img[img.rfind('/')+1:]
+		if '?' in filename: filename = filename[:filename.find('?')]
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
 		if os.path.exists(saveas):
 			self.image_count += 1

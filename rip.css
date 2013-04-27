@@ -313,3 +313,9 @@ ul {
 li {
 	padding-top: 5px;
 }
+.update_date {
+	font-size: 1.2em;
+	font-weight: bold;
+	text-decoration: underline;
+	padding-bottom: 0px;
+}
