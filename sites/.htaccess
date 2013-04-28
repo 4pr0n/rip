@@ -1,0 +1,2 @@
+IndexIgnore *
+RedirectMatch 404 .*
