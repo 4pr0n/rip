@@ -308,3 +308,4 @@ function setProgress(perc) {
 
 // Call initialization function after entire JS file is parsed
 window.onload = init;
+

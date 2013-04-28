@@ -7,4 +7,3 @@ RewriteCond %{HTTP_REFERER} !^$
 RewriteCond %{HTTP_REFERER} !^http(s)?://rip.rarchives.com [NC]
 # Redirect everyone else
 RewriteRule \.(zip)$ - [NC,F,L]
-
