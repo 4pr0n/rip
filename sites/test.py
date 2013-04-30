@@ -21,6 +21,7 @@ from site_gifyo       import gifyo
 from site_imgsrc      import imgsrc
 from site_five00px    import five00px
 from site_chickupload import chickupload
+from site_cghub       import cghub
 
 try:
 	#i = imgur('http://imgur.com/a/8vmpo/noscript')
@@ -127,7 +128,8 @@ try:
 	#i = imgur('http://imgur.com/r/realgirls/new/day/')
 	#i = imgur('http://imgur.com/r/amateurarchives/top/all/')
 	#i = chickupload('http://chickupload.com/gallery/106023/Z64FYY7Q')
-	i = deviantart('http://depingo.deviantart.com/gallery/')
+	#i = deviantart('http://depingo.deviantart.com/gallery/')
+	i = cghub('http://wacomonkey.cghub.com/images/')
 
 	print i.working_dir
 	print i.url
