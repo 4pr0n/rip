@@ -22,6 +22,7 @@ from site_imgsrc      import imgsrc
 from site_five00px    import five00px
 from site_chickupload import chickupload
 from site_cghub       import cghub
+from site_teenplanet  import teenplanet
 
 try:
 	#i = imgur('http://imgur.com/a/8vmpo/noscript')
@@ -129,7 +130,8 @@ try:
 	#i = imgur('http://imgur.com/r/amateurarchives/top/all/')
 	#i = chickupload('http://chickupload.com/gallery/106023/Z64FYY7Q')
 	#i = deviantart('http://depingo.deviantart.com/gallery/')
-	i = cghub('http://wacomonkey.cghub.com/images/')
+	#i = cghub('http://wacomonkey.cghub.com/images/')
+	i = teenplanet('http://photos.teenplanet.org/atomicfrog/Dromeus/Skinny_Babe_vs_Bfs_Cock')
 
 	print i.working_dir
 	print i.url
