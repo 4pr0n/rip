@@ -32,10 +32,14 @@ class cghub(basesite):
 				img = self.web.between(chunk, '<img src="', '"')[0]
 				img = 'http:' + img.replace('_stream', '_max')
 				index += 1
-				self.download_image(img, index, total=total)
+				if self.urls_only:
+					self.add_url(index, img, total=total)
+				else:
+					self.download_image(img, index, total=total)
 			if '<li class="next"><a href="' in r:
 				nextpage = self.web.between(r, '<li class="next"><a href="', '"')[0]
 				r = self.web.get(nextpage)
 			else:
 				break
 		self.wait_for_threads()
+

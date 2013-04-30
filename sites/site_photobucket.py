@@ -107,8 +107,11 @@ class photobucket(basesite):
 					full = full[:full.find('?')]
 				'''http://i579.photobucket.com/download-albums/ss239/merkler/.highres/a90a5a9d.jpg'''
 				index += 1
-				self.download_image(full, index, subdir=name, total=total)
-				if self.hit_image_limit(): break
+				if self.urls_only:
+					self.add_url(index, full, total=total)
+				else:
+					self.download_image(full, index, subdir=name, total=total)
+					if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
 			offset += 4
 			if 'href="?o=%d' % offset in r:

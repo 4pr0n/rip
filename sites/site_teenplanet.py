@@ -60,6 +60,10 @@ class teenplanet(basesite):
 			return
 		img = 'http://photos.teenplanet.org%s' % self.web.between(r, '<img id="thepic" src="', '"')[0]
 		img = img.replace(' ', '%20')
+		if self.urls_only:
+			self.add_url(index, img, total=total)
+			self.thread_count -= 1
+			return
 		filename = img[img.rfind('/')+1:]
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
 		if os.path.exists(saveas):

@@ -67,8 +67,11 @@ class minus(basesite):
 			else:
 				ext = '.jpg'
 			link = 'http://i.minus.com/i%s%s' % (image, ext)
-			self.download_image(link, index + 1, total=len(chunks))
-			if self.hit_image_limit(): break
+			if self.urls_only:
+				self.add_url(index + 1, link, total=len(chunks))
+			else:
+				self.download_image(link, index + 1, total=len(chunks))
+				if self.hit_image_limit(): break
 		self.wait_for_threads()
 	
 

@@ -74,6 +74,10 @@ class chickupload(basesite):
 		pics = self.web.between(r, '<img src="/picture/', '"')
 		if len(pics) > 0:
 			pic = 'http://chickupload.com/picture/%s' % pics[0]
+			if self.urls_only:
+				self.add_url(index, pic, total=total)
+				self.thread_count -= 1
+				return
 			filename = pic[pic.rfind('/')+1:]
 			saveas = '%s%s%03d_%s' % (self.working_dir, sep, index, filename)
 			if path.exists(saveas):

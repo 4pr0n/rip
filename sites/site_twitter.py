@@ -73,7 +73,10 @@ class twitter(basesite):
 				if '.twimg.com/' in url:
 					url += ':large'
 				index += 1
-				self.download_image(url, index)
+				if self.urls_only:
+					self.add_url(index, url)
+				else:
+					self.download_image(url, index)
 		return index
 
 	""" Retrieve all 'expanded_url' from tweets """
@@ -104,6 +107,10 @@ class twitter(basesite):
 			img = imgs[0]
 			if '?' in img: img = img[:img.find('?')]
 			if '#' in img: img = img[:img.find('#')]
+			if self.urls_only:
+				self.add_url(index, img)
+				self.thread_count -= 1
+				return
 			saveas = '%s/%03d_%s' % (self.working_dir, index, img[img.rfind('/')+1:])
 			if self.web.download(imgs[0], saveas):
 				self.log('downloaded (%d) (%s) - %s' % (index, self.get_size(saveas), img))

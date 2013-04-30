@@ -53,11 +53,17 @@ def main():
 		cached = True # Default to cached
 		if 'cached' in keys and keys['cached'] == 'false':
 			cached = False
-		rip(keys['url'], cached)
+		urls_only = False
+		if 'urls_only' in keys and keys['urls_only'] == 'true':
+			urls_only = True
+		rip(keys['url'], cached, urls_only)
 		
 	elif 'check' in keys and \
 			 'url'   in keys:
-		check(keys['url'])
+		urls_only = False
+		if 'urls_only' in keys and keys['urls_only'] == 'true':
+			urls_only = True
+		check(keys['url'], urls_only)
 		
 	elif 'recent' in keys:
 		lines = 10
@@ -69,11 +75,11 @@ def main():
 		print_error('invalid request')
 		
 """ Gets ripper, checks for existing rip, rips and zips as needed. """
-def rip(url, cached):
+def rip(url, cached, urls_only):
 	url = unquote(url).replace(' ', '%20')
 	try:
 		# Get domain-specific ripper for URL
-		ripper = get_ripper(url)
+		ripper = get_ripper(url, urls_only)
 	except Exception, e:
 		print_error(str(e))
 		return
@@ -132,10 +138,10 @@ def rip(url, cached):
 	Checks status of rip. Returns zip/size if finished, otherwise
 	returns the last log line from the rip.
 """
-def check(url):
+def check(url, urls_only):
 	url = unquote(url).replace(' ', '%20')
 	try:
-		ripper = get_ripper(url)
+		ripper = get_ripper(url, urls_only)
 	except Exception, e:
 		print_error(str(e))
 		return
@@ -155,7 +161,7 @@ def check(url):
 			} )
 
 """ Returns an appropriate ripper for a URL, or throws exception """
-def get_ripper(url):
+def get_ripper(url, urls_only):
 	sites = [        \
 			deviantart,  \
 			flickr,      \
@@ -182,7 +188,7 @@ def get_ripper(url):
 			teenplanet]
 	for site in sites:
 		try:
-			ripper = site(url)
+			ripper = site(url, urls_only)
 			return ripper
 		except Exception, e:
 			# Rippers that aren't made for the URL throw blank Exception

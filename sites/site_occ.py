@@ -57,8 +57,11 @@ class occ(basesite):
 					link = 'http://forum.oneclickchicks.com/' + threadalbum + '.php?%s' % link.replace('&amp;', '&')
 					saveas = self.web.between(link, 'id=', '&')[-1]
 					index += 1
-					self.download_image(link, index, total=total, saveas=saveas)
-					if self.hit_image_limit(): break
+					if self.urls_only:
+						self.add_url(index, link, total=total)
+					else:
+						self.download_image(link, index, total=total, saveas=saveas)
+						if self.hit_image_limit(): break
 			page += 1
 			if '&amp;page=%d' % page in r:
 				r = self.web.get('%s&page=%d' % (self.url, page))

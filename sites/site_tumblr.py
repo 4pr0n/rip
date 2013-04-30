@@ -80,7 +80,10 @@ class tumblr(basesite):
 				content = content.replace('\\/', '/')
 				if self.hit_image_limit(): return 0
 				index += 1
-				self.download_image(content, index, total=total)
+				if self.urls_only:
+					self.add_url(index, content, total=total)
+				else:
+					self.download_image(content, index, total=total)
 		return index
 	
 	""" Returns total # of posts given a JSON response """

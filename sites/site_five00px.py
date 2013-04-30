@@ -67,6 +67,10 @@ class five00px(basesite):
 		if not 'href="' in chunk: return
 		img = self.web.between(chunk, 'href="', '"')[0]
 		
+		if self.urls_only:
+			self.add_url(index, img)
+			self.thread_count -= 1
+			return
 		urlid = url[url.rfind('/')+1:]
 		extension = img[img.rfind('.')+1:]
 		saveas = '%s%s%03d_%s.%s' % (self.working_dir, sep, index, urlid, extension)

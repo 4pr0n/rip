@@ -57,6 +57,10 @@ class imagebam(basesite):
 			self.thread_count -= 1
 			return
 		img = imgs[0]
+		if self.urls_only:
+			self.add_url(index, img, total)
+			self.thread_count -= 1
+			return
 		filename = img[img.rfind('/')+1:]
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
 		if os.path.exists(saveas):

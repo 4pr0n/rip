@@ -148,8 +148,11 @@ class imgur(basesite):
 			link = self.get_highest_res('http://i.%s' % link)
 			# Download every image
 			# Uses superclass threaded download method
-			self.download_image(link, index + 1, total=len(links)) 
-			if self.hit_image_limit(): break
+			if self.urls_only:
+				self.add_url(index + 1, link, total=len(links))
+			else:
+				self.download_image(link, index + 1, total=len(links)) 
+				if self.hit_image_limit(): break
 		self.wait_for_threads()
 		
 	def download_subreddit(self, album):
@@ -181,8 +184,11 @@ class imgur(basesite):
 				# Download every image
 				# Uses superclass threaded download method
 				index += 1
-				self.download_image(link, index, total=total) 
-				if self.hit_image_limit(): break
+				if self.urls_only:
+					self.add_url(index, link, total=total)
+				else:
+					self.download_image(link, index, total=total) 
+					if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
 			page += 1
 		self.wait_for_threads()

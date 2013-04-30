@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from sys import exit
+
 from site_imgur       import imgur
 from site_deviantart  import deviantart
 from site_photobucket import photobucket
@@ -130,8 +132,28 @@ try:
 	#i = imgur('http://imgur.com/r/amateurarchives/top/all/')
 	#i = chickupload('http://chickupload.com/gallery/106023/Z64FYY7Q')
 	#i = deviantart('http://depingo.deviantart.com/gallery/')
-	#i = cghub('http://wacomonkey.cghub.com/images/')
-	i = teenplanet('http://photos.teenplanet.org/atomicfrog/Dromeus/Skinny_Babe_vs_Bfs_Cock')
+	#i = teenplanet('http://photos.teenplanet.org/atomicfrog/Dromeus/Skinny_Babe_vs_Bfs_Cock')
+	#i = cghub('http://wacomonkey.cghub.com/images/', urls_only=True)
+	#i = fourchan('http://boards.4chan.org/s/res/14177077', urls_only=True)
+	#i = anonib('http://www.anonib.com/azn/res/74347.html', urls_only=True)
+	#i = chickupload('http://chickupload.com/gallery/30621/OMTDRPYU', urls_only=True)
+	#i = deviantart('http://kindi-k.deviantart.com/gallery/', urls_only=True)
+	#i = five00px('http://500px.com/xxxsweetxxx', urls_only=True)
+	#i = getgonewild('http://getgonewild.com/profile/twoholes101', urls_only=True)
+	#i = gifyo('http://gifyo.com/ccrystallinee/', urls_only=True)
+	#i = imagearn('http://imagearn.com/gallery.php?id=226220', urls_only=True)
+	#i = imagebam('http://www.imagebam.com/gallery/3e4u10fk034871hs6idcil6txauu3ru6/', urls_only=True)
+	#i = imagefap('http://www.imagefap.com/pictures/2885204/Kentucky-Craigslist', urls_only=True)
+	#i = imgsrc('http://imgsrc.ru/fotoivanov/a661729.html', urls_only=True)
+	#i = imgur('http://imgur.com/a/brixs', urls_only=True)
+	#i = instagram('http://web.stagram.com/n/glitterypubez/', urls_only=True)
+	#i = minus('http://zuzahgaming.minus.com/mF31aoo7kNdiM', urls_only=True)
+	#i = motherless('http://motherless.com/G7DC1B74', urls_only=True)
+	#i = tumblr('http://caramiaphotography.tumblr.com/tagged/me', urls_only=True)
+	#i = twitter('https://twitter.com/darrow_ashley', urls_only=True)
+	#i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html', urls_only=True)
+	i = occ('http://forum.oneclickchicks.com/showthread.php?t=137808', urls_only=True)
+	#i = c('', urls_only=True)
 
 	print i.working_dir
 	print i.url
@@ -140,13 +162,15 @@ try:
 	else:
 		print 'downloading...'
 		i.download()
-		'''
-		print 'checking for zip'
+		print 'checking for zip:',
 		print str(i.existing_zip_path())
-		print i.zip()
-		print 'checking for zip'
+		print "zip = %s" % i.zip()
+		print 'checking for zip:',
 		print str(i.existing_zip_path())
-		'''
+		if i.existing_zip_path().endswith('.txt'):
+			f = open(i.existing_zip_path(), 'r')
+			print f.read()
+			f.close()
 except KeyboardInterrupt:
 	print '\ninterrupted'
 #except Exception, e:

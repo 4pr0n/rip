@@ -33,7 +33,7 @@ class basesite(object):
 		 * URL is invalid (not appropriate for site class),
 		 * Working directory could not be created.
 	"""
-	def __init__(self, url):
+	def __init__(self, url, urls_only=False):
 		self.web = Web() # Web object for downloading/parsing
 		self.base_dir = RIP_DIRECTORY
 		if not os.path.exists(self.base_dir):
@@ -47,6 +47,7 @@ class basesite(object):
 		self.max_images   = MAX_IMAGES
 		self.logfile      = '%s%s%s' % (self.working_dir, os.sep, LOG_NAME)
 		self.first_log    = True
+		self.urls_only    = urls_only
 	
 	""" To be overridden """
 	def sanitize_url(self, url):
@@ -158,7 +159,8 @@ class basesite(object):
 		while self.thread_count > 0:
 			time.sleep(0.1)
 		if os.path.exists(self.working_dir):
-			if len(os.listdir(self.working_dir)) <= 1:
+			if not self.urls_only and len(os.listdir(self.working_dir)) <= 1 \
+					or self.urls_only and len(os.listdir(self.working_dir)) == 0:
 				rmtree(self.working_dir) # Delete everything in working dir
 	
 	""" Returns human-readable filesize for file """
@@ -178,7 +180,10 @@ class basesite(object):
 	
 	""" Returns path to zip file if it exists, otherwise None. """
 	def existing_zip_path(self):
-		zipfile = '%s.zip' % self.working_dir
+		extension = 'zip'
+		if self.urls_only:
+			extension = 'txt'
+		zipfile = '%s.%s' % (self.working_dir, extension)
 		if os.path.exists(zipfile) and not os.path.exists(self.working_dir):
 			return zipfile
 		else:
@@ -190,6 +195,28 @@ class basesite(object):
 		Returns path to zip file
 	"""
 	def zip(self):
+		if self.urls_only:
+			if not os.path.exists('%s/log.txt' % self.working_dir):
+				raise Exception('no log found')
+			url_filename = '%s.txt' % self.working_dir
+			f = open('%s/log.txt' % self.working_dir, 'r')
+			lines = f.read().split('\n')[1:]
+			tuples = []
+			for line in lines:
+				if line.strip() == '' or ' - ' not in line: continue
+				if line.count('|') < 1: continue
+				line = line[line.find(' - ')+3:]
+				splits = line.split('|')
+				index  = splits[0]
+				url    = '|'.join(splits[1:])
+				tuples.append( (index, url) )
+			tuples = sorted(tuples, key=lambda tup: int(tup[0]))
+			f = open(url_filename, 'w')
+			for (index, url) in tuples:
+				f.write('%s\n' % url)
+			f.close()
+			rmtree(self.working_dir) # Delete everything in working dir
+			return url_filename
 		self.log('zipping album...')
 		zip_filename = '%s.zip' % self.working_dir
 		z = ZipFile(zip_filename, "w", ZIP_DEFLATED)
@@ -202,11 +229,13 @@ class basesite(object):
 				z.write(absfn, zfn)
 		z.close()
 		rmtree(self.working_dir) # Delete everything in working dir
-		"""
-		for filename in os.listdir(self.working_dir):
-			os.remove('%s%s%s' % (self.working_dir, os.sep, filename))
-		os.rmdir(self.working_dir)
-		"""
 		return zip_filename
 		
+	def add_url(self, index, url, total=0):
+		self.image_count += 1
+		string = '(%d' % index
+		if total > 0:
+			string += '/%d' % total
+		string += ')'
+		self.log('%s - %d|%s' % (string, index, url))
 

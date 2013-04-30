@@ -78,6 +78,10 @@ class imagearn(basesite):
 			break
 		# Download image
 		image = images[0]
+		if self.urls_only:
+			self.add_url(index, image, total=total)
+			self.thread_count -= 1
+			return
 		extension = image[image.rfind('.'):]
 		saveas += extension
 		if self.web.download(image, saveas):

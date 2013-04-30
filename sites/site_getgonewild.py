@@ -35,7 +35,10 @@ class getgonewild(basesite):
 			index += 1
 			# Direct link to image
 			if link[link.rfind('.')+1:].lower() in ['jpg', 'jpeg', 'gif', 'png']:
-				self.download_image(link, index, total=len(links)) 
+				if self.urls_only:
+					self.add_url(index, link, total=len(links))
+				else:
+					self.download_image(link, index, total=len(links)) 
 			# Imgur album
 			elif 'imgur.com/a/' in link:
 				while self.thread_count > self.max_threads: sleep(0.1)
@@ -70,6 +73,10 @@ class getgonewild(basesite):
 				alb_index += 1
 				image = 'http://i.%s' % image
 				image = self.get_highest_res(image)
+				if self.urls_only:
+					self.add_url(index, image, total=total)
+					self.thread_count -= 1
+					return
 				filename = image[image.rfind('/')+1:]
 				if '?' in filename: filename = filename[:filename.find('?')]
 				if '#' in filename: filename = filename[:filename.find('#')]
@@ -85,7 +92,10 @@ class getgonewild(basesite):
 			return url
 		temp = url.replace('h.', '.')
 		m = self.web.get_meta(temp)
-		if 'Content-Type' in m and 'image' in m['Content-Type'].lower():
+		if 'Content-Type' in m and \
+				'image' in m['Content-Type'].lower() and \
+				'Content-Length' in m and \
+				m['Content-Length'] != '503':
 			return temp
 		else:
 			return url
@@ -97,6 +107,10 @@ class getgonewild(basesite):
 			links = self.web.between(r, '<link rel="image_src" href="', '"')
 		if len(links) > 0:
 			image = links[0]
+			if self.urls_only:
+				self.add_url(index, link, total=total)
+				self.thread_count -= 1
+				return
 			filename = image[image.rfind('/')+1:]
 			if '?' in filename: filename = filename[:filename.find('?')]
 			if '#' in filename: filename = filename[:filename.find('#')]

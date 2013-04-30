@@ -85,6 +85,10 @@ class flickr(basesite):
 			self.log('unable to find image @ %s' % url)
 		else:
 			img = 'http://farm%s' % imgs[0]
+			if self.urls_only:
+				self.add_url(index, img, total)
+				self.thread_count -= 1
+				return
 			ext = img[img.rfind('.'):]
 			saveas = '%s/%03d_%s_%s%s' % (self.working_dir, index, pid, title, ext)
 			if '?' in saveas: saveas = saveas[:saveas.find('?')]

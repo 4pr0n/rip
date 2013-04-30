@@ -42,7 +42,8 @@ class fourchan(basesite):
 		
 		if path.exists('%s/post.txt' % self.working_dir):
 			remove('%s/post.txt' % self.working_dir)
-		self.log_post('http://rip.rarchives.com - text log from %s\n' % self.url)
+		if not self.urls_only:
+			self.log_post('http://rip.rarchives.com - text log from %s\n' % self.url)
 		
 		posts = self.web.between(r, '{', '}')
 		for index, post in enumerate(posts):
@@ -50,10 +51,13 @@ class fourchan(basesite):
 				imgid = self.web.between(post, ',"tim":', ',')[0]
 				imgext = self.web.between(post, ',"ext":"', '"')[0]
 				link = 'http://images.4chan.org/%s/src/%s%s' % (board, imgid, imgext)
-				self.download_image(link, index + 1, total=len(posts))
-				if self.hit_image_limit(): break
+				if self.urls_only:
+					self.add_url(index + 1, link, total=len(posts))
+				else:
+					self.download_image(link, index + 1, total=len(posts))
+					if self.hit_image_limit(): break
 			
-			if ',"com":"' in post:
+			if ',"com":"' in post and not self.urls_only:
 				comment = self.web.between(post, ',"com":"', '","')[0]
 				comment = comment.replace('\\"', '"')
 				comment = comment.replace('\\/', '/')

@@ -127,6 +127,10 @@ class deviantart(basesite):
 				splits.pop(i - 1)
 				img = '/'.join(splits)
 		if '&amp;' in img: img = img.replace('&amp;', '&')
+		if self.urls_only:
+			self.add_url(index, img, total=total)
+			self.thread_count -= 1
+			return
 		filename = img[img.rfind('/')+1:]
 		if '?' in filename: filename = filename[:filename.find('?')]
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)

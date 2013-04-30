@@ -63,6 +63,13 @@ class motherless(basesite):
 			urls = self.web.between(chunks[0], 'href="', '"')
 			if len(urls) > 0:
 				image = urls[0]
+				if self.urls_only:
+					if total.isdigit():
+						self.add_url(index, image, total=int(total))
+					else:
+						self.add_url(index, image)
+					self.thread_count -= 1
+					return
 				saveas = '%s/%03d_%s%s' % (self.working_dir, index, url[url.rfind('/')+1:], image[image.rfind('.'):])
 				if self.web.download(image, saveas):
 					self.image_count += 1

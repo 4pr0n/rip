@@ -85,6 +85,9 @@ function getQueryString(start) {
 	} else {
 		query += '&check=true';
 	}
+	if (gebi('rip_urls').checked) {
+		query += '&urls_only=true';
+	}
 	return query;
 }
 
