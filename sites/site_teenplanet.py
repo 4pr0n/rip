@@ -13,6 +13,7 @@ class teenplanet(basesite):
 		url = url.replace('http://', '')
 		splits = url.split('/')
 		if splits[-1].startswith('page'): splits.pop(-1)
+		if 'index.html' in splits: splits.remove('index.html')
 		if len(splits) != 4:
 			raise Exception('expected teenplanet.org/user/folder/set format not found')
 		return 'http://%s' % '/'.join(splits)
