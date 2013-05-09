@@ -171,7 +171,7 @@ function requestHandler(req) {
 			j = update.indexOf(')', i);
 			k = update.indexOf('/', i);
 			if (i >= 0 && j >= 0 && k >= 0 && k < j) {
-				var num = parseFloat(update.substr(i+1, k));
+				var num = parseFloat(update.substr(i+1, k).replace(',', ''));
 				var denom = parseFloat(update.substr(k+1, j));
 				setProgress(num / denom);
 			}

@@ -32,7 +32,7 @@ class motherless(basesite):
 		self.init_dir()
 		r = self.web.getter(self.url)
 		if 'Images [ ' in r:
-			total = self.web.between(r, 'Images [ ', ' ]')[0]
+			total = self.web.between(r, 'Images [ ', ' ]')[0].replace(',', '')
 		else: total = '?'
 		page  = 1
 		index = 0
@@ -41,11 +41,12 @@ class motherless(basesite):
 				index += 1
 				self.download_image('%s/%s' % (self.url.replace('.com/GI', '.com/G'), thumb), index, total=total)
 				if self.hit_image_limit(): break
+			if self.hit_image_limit(): break
 			page += 1
 			if '?page=%d' % page in r:
 				r = self.web.getter('%s?page=%d' % (self.url, page))
 			else: break
-		self.download_videos()
+		#self.download_videos()
 		self.wait_for_threads()
 	
 	def download_image(self, url, index, total):
@@ -86,10 +87,15 @@ class motherless(basesite):
 	def download_videos(self):
 		url = self.url.replace('.com/GI', '.com/GV')
 		r = self.web.get(url)
+		index = 0
+		total = 0
 		page  = 1
 		while True:
-			for thumb in self.web.between(r, 'thumbnail mediatype_video" rel="', '"'):
-				self.log(thumb)
+			thumbs = self.web.between(r, 'thumbnail mediatype_video" rel="', '"')
+			total += len(thumbs)
+			for thumb in thumbs:
+				index += 1
+				self.log('grabbing video link (%d/%d)' % (index, total))
 				self.download_video('%s/%s' % (url.replace('.com/GV', '.com/G'), thumb))
 			page += 1
 			if '?page=%d' % page in r:
@@ -110,10 +116,15 @@ class motherless(basesite):
 		if not path.exists(videolog):
 			log_text = 'http://i.rarchives.com - video links for motherless gallery %s\n' % self.url
 		if not "__fileurl = '" in r:
-			log_text += 'no video found @ %s' % url
+			log_text += 'no video link found @ %s' % url
 		else:
-			log_text += self.web.between(r, "__fileurl = '", "'")[0]
+			video_url = self.web.between(r, "__fileurl = '", "'")[0]
+			if len(video_url) < 100:
+				log_text += video_url
+			else:
+				log_text = 'no video link found @ %s' % url
 		f = open('%s/videos.txt' % self.working_dir, 'a')
 		f.write('%s\n' % log_text)
 		f.close()
 		self.thread_count -= 1
+
