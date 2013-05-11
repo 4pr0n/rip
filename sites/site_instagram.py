@@ -29,11 +29,11 @@ class instagram(basesite):
 		else: total = -1
 		index = 0
 		while True:
-			chunks = self.web.between(r, '<div class="photo">', '</div>')
+			chunks = self.web.between(r, '<div class="infolist">', '</div>')
 			for chunk in chunks:
-				imgs = self.web.between(chunk, '<img src="', '"')
-				if len(imgs) == 0: continue
-				img = imgs[0].replace('_6.', '_7.')
+				imgs = self.web.between(chunk, '<a href="', '"')
+				if len(imgs) < 4: continue
+				img = imgs[3].replace('_6.', '_7.')
 				
 				index += 1
 				if self.urls_only:
