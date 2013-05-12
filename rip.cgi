@@ -33,6 +33,7 @@ from sites.site_five00px    import    five00px
 from sites.site_chickupload import chickupload
 from sites.site_cghub       import       cghub
 from sites.site_teenplanet  import  teenplanet
+from sites.site_chansluts   import   chansluts
 
 """ Print error in JSON format """
 def print_error(text):
@@ -185,7 +186,8 @@ def get_ripper(url, urls_only):
 			five00px,    \
 			chickupload, \
 			cghub,       \
-			teenplanet]
+			teenplanet,  \
+			chansluts]
 	for site in sites:
 		try:
 			ripper = site(url, urls_only)
