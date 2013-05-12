@@ -249,7 +249,7 @@ function setExample(site) {
 		'photobucket' : 'http://s1216.beta.photobucket.com/user/Liebe_Dich/profile/',
 		'webstagram'  : 'http://web.stagram.com/n/glitterypubez/',
 		'imagefap'    : 'http://www.imagefap.com/pictures/2885204/Kentucky-Craigslist',
-		'imagearn'    : 'http://imagearn.com/gallery.php?id=82587',
+		'imagearn'    : 'http://imagearn.com/gallery.php?id=1616', // 'http://imagearn.com/gallery.php?id=82587',
 		'imagebam'    : 'http://www.imagebam.com/gallery/3b73c0f6ba797e77a33b46779fbfe678/',
 		'xhamster'    : 'http://xhamster.com/photos/gallery/1479233/sarah_from_glasgow.html',
 		'getgonewild' : 'http://getgonewild.com/profile/EW2d',
@@ -257,7 +257,11 @@ function setExample(site) {
 		'oneclickchicks' : 'http://forum.oneclickchicks.com/album.php?albumid=12510',
 		'4chan'       : 'http://boards.4chan.org/s/res/14020907',
 		'motherless'  : 'http://motherless.com/GC1FEFF5',
-		'minus'       : 'http://nappingdoneright.minus.com/mu6fuBNNdfPG0'
+		'minus'       : 'http://nappingdoneright.minus.com/mu6fuBNNdfPG0',
+		'gifyo'       : 'http://gifyo.com/robynsteen/', // http://gifyo.com/LinzieNeon/',
+		'cghub'       : 'http://katiedesousa.cghub.com/images/',
+		'chansluts'   : 'http://www.chansluts.com/camwhores/girls/res/3405.php',
+		'teenplanet'  : 'http://photos.teenplanet.org/atomicfrog/Latino_M4N/Ass_Beyond_Belief'
 	};
 	loadAlbum(dic[site].replace('http://', ''));
 	/*

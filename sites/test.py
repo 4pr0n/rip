@@ -25,6 +25,7 @@ from site_five00px    import five00px
 from site_chickupload import chickupload
 from site_cghub       import cghub
 from site_teenplanet  import teenplanet
+from site_chansluts   import chansluts
 
 try:
 	#i = imgur('http://imgur.com/a/8vmpo/noscript')
@@ -152,7 +153,8 @@ try:
 	#i = tumblr('http://caramiaphotography.tumblr.com/tagged/me', urls_only=True)
 	#i = twitter('https://twitter.com/darrow_ashley', urls_only=True)
 	#i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html', urls_only=True)
-	i = occ('http://forum.oneclickchicks.com/showthread.php?t=137808', urls_only=True)
+	#i = occ('http://forum.oneclickchicks.com/showthread.php?t=137808', urls_only=True)
+	i = chansluts('http://www.chansluts.com/camwhores/girls/res/9447.php')
 	#i = c('', urls_only=True)
 
 	print i.working_dir
