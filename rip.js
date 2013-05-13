@@ -47,7 +47,8 @@ function recentHandler(req) {
 		output.push(' <a href="');
 		output.push(rec[i]);
 		output.push('">');
-		output.push(truncate(rec[i].replace('http://www.', '').replace('http://', ''), 16));
+		var url = rec[i].replace('http://www.', '').replace('http://', '').replace('https://', '');
+		output.push(truncate(url, 16));
 		output.push('</a>');
 	}
 	output.push('</ul>');
