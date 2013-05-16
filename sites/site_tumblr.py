@@ -55,6 +55,7 @@ class tumblr(basesite):
 		if '/tagged/' in url:
 			tag = url[url.find('/tagged/')+len('/tagged/'):]
 			if '/' in tag: tag = tag[:tag.find('/')]
+			tag = tag.replace('-', '+')
 			turl += '&tag=%s' % tag
 		return turl
 
