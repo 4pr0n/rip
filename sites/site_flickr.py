@@ -38,12 +38,18 @@ class flickr(basesite):
 			count = self.web.between(r, 'class="Results">(', ' ')[0]
 			count = count.replace(' ', '').replace('\n', '').replace(',', '')
 			if count.isdigit(): total = int(count)
+		if '<div class="stat statcount"' in r:
+			chunk = self.web.between(r, '<div class="stat statcount"', '</div>')[0]
+			if '<h1>' in chunk:
+				count = self.web.between(chunk, '<h1>', '</h1>')[0].strip()
+				if count.isdigit(): total = int(count)
 			
 		index = 0
 		while True:
 			# Get images
 			links = self.web.between(r, '><a data-track="photo-click" href="', '"')
 			for link in links:
+				if link == '{{photo_url}}': continue
 				link = 'http://www.flickr.com%s' % link
 				# Download every image
 				# Uses superclass threaded download method
@@ -72,7 +78,7 @@ class flickr(basesite):
 		pid = url[:url.rfind('/in/')]
 		pid = pid[pid.rfind('/')+1:]
 		larger = url.replace('/in/', '/sizes/o/in/')
-		r = self.web.get(url)
+		r = self.web.get(larger)
 		titles = self.web.between(r, 'title="', '"')
 		if len(titles) > 0:
 			title = titles[0]
