@@ -26,6 +26,7 @@ from site_chickupload import chickupload
 from site_cghub       import cghub
 from site_teenplanet  import teenplanet
 from site_chansluts   import chansluts
+from site_gonearch    import gonearch
 
 try:
 	#i = imgur('http://imgur.com/a/8vmpo/noscript')
@@ -154,8 +155,14 @@ try:
 	#i = twitter('https://twitter.com/darrow_ashley', urls_only=True)
 	#i = xhamster('http://xhamster.com/photos/gallery/1443114/cute_teens.html', urls_only=True)
 	#i = occ('http://forum.oneclickchicks.com/showthread.php?t=137808', urls_only=True)
-	i = chansluts('http://www.chansluts.com/camwhores/girls/res/9447.php')
+	#i = chansluts('http://www.chansluts.com/camwhores/girls/res/9447.php')
+	#i = flickr('http://www.flickr.com/photos/sabrina-dacos/') # NSFW, "bad panda"
+	#i = flickr('http://www.flickr.com/photos/alifewortheating/sets/72157632351550870/')
+	#i = flickr('http://www.flickr.com/photos/vichollo/')
 	#i = c('', urls_only=True)
+	#http://vk.com/album-34908971_163639688
+	#i = gonearch('http://gonearchiving.com/indexpics.php?author=personally-yours')
+	i = gonearch('http://gonearchiving.com/indexlist.php?author=nutmegster')
 
 	print i.working_dir
 	print i.url
@@ -164,6 +171,7 @@ try:
 	else:
 		print 'downloading...'
 		i.download()
+		'''
 		print 'checking for zip:',
 		print str(i.existing_zip_path())
 		print "zip = %s" % i.zip()
@@ -173,6 +181,7 @@ try:
 			f = open(i.existing_zip_path(), 'r')
 			print f.read()
 			f.close()
+		'''
 except KeyboardInterrupt:
 	print '\ninterrupted'
 #except Exception, e:

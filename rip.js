@@ -41,7 +41,7 @@ function recentHandler(req) {
 		output.push('<li class="recent">');
 		output.push('<input class="download_box" type="button" onclick=loadAlbum(');
 		output.push("'");
-		output.push(rec[i].replace('http://', ''));
+		output.push(rec[i].replace('http://', '').replace('https://', ''));
 		output.push("'");
 		output.push('); value="download" /> ');
 		output.push(' <a href="');
