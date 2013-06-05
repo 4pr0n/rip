@@ -53,12 +53,12 @@ class photobucket(basesite):
 			self.log('Unable to find currentAlbumPath at %s' % self.url)
 			return
 		totals = self.web.between(r, '"albumStats":{"images":{"count":', ',')
-		if len(totals) == 0:
-			self.debug('total not found')
-			total = '?'
-		else:
-			total = totals[0]
+		if len(totals) > 0 and totals[0].isdigit():
+			total = int(totals[0])
 			self.debug('total: %s' % total)
+		else:
+			total = '?'
+			self.debug('total not found')
 		path = paths[0]
 		self.debug('path: %s' % path)
 		subpath = path
