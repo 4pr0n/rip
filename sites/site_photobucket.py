@@ -13,6 +13,7 @@ class photobucket(basesite):
 			raise Exception('')
 		if not '/user/' in url:
 			raise Exception('URL must contain /user/')
+		self.debug('url before: %s' % url)
 		url = url.replace('https://', 'http://')
 		if not url.startswith('http://'): url = 'http://%s' % url
 		if '?' in url: url = url[:url.find('?')]
@@ -20,9 +21,11 @@ class photobucket(basesite):
 		subdir = ''
 		if '/library/' in url:
 			subdir = url[url.rfind('/library/')+len('/library/'):]
+			self.debug('subdir: %s' % subdir)
 		if '/profile/' in url:
 			url = url[:url.find('/profile/'):] + '/library/'
 			url += subdir
+		self.debug('url after: %s' % url)
 		return url
 
 	""" Discover directory path based on URL """
@@ -32,16 +35,18 @@ class photobucket(basesite):
 		if '/library/' in url:
 			subdir = url[url.rfind('/library/')+len('/library/'):]
 			if subdir != '': subdir = '_%s' % subdir
+		self.debug('got directory: "photobucket_%s%s"' % (user, subdir))
 		return 'photobucket_%s%s' % (user, subdir)
 
 	def download(self):
 		self.init_dir()
-		'''http://s579.beta.photobucket.com/user/merkler/library/'''
 		r = self.web.getter(self.url)
 		paths = self.web.between(r, "currentAlbumPath: '", "'")
 		if len(paths) == 0:
-			paths = self.web.between(r, "setCurrentAlbum('", '"')
+			self.debug('currentAlbumpPath not found')
+			paths = self.web.between(r, "setCurrentAlbum('", "'")
 		if len(paths) == 0:
+			self.debug('setCurrentAlbum not found')
 			if 'This is a Private Album' in r:
 				self.log('Private album! %s' % self.url)
 				return
@@ -49,10 +54,13 @@ class photobucket(basesite):
 			return
 		totals = self.web.between(r, '"albumStats":{"images":{"count":', ',')
 		if len(totals) == 0:
+			self.debug('total not found')
 			total = '?'
 		else:
 			total = totals[0]
+			self.debug('total: %s' % total)
 		path = paths[0]
+		self.debug('path: %s' % path)
 		subpath = path
 		if path.count('/') >= 4:
 			subpath = '/'.join(path.split('/')[0:3])

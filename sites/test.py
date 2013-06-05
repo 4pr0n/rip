@@ -27,6 +27,7 @@ from site_cghub       import cghub
 from site_teenplanet  import teenplanet
 from site_chansluts   import chansluts
 from site_gonearch    import gonearch
+from site_chanarchive import chanarchive
 
 try:
 	#i = imgur('http://imgur.com/a/8vmpo/noscript')
@@ -162,7 +163,10 @@ try:
 	#i = c('', urls_only=True)
 	#http://vk.com/album-34908971_163639688
 	#i = gonearch('http://gonearchiving.com/indexpics.php?author=personally-yours')
-	i = gonearch('http://gonearchiving.com/indexlist.php?author=nutmegster')
+	#i = gonearch('http://gonearchiving.com/indexlist.php?author=nutmegster')
+	#i = chanarchive('http://chanarchive.org/4chan/a/70052/can-a-make-a-good-soundtrack-for-netorare')
+	#http://chanarchive.org/4chan/s/10261/madalina-pica
+	i = photobucket('http://s1275.photobucket.com/user/ew4ever/library/EW', debugging=True)
 
 	print i.working_dir
 	print i.url

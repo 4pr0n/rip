@@ -1,4 +1,4 @@
-#!usr/bin/python
+#!/usr/bin/python
 
 import os   # fs: exists, mkdir, listdir, rmdir
 import time # Sleep
@@ -33,7 +33,8 @@ class basesite(object):
 		 * URL is invalid (not appropriate for site class),
 		 * Working directory could not be created.
 	"""
-	def __init__(self, url, urls_only=False):
+	def __init__(self, url, urls_only=False, debugging=False):
+		self.debugging = debugging
 		self.web = Web() # Web object for downloading/parsing
 		self.base_dir = RIP_DIRECTORY
 		if not os.path.exists(self.base_dir):
@@ -239,3 +240,6 @@ class basesite(object):
 		string += ')'
 		self.log('%s - %d|%s' % (string, index, url))
 
+	def debug(self, text):
+		if not self.debugging: return
+		sys.stderr.write('%s\n' % text)
