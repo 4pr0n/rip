@@ -23,7 +23,13 @@ class flickr(basesite):
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
-		return 'flickr_%s' % self.web.between(url, '/photos/', '/')[0]
+		sets = ''
+		if '/sets/' in url:
+			sets = url[url.find('/sets/')+len('/sets/'):]
+			if '/' in sets: sets = sets[:sets.find('/')]
+			sets = '_%s' % sets
+		name = self.web.between(url, '/photos/', '/')[0]
+		return 'flickr_%s%s' % (name, sets)
 
 	def download(self):
 		self.init_dir()
