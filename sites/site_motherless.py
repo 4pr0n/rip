@@ -37,7 +37,7 @@ class motherless(basesite):
 		page  = 1
 		index = 0
 		while True:
-			for thumb in self.web.between(r, 'thumbnail mediatype_image" rel="', '"'):
+			for thumb in self.web.between(r, 'data-codename="', '"'):
 				index += 1
 				self.download_image('%s/%s' % (self.url.replace('.com/GI', '.com/G'), thumb), index, total=total)
 				if self.hit_image_limit(): break
