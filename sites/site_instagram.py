@@ -29,11 +29,22 @@ class instagram(basesite):
 		else: total = -1
 		index = 0
 		while True:
-			chunks = self.web.between(r, '<div class="infolist">', '</div>')
+			chunks = self.web.between(r, '<div class="infolist">', '<div class="like_comment')
 			for chunk in chunks:
 				imgs = self.web.between(chunk, '<a href="', '"')
 				if len(imgs) < 4: continue
 				img = imgs[3].replace('_6.', '_7.')
+				self.debug('found img: %s' % img)
+				if '<div class="hasvideo' in chunk:
+					vid = img.replace('_7.jpg', '_101.mp4')
+					self.debug('video found, url: %s' % vid)
+					meta = self.web.get_meta(vid)
+					if 'Content-Length' in meta and meta['Content-Length'] != '0' and \
+						'Content-Type' in meta and 'video' in meta['Content-Type']:
+						self.debug('meta shows vid is legit')
+						img = vid
+					else:
+						self.debug('meta shows vid is not legit')
 				
 				index += 1
 				if self.urls_only:
