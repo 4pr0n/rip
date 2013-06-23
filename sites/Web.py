@@ -2,18 +2,17 @@
 # -*- coding: utf-8 -*-
 
 """
+	Web class.
 
-Web class.
+	Holds commonly-used HTTP/web request/post methods.
 
-Holds commonly-used HTTP/web request/post methods.
-
-Compatible with Python 2.4.*
+	Compatible with Python 2.5, 2.6, 2.7
 """
 
 import time
 
-import urllib2, cookielib, urllib
-from httplib import HTTPException, IncompleteRead
+import urllib2, cookielib, urllib, httplib
+from sys import stderr
 
 class Web:
 	"""
@@ -96,7 +95,7 @@ class Web:
 				
 				else: return ''
 			
-			except HTTPException: return ''
+			except httplib.HTTPException: return ''
 			except UnicodeEncodeError: return ''
 			except ValueError: return ''
 				
@@ -110,26 +109,55 @@ class Web:
 		
 		return result
 
-	def getter(self, url):
+	def getter(self, url, headers={}, retry=1):
 		"""
-			Attempts GET request with TWITTER.
+			Attempts GET request with extended options.
 			
 			Returns html source of a webpage (string).
 			Returns '' if unable to retrieve webpage for any reason.
 			
-			Will attempt to repeatedly post if '504' response error is received
-			or 'getaddrinfo' fails.
+			Will retry attempts that fail.
+
+			Does *NOT* utilize cookie jar!
 		"""
-		headers = { 'User-agent' : self.user_agent }
+		if not 'User-agent' in headers:
+			headers['User-agent'] = self.user_agent
+		
+		(https, host, path) = self.get_https_host_path(url)
+		stderr.write('Web.py: https: %s\n' % https)
+		stderr.write('Web.py: host: %s\n' % host)
+		stderr.write('Web.py: path: %s\n' % path)
 		try:
-			req = urllib2.Request(url, headers=headers)
-			handle = self.urlopen(req)
-		except Exception:
-			return ''
-		try: result = handle.read()
-		except IncompleteRead: return ''
-		return result
+			if https:
+				req = httplib.HTTPSConnection(host)
+			else:
+				req = httplib.HTTPConnection(host)
+			req.putrequest('GET', path)
+			for hkey in headers.keys():
+				stderr.write('Web.py: header: %s: %s\n' % (hkey, headers[hkey]))
+				req.putheader(hkey, headers[hkey])
+			req.endheaders()
+			resp = req.getresponse()
+			if resp.status == 200:
+				return resp.read()
+			elif resp.status in [301, 302] and resp.getheader('Location') != None:
+				return self.getter(resp.getheader('Location'), headers=headers, retry=retry-1)
+			else:
+				stderr.write('Web.py: HTTPS status %s: %s: %s\n' % (resp.status, resp.reason, resp.read()))
+		except Exception, e:
+			stderr.write('Web.py: %s: %s\n' % (url, str(e)))
+			if retry > 0:
+				return self.getter(url, headers=headers, retry=retry-1)
+		return ''
 	
+	def get_https_host_path(self, url):
+		https  = url.startswith('https')
+		path   = ''
+		host   = url[url.find('//')+2:]
+		if '/' in host:
+			host = host[:host.find('/')]
+			path = url[url.find(host)+len(host):]
+		return (https, host, path)
 	
 	def fix_string(self, s):
 		r = ''
@@ -151,7 +179,7 @@ class Web:
 		return d
 		
 		
-	def post(self, url, postdict=None):
+	def post(self, url, postdict=None, headers={}):
 		"""
 			Attempts POST request with web server.
 			
@@ -162,41 +190,40 @@ class Web:
 			Will attempt to repeatedly post if '504' response error is received
 			or 'getaddrinfo' fails.
 		"""
-		headers = {'User-agent' : self.user_agent}
-		
+		if not 'User-agent' in headers:
+			headers['User-agent'] = self.user_agent
 		data = ''
-		if postdict != None:
+		if postdict != None and type(postdict) == dict:
 			fixed_dict = self.fix_dict(postdict)
 			data = urllib.urlencode(fixed_dict)
+		headers['Content-Length'] = len(data)
 		
-		try_again = True
-		while try_again:
-			try:
-				req = urllib2.Request(url, data, headers)
-				handle = self.urlopen(req)
-				
-			except IOError, e:
-				if str(e) == 'HTTP Error 504: Gateway Time-out' or \
-					 str(e) == 'getaddrinfo failed':
-					try_again = True
-					time.sleep(2)
-				
-				else: return ''
-			
-			except HTTPException: return ''
-			except UnicodeEncodeError: return ''
-			except ValueError: return ''
-				
-			else:
-				try_again = False
-			
+		host = url[url.find('//')+2:]
+		host = host[:host.find('/')]
+		stderr.write('Web.py: host: "%s"\n' % host)
+		path = url[url.find(host)+len(host):]
+		stderr.write('Web.py: path: "%s"\n' % path)
+		stderr.write('Web.py: headers: %s\n' % str(headers))
+		stderr.write('Web.py: postdata: "%s"\n' % data)
 		try:
-			result = handle.read()
-		except IncompleteRead:
+			if url.startswith('https'):
+				req = httplib.HTTPSConnection(host)
+			else:
+				req = httplib.HTTPConnection(host)
+			req.putrequest('POST', path)
+			for hkey in headers.keys():
+				req.putheader(hkey, headers[hkey])
+			req.endheaders()
+			req.send(data)
+			resp = req.getresponse()
+			if resp.status == 200:
+				return resp.read()
+			else:
+				stderr.write('Web.py: HTTPS status %s: %s: %s\n' % (resp.status, resp.reason, resp.read()))
+				return ''
+		except Exception, e:
+			stderr.write('Web.py: %s: %s\n' % (url, str(e)))
 			return ''
-		
-		return result
-	
 	
 	def download(self, url, save_as):
 		"""
@@ -219,7 +246,7 @@ class Web:
 			result = True
 			
 		except IOError, e: pass
-		except HTTPException, e: pass
+		except httplib.HTTPException, e: pass
 		except ValueError: return ''
 		
 		output.close()
