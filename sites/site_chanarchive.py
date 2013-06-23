@@ -31,7 +31,7 @@ class chanarchive(basesite):
 		if not self.urls_only:
 			self.log_post('http://rip.rarchives.com - text log from %s\n' % self.url)
 		
-		posts = self.web.between(r, '<div class="postContainer' '</blockquote>')
+		posts = self.web.between(r, '<div class="postContainer', '</blockquote>')
 		for index, post in enumerate(posts):
 			if ',"tim":' in post and ',"ext":"' in post:
 				# Has image
