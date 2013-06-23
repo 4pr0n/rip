@@ -9,7 +9,15 @@ class instagram(basesite):
 	
 	""" Parse/strip URL to acceptable format """
 	def sanitize_url(self, url):
-		if not 'web.stagram.com/n/' in url:
+		if'web.stagram.com/n/' in url:
+			# Legit
+			pass
+		elif 'instagram.com/' in url:
+			# Convert to web.stagram
+			user = url[url.find('.com/')+len('.com/'):]
+			if '/' in user: user = user[:user.find('/')]
+			url = 'http://web.stagram.com/n/%s' % user
+		else:
 			raise Exception('')
 		if '?' in url: url = url[:url.find('?')]
 		if '#' in url: url = url[:url.find('#')]
