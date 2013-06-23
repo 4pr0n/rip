@@ -3,8 +3,13 @@
 from basesite  import basesite
 from time      import sleep
 from threading import Thread
+from os        import path
 
 BATCH_COUNT = 200 # Number of tweets per request (max)
+
+# Key must contain base64-encoding of UTF-8-encoded 'consumer_key:consumer_secret'
+# See https://dev.twitter.com/docs/auth/application-only-auth
+TWITTER_API_PATH = 'sites/twitter_api.key'
 
 """
 	Downloads twitter albums
@@ -32,7 +37,7 @@ class twitter(basesite):
 	""" Returns URL request string for user from URL """
 	def get_request(self, url, max_id='0'):
 		user = self.get_user(url)
-		req  = 'https://api.twitter.com/1/statuses/user_timeline.json'
+		req  = 'https://api.twitter.com/1.1/statuses/user_timeline.json'
 		req += '?screen_name=%s' % user
 		req += '&include_entities=true'
 		req += '&exclude_replies=true'
@@ -41,13 +46,21 @@ class twitter(basesite):
 		req += '&count=%d' % BATCH_COUNT
 		if max_id != '0':
 			req += '&max_id=%s' % max_id
+		self.debug('request: %s' % req)
 		return req
 
 	""" Magic! """
 	def download(self):
 		self.init_dir()
+		# Get token
+		token = self.get_access_token()
+		if token == '' or token == None:
+			self.wait_for_threads()
+			return
+		headers = { 'Authorization' : 'Bearer %s' % token }
+		# Make request
 		turl = self.get_request(self.url)
-		r = self.web.getter(turl)
+		r = self.web.getter(turl, headers=headers)
 		index = 0
 		while r.strip() != '[]':
 			index = self.get_medias(r, index)
@@ -60,16 +73,18 @@ class twitter(basesite):
 			if self.hit_image_limit(): break
 			self.log('loading tweets... - %s' % turl)
 			sleep(2)
-			r = self.web.getter(turl)
+			r = self.web.getter(turl, headers=headers)
 		self.wait_for_threads()
 	
 	""" Retrieve all 'media' URLs from tweets """
 	def get_medias(self, json, index):
 		medias = self.web.between(json, '"media":[{', '}]')
+		self.debug('# of medias: %d' % len(medias))
 		for media in medias:
 			urls = self.web.between(media, '"media_url":"', '"')
 			for url in urls:
 				url = url.replace('\\/', '/')
+				self.debug('media: %s' % url)
 				if '.twimg.com/' in url:
 					url += ':large'
 				index += 1
@@ -82,10 +97,12 @@ class twitter(basesite):
 	""" Retrieve all 'expanded_url' from tweets """
 	def get_urls(self, json, index):
 		urls = self.web.between(json, '"expanded_url":"', '"')
+		self.debug('# of urls: %d' % len(urls))
 		for url in urls:
 			url = url.replace('\\/', '/')
 			if  'twitpic.com/' in url or \
 					'tumblr.com/'  in url:
+				self.debug('url: %s' % url)
 				index += 1
 				while self.thread_count > self.max_threads: sleep(0.1)
 				self.thread_count += 1
@@ -95,6 +112,7 @@ class twitter(basesite):
 
 	""" Download image from some URL """
 	def get_url(self, url, index):
+		self.debug('get_url: %s' % url)
 		ext = url.lower()[url.rfind('.')+1:]
 		if ext in ['jpg', 'jpeg', 'gif', 'png']:
 			imgs = [url]
@@ -120,3 +138,25 @@ class twitter(basesite):
 		else:
 			self.log('no image found (%d) - %s' % (index, url))
 		self.thread_count -= 1
+
+	def get_access_token(self):
+		global TWITTER_API_PATH
+		if not path.exists(TWITTER_API_PATH):
+			TWITTER_API_PATH = TWITTER_API_PATH.replace('sites/', '')
+		if not path.exists(TWITTER_API_PATH):
+			raise Exception('twitter api key not found')
+		f = open(TWITTER_API_PATH, 'r')
+		key = f.read().strip()
+		f.close()
+		headers = {
+				'Authorization'   : 'Basic %s' % key,
+				'Content-Type'    : 'application/x-www-form-urlencoded;charset=UTF-8'
+			}
+		postdata = { 'grant_type' : 'client_credentials' }
+		r = self.web.post('https://api.twitter.com/oauth2/token', postdict=postdata, headers=headers)
+		self.debug('token response: %s' % r)
+		if not '"access_token":"' in r:
+			return ''
+		token = self.web.between(r, '"access_token":"', '"')[0]
+		return token
+
