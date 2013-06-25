@@ -138,6 +138,7 @@ class Web:
 				req.putheader(hkey, headers[hkey])
 			req.endheaders()
 			resp = req.getresponse()
+			#stderr.write('Web.py: response headers: %s\n' % resp.getheaders())
 			if resp.status == 200:
 				return resp.read()
 			elif resp.status in [301, 302] and resp.getheader('Location') != None:
