@@ -62,7 +62,6 @@ class twitter(basesite):
 		# Make request
 		turl = self.get_request(self.url)
 		r = self.web.getter(turl, headers=headers)
-		print '\n\n%s\n' % r
 		index = 0
 		max_id = -1
 		while r.strip() != '[]' and r.strip() != '':
