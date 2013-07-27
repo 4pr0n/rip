@@ -142,9 +142,10 @@ class imgur(basesite):
 		# Temporary fix (this is ugly)
 		# Use imgur's API to download album, this gets captions as well
 		# Remove below lines to revert back to "noscript" method
-		self.download_album_json(album)
-		self.wait_for_threads()
-		return
+		if '/a/' in album:
+			self.download_album_json(album)
+			self.wait_for_threads()
+			return
 		# Get album source
 		r = self.web.get('%s/noscript' % album)
 		# Get images
