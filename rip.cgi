@@ -28,13 +28,14 @@ from sites.site_4chan       import    fourchan
 from sites.site_occ         import         occ
 from sites.site_minus       import       minus
 from sites.site_gifyo       import       gifyo
-from sites.site_imgsrc      import      imgsrc
 from sites.site_five00px    import    five00px
 from sites.site_chickupload import chickupload
 from sites.site_cghub       import       cghub
 from sites.site_teenplanet  import  teenplanet
 from sites.site_chansluts   import   chansluts
 from sites.site_gonearch    import    gonearch
+from sites.site_buttoucher  import  buttoucher
+from sites.site_pichunter   import   pichunter
 
 """ Print error in JSON format """
 def print_error(text):
@@ -183,13 +184,13 @@ def get_ripper(url, urls_only):
 			occ,         \
 			minus,       \
 			gifyo,       \
-			imgsrc,      \
 			five00px,    \
 			chickupload, \
 			cghub,       \
 			teenplanet,  \
 			chansluts,   \
-			gonearch]
+			buttoucher,  \
+			pichunter]
 	for site in sites:
 		try:
 			ripper = site(url, urls_only)
@@ -256,6 +257,7 @@ def tail(f, lines=1, _buffer=4098):
 
 """ Adds url to list of recently-downloaded albums """
 def add_recent(url):
+	if '.ru/' in url: return
 	if path.exists('recent_rips.lst'):
 		already_added = False
 		f = open('recent_rips.lst', 'r')
