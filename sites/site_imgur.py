@@ -181,7 +181,7 @@ class imgur(basesite):
 			if title != '' or caption != '':
 				captions.append( (url, title, caption) )
 			if self.urls_only:
-				self.add_url(index + 1, url, total=len(links))
+				self.add_url(index + 1, url, total=total)
 			else:
 				self.download_image(url, index + 1, total=total) 
 				if self.hit_image_limit(): break
