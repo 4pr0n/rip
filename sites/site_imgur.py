@@ -2,6 +2,7 @@
 
 from basesite import basesite
 from os import path, mkdir, listdir, rmdir
+from json import loads
 
 """
 	Downloads imgur albums
@@ -138,6 +139,11 @@ class imgur(basesite):
 		self.wait_for_threads()
 
 	def download_album(self, album):
+		# Temporary fix (this is ugly)
+		# Use imgur's API to download album, this gets captions as well
+		# Remove below lines to revert back to "noscript" method
+		self.download_album_json(album)
+		return
 		# Get album source
 		r = self.web.get('%s/noscript' % album)
 		# Get images
@@ -154,6 +160,36 @@ class imgur(basesite):
 				self.download_image(link, index + 1, total=len(links)) 
 				if self.hit_image_limit(): break
 		self.wait_for_threads()
+	
+	def download_album_json(self, album):
+		aid = album[album.find('/a/')+len('/a/'):]
+		if '/' in aid: aid = aid[:aid.find('/')]
+		r = self.web.get('http://api.imgur.com/2/album/%s.json' % aid)
+		json = loads(r)
+		if not 'album' in json: return
+		alb = json['album']
+		if not 'images' in alb: return
+		captions = []
+		total = len(alb['images'])
+		for index, image in enumerate(alb['images']):
+			# Image
+			url = image['links']['original']
+			# Captions / Metadata
+			meta = image['image']
+			title = meta.get('title', '')
+			caption = meta.get('caption', '')
+			if title != '' or caption != '':
+				captions.append( (url, title, caption) )
+			if self.urls_only:
+				self.add_url(index + 1, url, total=len(links))
+			else:
+				self.download_image(url, index + 1, total=total) 
+				if self.hit_image_limit(): break
+		if captions != []:
+			f = open('%s/captions.txt' % self.working_dir, 'w')
+			for meta in captions:
+				f.write('url: %s\n  title: "%s"\n  caption: "%s"\n\n' % (meta[0], meta[1], meta[2]))
+			f.close()
 		
 	def download_subreddit(self, album):
 		self.max_images = 500
