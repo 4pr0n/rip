@@ -314,6 +314,51 @@ function setProgress(perc) {
 	}
 }
 
+/************************
+ * Video stuff
+ */
+function vidstatusbar(text) { 
+	gebi('vid_status_bar').innerHTML = text;
+}
+
+// Start vid download when user presses enter key in textbox
+function vidboxKeyUp(evt) {
+	var theEvent = evt || window.event;
+	var key = theEvent.keyCode || theEvent.which;
+	key = String.fromCharCode( key );
+	if (theEvent.keyCode == 13) {
+		startVid();
+	}
+}
+
+// Start ripping album
+function startVid() {
+	var query = 'vid.cgi?url=' + encodeURIComponent(gebi('vid_text').value);
+	sendRequest(query, vidRequestHandler);
+}
+
+// Handles requests (both 'status' and 'start')
+function vidRequestHandler(req) {
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		console.log('unable to parse response:\n' + req.responseText);
+		throw new Error('unable to parse response:\n' + req.responseText);
+		return;
+	}
+	
+	if (json.error != null) {
+		// ERROR
+		vidstatusbar('<div class="error">error: ' + json.error + '</div>');
+	} else if (json.url != null) {
+		// do stuff
+		vidstatusbar('<a class="download_box" href="' + json.url + '">right-click, save as</a>');
+	} else {
+		vidstatusbar("unexpected stuff!");
+	}
+}
+
 // Call initialization function after entire JS file is parsed
 window.onload = init;
 

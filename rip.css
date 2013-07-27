@@ -167,7 +167,7 @@ label.checkbox:hover {
 	              0px -4px 10px rgba(190, 190, 190, 0.6);
 }
 
-div#status_bar {
+.statusbar {
 	padding: 5px;
 	padding-top: 10px;
 	padding-bottom: 8px;
