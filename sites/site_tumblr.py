@@ -36,6 +36,12 @@ class tumblr(basesite):
 			if '?' in tag: tag = tag[:tag.find('?')]
 			if '#' in tag: tag = tag[:tag.find('#')]
 			return 'tumblr_%s_%s' % (user, tag)
+		elif '/post/' in url:
+			tag = url[url.find('/post/')+len('/post/'):]
+			if '/' in tag: tag = tag[:tag.find('/')]
+			if '?' in tag: tag = tag[:tag.find('?')]
+			if '#' in tag: tag = tag[:tag.find('#')]
+			return 'tumblr_%s-%s' % (user, tag)
 		else:
 			return 'tumblr_%s' % user
 	
@@ -98,16 +104,31 @@ class tumblr(basesite):
 		self.init_dir()
 		index = 0
 		total = 0
-		for media in ['photo']: #, 'video']:
-			offset = 0
-			while True:
-				base_url = self.get_base_url(self.url, media=media, offset=offset)
-				offset += 20
-				r = self.web.get(base_url)
-				if total == 0: total = self.get_total(r)
-				index = self.parse_tumblr(r, index, total, media)
-				if index == 0: break
-				sleep(2)
-			if self.hit_image_limit(): break
+		if '/post/' in self.url:
+			# Parse images from post
+			user  = self.get_user(self.url)
+			tagnum = self.url[self.url.find('/post/')+len('/post/'):]
+			if '/' in tagnum: tagnum = tagnum[:tagnum.find('/')]
+			if '?' in tagnum: tagnum = tagnum[:tagnum.find('?')]
+			if '#' in tagnum: tagnum = tagnum[:tagnum.find('#')]
+			url = 'http://api.tumblr.com/v2/blog/%s.tumblr.com/posts?id=%s&api_key=%s' % (user, tagnum, API_KEY)
+			self.debug(url)
+			r = self.web.get(url)
+			if total == 0: total = r.count('"caption":"') - 1
+			if total <= 1:
+				raise Exception('tumblr post not a photoset')
+			index = self.parse_tumblr(r, index, total, 'photo')
+		else:
+			for media in ['photo']: #, 'video']:
+				offset = 0
+				while True:
+					base_url = self.get_base_url(self.url, media=media, offset=offset)
+					offset += 20
+					r = self.web.get(base_url)
+					if total == 0: total = self.get_total(r)
+					index = self.parse_tumblr(r, index, total, media)
+					if index == 0: break
+					sleep(2)
+				if self.hit_image_limit(): break
 		self.wait_for_threads()
 	

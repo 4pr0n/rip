@@ -144,7 +144,11 @@ class Web:
 			elif resp.status in [301, 302] and resp.getheader('Location') != None:
 				return self.getter(resp.getheader('Location'), headers=headers, retry=retry-1)
 			else:
-				stderr.write('Web.py: HTTPS status %s: %s: %s\n' % (resp.status, resp.reason, resp.read()))
+				result = ''
+				try: result = resp.read()
+				except: pass
+				stderr.write('Web.py: HTTP status %s: %s\n' % (resp.status, resp.reason))
+				return result
 		except Exception, e:
 			stderr.write('Web.py: %s: %s\n' % (url, str(e)))
 			if retry > 0:

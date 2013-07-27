@@ -126,31 +126,34 @@ class twitter(basesite):
 
 	""" Download image from some URL """
 	def handle_url(self, url, index):
-		self.debug('handle_url: %s' % url)
-		ext = url.lower()[url.rfind('.')+1:]
-		if ext in ['jpg', 'jpeg', 'gif', 'png']:
-			imgs = [url]
-		else:
-			r = self.web.get(url)
-			imgs = self.web.between(r, '<meta name="twitter:image" value="', '"')
-			if len(imgs) == 0:
-				imgs = self.web.between(r, '<meta name="twitter:image" content="', '"')
-		if len(imgs) > 0:
-			img = imgs[0]
-			if '?' in img: img = img[:img.find('?')]
-			if '#' in img: img = img[:img.find('#')]
-			if self.urls_only:
-				self.add_url(index, img)
-				self.thread_count -= 1
-				return
-			saveas = '%s/%03d_%s' % (self.working_dir, index, img[img.rfind('/')+1:])
-			if self.web.download(imgs[0], saveas):
-				self.log('downloaded (%d) (%s) - %s' % (index, self.get_size(saveas), img))
+		try:
+			self.debug('handle_url: %s' % url)
+			ext = url.lower()[url.rfind('.')+1:]
+			if ext in ['jpg', 'jpeg', 'gif', 'png']:
+				imgs = [url]
 			else:
-				self.log('download failed (%d) - %s' % (index, img))
-			sleep(1)
-		else:
-			self.log('no image found (%d) - %s' % (index, url))
+				r = self.web.get(url)
+				imgs = self.web.between(r, '<meta name="twitter:image" value="', '"')
+				if len(imgs) == 0:
+					imgs = self.web.between(r, '<meta name="twitter:image" content="', '"')
+			if len(imgs) > 0:
+				img = imgs[0]
+				if '?' in img: img = img[:img.find('?')]
+				if '#' in img: img = img[:img.find('#')]
+				if self.urls_only:
+					self.add_url(index, img)
+					self.thread_count -= 1
+					return
+				saveas = '%s/%03d_%s' % (self.working_dir, index, img[img.rfind('/')+1:])
+				if self.web.download(imgs[0], saveas):
+					self.log('downloaded (%d) (%s) - %s' % (index, self.get_size(saveas), img))
+				else:
+					self.log('download failed (%d) - %s' % (index, img))
+				sleep(1)
+			else:
+				self.log('no image found (%d) - %s' % (index, url))
+		except Exception, e:
+			self.debug('exception in handle_url: %s' % str(e))
 		self.thread_count -= 1
 
 	def get_access_token(self):
