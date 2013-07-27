@@ -36,6 +36,7 @@ from sites.site_chansluts   import   chansluts
 from sites.site_gonearch    import    gonearch
 from sites.site_buttoucher  import  buttoucher
 from sites.site_pichunter   import   pichunter
+from sites.site_soupio      import      soupio
 
 """ Print error in JSON format """
 def print_error(text):
@@ -190,7 +191,8 @@ def get_ripper(url, urls_only):
 			teenplanet,  \
 			chansluts,   \
 			buttoucher,  \
-			pichunter]
+			pichunter,   \
+			soupio]
 	for site in sites:
 		try:
 			ripper = site(url, urls_only)
