@@ -22,18 +22,29 @@ class soupio(basesite):
 
 	def download(self):
 		self.init_dir()
-		r = self.web.get(self.url)
-		chunks = self.web.between(r, '<div class="imagecontainer"', '</div>')
-		for index, chunk in enumerate(chunks):
-			if '<a href="' in chunk:
-				url = self.web.between(chunk, '<a href="', '"')[0]
-			elif ' src="' in chunk:
-				url = self.web.between(chunk, ' src="', '"')[0]
+		url = self.url
+		index = 0
+		total = 0
+		while True:
+			r = self.web.get(url)
+			chunks = self.web.between(r, '<div class="imagecontainer"', '</div>')
+			total += len(chunks)
+			for chunk in chunks:
+				if '<a href="' in chunk:
+					url = self.web.between(chunk, '<a href="', '"')[0]
+				elif ' src="' in chunk:
+					url = self.web.between(chunk, ' src="', '"')[0]
+				else:
+					continue
+				index += 1
+				if self.urls_only:
+					self.add_url(index, url, total=total)
+				else:
+					self.download_image(url, index, total=total)
+				if self.hit_image_limit(): break
+			if "SOUP.Endless.next_url = '" in r:
+				next_page = self.web.between(r, "SOUP.Endless.next_url = '", "'")[0]
+				url = 'http://redditsluts.soup.io%s' % next_page
 			else:
-				continue
-			if self.urls_only:
-				self.add_url(index + 1, url, total=len(chunks))
-			else:
-				self.download_image(url, index + 1, total=len(chunks))
-			if self.hit_image_limit(): break
+				break
 		self.wait_for_threads()
