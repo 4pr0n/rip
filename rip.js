@@ -242,7 +242,7 @@ function sendRequest(url, handler) {
 
 function setExample(site) {
 	var dic = {
-		'imgur'       : 'http://imgur.com/a/4Qflh', //'http://imgur.com/a/RdXNa',
+		'imgur'       : 'http://imgur.com/a/DU74E', //'http://imgur.com/a/RdXNa',
 		'tumblr'      : 'http://mourning-sex.tumblr.com/tagged/me',
 		'twitter'     : 'https://twitter.com/MrNMissesSmith',
 		'deviantart'  : 'http://geekysica.deviantart.com/gallery/40343783',
