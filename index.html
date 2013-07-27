@@ -64,7 +64,7 @@
 				</center>
 			</td></tr>
 			<tr><td>
-				<div id="status_bar">&nbsp;</div>
+				<div class="statusbar" id="status_bar">&nbsp;</div>
 				<div id="progress_bar_div">
 					<progress id="progress_bar" value="22" max="100"></progress>
 				</div>
@@ -124,6 +124,12 @@
 			<tr><td class="updates">
 				<!-- <ul> <li style="list-style: none;"> this site is ad-free. if you want to donate, ask <a class="box" href="http://www.reddit.com/message/compose/?to=4_pr0n&subject=about%20rip.rarchives.com&message=I%20have%20a%20%3Ccomplaint%2C%20comment%2C%20suggestion%3E%3A">4_pr0n</a> on reddit </ul> -->
 				<div id="more_news_link">
+					<span class="update_date">2013-07-26</span>
+					<ul style="padding-left: 20px;">
+						<li> added support for society.pichunter
+						<li> added support for imgur captions
+						<li> fixed 500px
+					</ul>
 					<span class="update_date">2013-06-04</span>
 					<ul style="padding-left: 20px;">
 						<li> added support for gonearchiving
@@ -133,6 +139,7 @@
 					<span class="update_date">2013-04-27</span>
 					<ul style="padding-left: 20px;">
 						<li> source released <a href="https://github.com/4pr0n/rip" target="_BLANK" style="text-decoration: underline">on github</a>
+						<ul> <li> want support for a new site? <i>create a new <a style="text-decoration: underline" href="https://github.com/4pr0n/rip/issues" target="_BLANK">issue</a></i> </ul>
 					</ul>
 					<span class="update_date">2013-03-06</span>
 					<ul style="padding-left: 20px;">
@@ -150,6 +157,12 @@
 					</center>
 				</div>
 				<div id="more_news" style="padding: 0px; margin: 0px; border: none; display: none">
+					<span class="update_date">2013-07-26</span>
+					<ul style="padding-left: 20px;">
+						<li> added support for society.pichunter
+						<li> added support for imgur captions
+						<li> fixed 500px
+					</ul>
 					<span class="update_date">2013-06-04</span>
 					<ul style="padding-left: 20px;">
 						<li> added support for gonearchiving
@@ -177,7 +190,7 @@
 					<ul style="padding-left: 20px;">
 						<li> (attempted) fix for deviantart rips
 						<li> source released <a href="https://github.com/4pr0n/rip" target="_BLANK" style="text-decoration: underline">on github</a>
-						<ul> <li> want support for a new site? <i>add it yourself and make a pull request!</i> </ul>
+						<ul> <li> want support for a new site? <i>create a new <a style="text-decoration: underline" href="https://github.com/4pr0n/rip/issues" target="_BLANK">issue</a></i> </ul>
 					</ul>
 					<div class="update_date">2013-04-19</div>
 					<ul style="padding-left: 20px;">
@@ -237,6 +250,39 @@
 			</td></tr>
 		</table>
 
+		<div style="padding-top: 30px;"></div>
+		<table class="page" style="padding-bottom: 10px;">
+			<tr><td colspan="2" class="updates_header">
+					video ripper
+			</td></tr>
+			<tr>
+				<td>
+					<table><tr><td>
+						video&nbsp;url:
+					</td><td>
+						<input class="textbox"
+							type="text" 
+							id="vid_text" 
+							value="http://videobam.com/wNpcO" 
+							size=27
+							onFocus="this.select();"
+							onKeyUp="vidboxKeyUp(event);" />
+					</td></tr></table>
+				</td>
+			</tr><tr>
+				<td class="button" colspan="2">
+					<input class="button"
+						type="button"
+						id="vid_button"
+						value="download"
+						onClick="startVid();" />
+				</td>
+			</tr><tr>
+				<td colspan="2">
+					<div class="statusbar" id="vid_status_bar">&nbsp;</div>
+				</td>
+			</tr>
+		</table>
 		
 		<div class="footer">
 			bug report? feature request?
