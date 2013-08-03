@@ -116,6 +116,41 @@
 				</ul>
 			</td></tr>
 		</table>
+
+		<div style="padding-top: 30px;"></div>
+		<table class="page" style="padding-bottom: 10px;">
+			<tr><td colspan="2" class="updates_header" style="padding-bottom: 5px;">
+					video ripper (beta)
+			</td></tr>
+			<tr>
+				<td>
+					<table><tr><td>
+						url:
+					</td><td>
+						<input class="textbox"
+							type="text" 
+							id="vid_text" 
+							value="http://beeg.com/7756743" 
+							size=33
+							onFocus="this.select();"
+							onKeyUp="vidboxKeyUp(event);" />
+					</td></tr></table>
+				</td>
+			</tr><tr>
+				<td class="button" colspan="2">
+					<input class="button"
+						type="button"
+						id="vid_button"
+						value="get video link"
+						onClick="startVid();" />
+				</td>
+			</tr><tr>
+				<td colspan="2">
+					<div class="statusbar" id="vid_status_bar">&nbsp;</div>
+				</td>
+			</tr>
+		</table>
+		
 		<div style="padding-top: 30px;"></div>
 		<table class="page" style="padding-bottom: 10px;">
 			<tr><td class="updates_header">
@@ -255,40 +290,6 @@
 			</td></tr>
 		</table>
 
-		<div style="padding-top: 30px;"></div>
-		<table class="page" style="padding-bottom: 10px; display: none;">
-			<tr><td colspan="2" class="updates_header">
-					video ripper
-			</td></tr>
-			<tr>
-				<td>
-					<table><tr><td>
-						video&nbsp;url:
-					</td><td>
-						<input class="textbox"
-							type="text" 
-							id="vid_text" 
-							value="http://videobam.com/wNpcO" 
-							size=27
-							onFocus="this.select();"
-							onKeyUp="vidboxKeyUp(event);" />
-					</td></tr></table>
-				</td>
-			</tr><tr>
-				<td class="button" colspan="2">
-					<input class="button"
-						type="button"
-						id="vid_button"
-						value="download"
-						onClick="startVid();" />
-				</td>
-			</tr><tr>
-				<td colspan="2">
-					<div class="statusbar" id="vid_status_bar">&nbsp;</div>
-				</td>
-			</tr>
-		</table>
-		
 		<div class="footer">
 			bug report? feature request?
 			<p>

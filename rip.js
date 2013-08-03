@@ -9,7 +9,7 @@ function init() {
 	var url = String(window.location);
   if (url.lastIndexOf('#') >= 0) {
     var link = unescape(url.substring(url.lastIndexOf('#')+1));
-		if (link.indexOf('http://') != 0) {
+		if (link.indexOf('http://') != 0 && link.indexOf('https://') != 0) {
 			link = 'http://' + link;
 		}
 		gebi('rip_text').value = link;
@@ -318,7 +318,7 @@ function setProgress(perc) {
  * Video stuff
  */
 function vidstatusbar(text) { 
-	gebi('vid_status_bar').innerHTML = text;
+	gebi('vid_status_bar').innerHTML = '<center>' + text + '</center>';
 }
 
 // Start vid download when user presses enter key in textbox
@@ -333,6 +333,7 @@ function vidboxKeyUp(evt) {
 
 // Start ripping album
 function startVid() {
+	vidstatusbar('loading...');
 	var query = 'vid.cgi?url=' + encodeURIComponent(gebi('vid_text').value);
 	sendRequest(query, vidRequestHandler);
 }
@@ -353,7 +354,18 @@ function vidRequestHandler(req) {
 		vidstatusbar('<div class="error">error: ' + json.error + '</div>');
 	} else if (json.url != null) {
 		// do stuff
-		vidstatusbar('<a class="download_box" href="' + json.url + '">right-click, save as</a>');
+		var stat = '';
+		stat += '<a class="download_box" href="';
+		stat += 'data:text/html;charset=utf-8, ';
+		stat += '<html><head><meta http-equiv=\'REFRESH\' content=\'0;url=';
+		stat += json.url;
+		stat += '\'></head><body><h1>redirecting...</h1></body></html>" ';
+		stat += 'rel="noreferrer">redirect to video</a>';
+		stat += '<div style="padding-top: 10px;">';
+		stat += '<input type="text" class="textbox" value="';
+		stat += json.url;
+		stat += '" id="video_textarea" onfocus="this.select()" onmouseup="return false" readonly></textarea>';
+		vidstatusbar(stat);
 	} else {
 		vidstatusbar("unexpected stuff!");
 	}
