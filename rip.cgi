@@ -39,6 +39,7 @@ from sites.site_pichunter   import   pichunter
 from sites.site_soupio      import      soupio
 from sites.site_imgbox      import      imgbox
 from sites.site_reddit      import      reddit
+from sites.site_gallerydump import gallerydump
 
 """ Print error in JSON format """
 def print_error(text):
@@ -196,7 +197,8 @@ def get_ripper(url, urls_only):
 			pichunter,   \
 			soupio,      \
 			imgbox,      \
-			reddit]
+			reddit,      \
+			gallerydump]
 	for site in sites:
 		try:
 			ripper = site(url, urls_only)

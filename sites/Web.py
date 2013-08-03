@@ -183,6 +183,28 @@ class Web:
 			d[key] = self.fix_string(value)
 		return d
 		
+	def oldpost(self, url, postdict=None, headers={}):
+		""" 
+			Submits a POST request to URL. Posts 'postdict' if
+			not None. URL-encodes postdata (if dict) 
+			and strips Unicode chars.
+		"""
+		result = ''
+		if not 'User-agent' in headers:
+			headers['User-agent'] = self.user_agent
+		if postdict == None:
+			encoded_data = ''
+		elif type(postdict) == dict:
+			encoded_data = urlencode(postdict)
+		elif type(postdict) == str:
+			encoded_data = postdict
+		try:
+			req = self.Request(url, encoded_data, headers)
+			handle = self.urlopen(req)
+			result = handle.read()
+		except Exception, e:
+			stderr.write('Web.py: %s: %s\n' % (url, str(e)))
+		return result
 		
 	def post(self, url, postdict=None, headers={}):
 		"""
@@ -201,6 +223,8 @@ class Web:
 		if postdict != None and type(postdict) == dict:
 			fixed_dict = self.fix_dict(postdict)
 			data = urllib.urlencode(fixed_dict)
+		elif postdict != None and type(postdict) == str:
+			data = postdict
 		headers['Content-Length'] = len(data)
 		
 		host = url[url.find('//')+2:]
