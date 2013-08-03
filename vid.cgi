@@ -21,7 +21,7 @@ def main():
 def get_video_url(siteurl):
 	url = get_url(siteurl)
 	meta = web.get_meta(url)
-	if not 'Content-Type' in meta or 'video' not in meta['Content-Type'].lower():
+	if not 'Content-Type' in meta or ('video' not in meta['Content-Type'].lower() and 'application/octet-stream' not in meta['Content-Type'].lower()):
 		print_error('no video content at %s' % url)
 		return
 	print dumps( {
