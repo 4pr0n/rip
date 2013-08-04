@@ -25,21 +25,23 @@ from sites.site_getgonewild import getgonewild
 from sites.site_anonib      import      anonib
 from sites.site_motherless  import  motherless
 from sites.site_4chan       import    fourchan
-from sites.site_occ         import         occ
 from sites.site_minus       import       minus
 from sites.site_gifyo       import       gifyo
 from sites.site_five00px    import    five00px
-from sites.site_chickupload import chickupload
 from sites.site_cghub       import       cghub
+from sites.site_chickupload import chickupload
 from sites.site_teenplanet  import  teenplanet
 from sites.site_chansluts   import   chansluts
-from sites.site_gonearch    import    gonearch
 from sites.site_buttoucher  import  buttoucher
 from sites.site_pichunter   import   pichunter
 from sites.site_soupio      import      soupio
 from sites.site_imgbox      import      imgbox
 from sites.site_reddit      import      reddit
 from sites.site_gallerydump import gallerydump
+from sites.site_fapdu       import       fapdu
+# No longer supported
+from sites.site_occ         import         occ
+from sites.site_gonearch    import    gonearch
 
 """ Print error in JSON format """
 def print_error(text):
@@ -198,7 +200,8 @@ def get_ripper(url, urls_only):
 			soupio,      \
 			imgbox,      \
 			reddit,      \
-			gallerydump]
+			gallerydump, \
+			fapdu]
 	for site in sites:
 		try:
 			ripper = site(url, urls_only)

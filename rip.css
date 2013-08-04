@@ -246,6 +246,7 @@ div.footer {
 	padding: 5px;
 	padding-left: 10px;
 	padding-right: 10px;
+	white-space: nowrap;
 	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.6),
 	            0px  4px 10px rgba(150, 150, 150, 0.6),
 	           -4px  0px 10px rgba(150, 150, 150, 0.6),
