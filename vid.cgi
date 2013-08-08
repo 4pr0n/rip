@@ -37,23 +37,20 @@ def get_url(siteurl):
 			'videarn.com/'  : { 'begend' : ["src='",  "'"],     'unquote' : 1 },
 			'beeg.com/'     : { 'begend' : ['"',      '"'],     'unquote' : 1 },
 			'drtuber.com/'  : { 'begend' : ['url%3D', '"'],     'unquote' : 1 },
-			'youporn.com/'  : { 'begend' : ['href="', '&amp;'], 'unquote' : 1 }
+			'youporn.com/'  : { 'begend' : ['href="', '&amp;'], 'unquote' : 1 },
+			'redtube.com/'  : { 'begend' : ['&flv_url=', '&'],  'unquote' : 1 }
 		}
-	supported = False
-	for key in sites.keys():
-		if key in siteurl:
-			supported = True
-	if not supported:
-		raise Exception('site not supported, <a href="http://www.reddit.com/message/compose/?to=4_pr0n&subject=rip.rarchives.com&message=Support%20this%20site:%20enter_site_here.com">ask 4_pr0n to support it</a>')
-	source = web.getter(siteurl)
-	ext_inds = get_extension_indexes(source)
-	index = get_deepest_ind(source, ext_inds)
 	site_key = None
 	for key in sites.keys():
 		if key in siteurl:
+			supported = True
 			site_key = key
-			url = between(source, index, sites[key]['begend'][0], sites[key]['begend'][1])
-			break
+	if site_key == None:
+		raise Exception('site not supported, <a href="http://www.reddit.com/message/compose/?to=4_pr0n&subject=rip.rarchives.com&message=Support%%20this%%20video%%20site:%%20`%s`">ask 4_pr0n to support it</a>' % siteurl)
+	source = web.getter(siteurl)
+	ext_inds = get_extension_indexes(source)
+	index = get_deepest_ind(source, ext_inds)
+	url = between(source, index, sites[key]['begend'][0], sites[key]['begend'][1])
 	url = url.replace('\\/', '/')
 	while sites[site_key]['unquote'] > 0 and '%' in url:
 		sites[site_key]['unquote'] -= 1
