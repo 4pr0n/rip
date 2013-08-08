@@ -10,31 +10,35 @@ class fapdu(basesite):
 	def sanitize_url(self, url):
 		if not 'fapdu.com/' in url:
 			raise Exception('')
-		if not '.view/' in url:
-			raise Exception('required <b>.view/</b> not found in URL')
-		url = url[:url.find('.view/')+len('.view/')]
+		if '.view/' in url:
+			url = url[:url.find('.view/')+len('.view/')]
+		elif '.pics' in url:
+			url = url[:url.find('.pics')+len('.pics')]
+		else:
+			raise Exception('<b>.view/</b> and <b>.pics</b> not found in URL')
 		return url
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
 		fields = url.replace('http://', '').split('/')
-		album = fields[1].replace('.view', '')
+		album = fields[1].replace('.view', '').replace('.pics', '')
 		return 'fapdu_%s' % album
 
 	def download(self):
 		self.init_dir()
 		r = self.web.get(self.url)
-		if not 'var rp = ' in r:
-			self.wait_for_threads()
-			raise Exception('could not find "var rp = " at %s' % self.url)
-		total = int(self.web.between(r, 'var rp = ', ';')[0])
-		for index in xrange(1, total + 1):
-			url = '%s%d' % (self.url, index)
-			while self.thread_count > self.max_threads:
-				sleep(0.1)
-			t = Thread(target=self.download_image, args=(url, index, total))
-			t.start()
-			if self.hit_image_limit(): break
+		if self.url.endswith('.view/'):
+			if not 'var rp = ' in r:
+				self.wait_for_threads()
+				raise Exception('could not find "var rp = " at %s' % self.url)
+			total = int(self.web.between(r, 'var rp = ', ';')[0])
+			for index in xrange(1, total + 1):
+				url = '%s%d' % (self.url, index)
+				while self.thread_count > self.max_threads:
+					sleep(0.1)
+				t = Thread(target=self.download_image, args=(url, index, total))
+				t.start()
+				if self.hit_image_limit(): break
 		self.wait_for_threads()
 	
 	def download_image(self, url, index, total):

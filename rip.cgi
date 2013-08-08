@@ -39,6 +39,7 @@ from sites.site_imgbox      import      imgbox
 from sites.site_reddit      import      reddit
 from sites.site_gallerydump import gallerydump
 from sites.site_fapdu       import       fapdu
+from sites.site_fuskator    import    fuskator
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -201,7 +202,8 @@ def get_ripper(url, urls_only):
 			imgbox,      \
 			reddit,      \
 			gallerydump, \
-			fapdu]
+			fapdu,       \
+			fuskator]
 	for site in sites:
 		try:
 			ripper = site(url, urls_only)
