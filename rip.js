@@ -57,6 +57,9 @@ function recentHandler(req) {
 
 // Loads URL in hash and refreshes page
 function loadAlbum(url) {
+	if (url.indexOf('#') > -1) {
+		url = url.substr(0, url.indexOf('#'));
+	}
 	window.location.href = window.location.pathname + '#' + url;
 	window.location.reload(true);
 }
