@@ -14,6 +14,7 @@ class minus(basesite):
 			raise Exception('required <b>http://&lt;user&gt;.minus.com/</b> not found in URL')
 		if not '.minus.com' in url or 'www.minus.com' in url:
 			temp = url.replace('http://', '').replace('https://', '')
+			if temp.endswith('/'): temp = temp[:-1]
 			if not '/' in temp or '/' in temp[temp.find('/')+1:]:
 				raise Exception('invalid minus url')
 		return url
@@ -30,6 +31,7 @@ class minus(basesite):
 			return 'minus_%s' % '_'.join(dirs)
 		else:
 			# Guest upload
+			while url.endswith('/'): url = url[:-1]
 			url = url[url.find('/')+1:]
 			return 'minus_guest_%s' % url
 			
