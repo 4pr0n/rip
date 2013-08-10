@@ -14,7 +14,7 @@ class testsite(basesite):
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
-		gid = url[:url.rfind('/')]
+		gid = url[url.rfind('/')+1:]
 		return 'testsite_%s' % gid
 
 	def download(self):
