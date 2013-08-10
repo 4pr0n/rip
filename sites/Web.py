@@ -124,17 +124,16 @@ class Web:
 			headers['User-agent'] = self.user_agent
 		
 		(https, host, path) = self.get_https_host_path(url)
-		stderr.write('Web.py: https: %s\n' % https)
-		stderr.write('Web.py: host: %s\n' % host)
-		stderr.write('Web.py: path: %s\n' % path)
+		#stderr.write('Web.py: GET http%s://%s%s\n' % ('s' if https else '', host, path))
 		try:
 			if https:
 				req = httplib.HTTPSConnection(host)
 			else:
 				req = httplib.HTTPConnection(host)
 			req.putrequest('GET', path)
+			#stderr.write('Web.py: headers:\n')
 			for hkey in headers.keys():
-				stderr.write('Web.py: header: %s: %s\n' % (hkey, headers[hkey]))
+				#stderr.write('        %s:\t%s\n' % (hkey, headers[hkey]))
 				req.putheader(hkey, headers[hkey])
 			req.endheaders()
 			resp = req.getresponse()
@@ -142,12 +141,13 @@ class Web:
 			if resp.status == 200:
 				return resp.read()
 			elif resp.status in [301, 302] and resp.getheader('Location') != None:
+				stderr.write('Web.py: Got %d to %s' % (resp.status, resp.getheader('Location')))
 				return self.getter(resp.getheader('Location'), headers=headers, retry=retry-1)
 			else:
 				result = ''
 				try: result = resp.read()
 				except: pass
-				stderr.write('Web.py: HTTP status %s: %s\n' % (resp.status, resp.reason))
+				#stderr.write('Web.py: HTTP status %s: %s\n' % (resp.status, resp.reason))
 				return result
 		except Exception, e:
 			stderr.write('Web.py: %s: %s\n' % (url, str(e)))
