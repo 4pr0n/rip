@@ -34,6 +34,7 @@ from sites.site_reddit      import      reddit
 from sites.site_gallerydump import gallerydump
 from sites.site_fapdu       import       fapdu
 from sites.site_fuskator    import    fuskator
+from sites.site_kodiefiles  import  kodiefiles
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -68,7 +69,8 @@ sites = [        \
 		reddit,      \
 		gallerydump, \
 		fapdu,       \
-		fuskator]
+		fuskator,    \
+		kodiefiles]
 
 def main():
 	print '\nrarchives\' album ripper\n'
