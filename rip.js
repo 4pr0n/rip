@@ -311,7 +311,7 @@ function setProgress(perc) {
 	}
 	if (value == "0") {
 		gebi('progress_bar_div').style.display = "none";
-	} else {
+	} else if (!isNaN(parseFloat(value)) && isFinite(value)) {
 		gebi('progress_bar_div').style.display = "inline-block";
 		gebi('progress_bar').value = value;
 	}
