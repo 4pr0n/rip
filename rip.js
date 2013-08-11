@@ -265,7 +265,15 @@ function setExample(site) {
 		'gifyo'       : 'http://gifyo.com/robynsteen/', // http://gifyo.com/LinzieNeon/',
 		'cghub'       : 'http://katiedesousa.cghub.com/images/',
 		'chansluts'   : 'http://www.chansluts.com/camwhores/girls/res/3405.php',
-		'teenplanet'  : 'http://photos.teenplanet.org/atomicfrog/Latino_M4N/Ass_Beyond_Belief'
+		'teenplanet'  : 'http://photos.teenplanet.org/atomicfrog/Latino_M4N/Ass_Beyond_Belief',
+		'buttoucher'  : 'http://butttoucher.com/users/Shelbolovesnate',
+		'imgbox'      : 'http://imgbox.com/g/UyaOUEBXzO',
+		'reddit'      : 'http://reddit.com/user/thatnakedgirl',
+		'fuskator'    : 'http://fuskator.com/full/l4IoKiE51-K/1012_chicas123_exotic_landysh_met-art_old+chicks.html#',
+		'redditsluts' : 'http://redditsluts.soup.io/tag/Miss_Ginger_Biscuit',
+		'kodiefiles'  : 'http://www.kodiefiles.nl/2010/10/ff-eerder-gezien.html',
+		'gallerydump' : 'http://www.gallery-dump.com/index.php?gid=553056',
+		'fapdu'       : 'http://fapdu.com/cuties-4.view/'
 	};
 	loadAlbum(dic[site].replace('http://', ''));
 	/*
