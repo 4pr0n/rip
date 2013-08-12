@@ -31,14 +31,15 @@ def get_video_url(siteurl):
 def get_url(siteurl):
 	is_supported(siteurl)
 	sites = {
-			'xvideos.com/'  : { 'begend' : ['url=',   '&amp;'], 'unquote' : 1 },
-			'videobam.com/' : { 'begend' : ['"',      '"'],     'unquote' : 1 },
-			'xhamster.com/' : { 'begend' : ['"',      '"'],     'unquote' : 1 },
-			'videarn.com/'  : { 'begend' : ["src='",  "'"],     'unquote' : 1 },
-			'beeg.com/'     : { 'begend' : ['"',      '"'],     'unquote' : 1 },
-			'drtuber.com/'  : { 'begend' : ['url%3D', '"'],     'unquote' : 1 },
-			'youporn.com/'  : { 'begend' : ['href="', '&amp;'], 'unquote' : 1 },
-			'redtube.com/'  : { 'begend' : ['&flv_url=', '&'],  'unquote' : 1 }
+			'xvideos.com/'  :  { 'begend' : ['url=',   '&amp;'],    'unquote' : 1 },
+			'videobam.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
+			'xhamster.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
+			'videarn.com/'  :  { 'begend' : ["src='",  "'"],        'unquote' : 1 },
+			'beeg.com/'     :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
+			'drtuber.com/'  :  { 'begend' : ['url%3D', '"'],        'unquote' : 1 },
+			'youporn.com/'  :  { 'begend' : ['href="', '&amp;'],    'unquote' : 1 },
+			'redtube.com/'  :  { 'begend' : ['&flv_url=', '&'],     'unquote' : 1 },
+			'motherless.com/': { 'begend' : ["__fileurl = '", '"'], 'unquote' : 1 },
 		}
 	site_key = None
 	for key in sites.keys():
