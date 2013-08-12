@@ -53,9 +53,6 @@ class gallerydump(basesite):
 			sleep(5)
 			r = self.web.get(url)
 			if "TargetUrl = '" in r:
-				f = open('wtf.txt', 'w')
-				f.write(r)
-				f.close()
 				url = self.web.between(r, "TargetUrl = '", "'")[0]
 				self.debug('it was linkbucks, new url: %s' % url)
 			else:
