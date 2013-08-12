@@ -68,6 +68,9 @@ class twitter(basesite):
 			json = loads(r)
 			self.debug(dumps(json, indent=2))
 			for tweet in json:
+				if not type(tweet) == dict or not 'id' in tweet:
+					self.wait_for_threads()
+					raise Exception('twitter rate limit, try again in 1 hour')
 				this_id = int(tweet.get('id'))
 				if max_id == -1 or this_id < max_id:
 					max_id = this_id - 1
@@ -166,8 +169,9 @@ class twitter(basesite):
 		key = f.read().strip()
 		f.close()
 		headers = {
-				'Authorization'   : 'Basic %s' % key,
-				'Content-Type'    : 'application/x-www-form-urlencoded;charset=UTF-8'
+				'Authorization' : 'Basic %s' % key,
+				'Content-Type'  : 'application/x-www-form-urlencoded;charset=UTF-8',
+				'User-agent'    : 'derv\'s ripe and zipe'
 			}
 		postdata = { 'grant_type' : 'client_credentials' }
 		r = self.web.post('https://api.twitter.com/oauth2/token', postdict=postdata, headers=headers)
