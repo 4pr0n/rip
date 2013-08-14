@@ -41,6 +41,8 @@ def get_url(siteurl):
 			'redtube.com/'  :  { 'begend' : ['&flv_url=', '&'],     'unquote' : 1 },
 			'motherless.com/': { 'begend' : ["__fileurl = '", '"'], 'unquote' : 1 },
 		}
+	if 'fapmenow.com/' in siteurl:
+		return get_site_fapmenow(siteurl)
 	site_key = None
 	for key in sites.keys():
 		if key in siteurl:
@@ -57,6 +59,12 @@ def get_url(siteurl):
 		sites[site_key]['unquote'] -= 1
 		url = unquote(url)
 	return url
+
+def get_site_fapmenow(siteurl):
+	r = web.getter(siteurl)
+	if not '"video_src" href="' in r:
+		raise Exception('could not find video_src at %s' % siteurl)
+	return web.between(r, '"video_src" href="', '"')[0]
 
 def is_supported(url):
 	for not_supported in ['pornhub.com/', 'youtube.com/', 'dailymotion.com/']:
