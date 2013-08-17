@@ -43,6 +43,8 @@ def get_url(siteurl):
 		}
 	if 'fapmenow.com/' in siteurl:
 		return get_site_fapmenow(siteurl)
+	if 'vimeo.com/' in siteurl:
+		return get_site_vimeo(siteurl)
 	site_key = None
 	for key in sites.keys():
 		if key in siteurl:
@@ -65,6 +67,21 @@ def get_site_fapmenow(siteurl):
 	if not '"video_src" href="' in r:
 		raise Exception('could not find video_src at %s' % siteurl)
 	return web.between(r, '"video_src" href="', '"')[0]
+
+def get_site_vimeo(siteurl):
+	r = web.getter(siteurl)
+	if not "window.addEvent('domready'" in r:
+		raise Exception('could not find domready at %s' % siteurl)
+	chunk = web.between(r, "window.addEvent('domready'", 'window.addEvent(')[0]
+	ts  = web.between(chunk, '"timestamp":',   ',')[0]
+	sig = web.between(chunk, '"signature":"',  '"')[0]
+	vid = web.between(chunk, '"video":{"id":', ',')[0]
+	url  = 'http://player.vimeo.com/play_redirect'
+	url += '?clip_id=%s' % vid
+	url += '&sig=%s' % sig
+	url += '&time=%s' % ts
+	url += '&quality=hd&codecs=H264,VP8,VP6&type=moogaloop_local&embed_location=&seek=0'
+	return url
 
 def is_supported(url):
 	for not_supported in ['pornhub.com/', 'youtube.com/', 'dailymotion.com/']:
