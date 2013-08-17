@@ -40,6 +40,7 @@ def get_url(siteurl):
 			'youporn.com/'  :  { 'begend' : ['href="', '&amp;'],    'unquote' : 1 },
 			'redtube.com/'  :  { 'begend' : ['&flv_url=', '&'],     'unquote' : 1 },
 			'motherless.com/': { 'begend' : ["__fileurl = '", '"'], 'unquote' : 1 },
+			'vine.co/'      :  { 'begend' : ['source src="', '"'],  'unquote' : 1 },
 		}
 	if 'fapmenow.com/' in siteurl:
 		return get_site_fapmenow(siteurl)
