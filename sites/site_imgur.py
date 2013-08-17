@@ -108,7 +108,7 @@ class imgur(basesite):
 			self.download_account(self.url)
 	
 	def text_to_fs_safe(self, text):
-		safe = 'abcdefghijklmnopqrstuvwxyz0123456789-_ &'
+		safe = 'abcdefghijklmnopqrstuvwxyz0123456789-_ &()'
 		text = text.replace('&amp;', '&')
 		result = ''
 		for c in xrange(0, len(text)):
@@ -132,7 +132,7 @@ class imgur(basesite):
 			self.working_dir += '/%03d_%s' % (index + 1, alt)
 			if not path.exists(self.working_dir):
 				mkdir(self.working_dir)
-			self.log('downloading album (%d/%d) \\"%s\\"' % (index + 1, len(covers), alt))
+			self.log('downloading album (%d/%d) "%s"' % (index + 1, len(covers), alt))
 			self.download_album(url)
 			self.working_dir = prev_dir
 			if self.hit_image_limit(): break
@@ -163,6 +163,15 @@ class imgur(basesite):
 				if self.hit_image_limit(): break
 		self.wait_for_threads()
 	
+	def safe_text(self, text):
+		escaped = []
+		for c in text:
+			if ord(c) < 32 or ord(c) > 126:
+				escaped.append('_')
+			else:
+				escaped.append(c)
+		return ''.join(escaped)
+	
 	def download_album_json(self, album):
 		aid = album[album.find('/a/')+len('/a/'):]
 		if '/' in aid: aid = aid[:aid.find('/')]
@@ -181,8 +190,8 @@ class imgur(basesite):
 			url = image['links']['original']
 			# Captions / Metadata
 			meta = image['image']
-			title = meta.get('title', '')
-			caption = meta.get('caption', '')
+			title = self.safe_text(meta.get('title', ''))
+			caption = self.safe_text(meta.get('caption', ''))
 			if title != '' or caption != '':
 				captions.append( (url, title, caption) )
 			if self.urls_only:
