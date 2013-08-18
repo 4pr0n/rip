@@ -43,6 +43,7 @@ class reddit(imgur):
 				url = child['data']['url']
 				index += 1
 				if not 'imgur.com' in url: continue
+				url = url.replace('/m.imgur.com/', '/imgur.com/')
 				if 'imgur.com/a/' in url:
 					self.download_album(url)
 				elif not 'i.imgur.com' in url and not (url[-4] == '.' or url[-5] == '.'):

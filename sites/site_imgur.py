@@ -22,6 +22,7 @@ class imgur(basesite):
 		self.album_type = None 
 		if not 'http://imgur.com' in url and not '.imgur.com' in url:
 			raise Exception('')
+		if '/m.imgur.com/' in url: url = url.replace('/m.imgur.com/', '/imgur.com/')
 		if      '.imgur.com'    in url and \
 				not 'i.imgur.com'   in url and \
 				not 'www.imgur.com' in url:
