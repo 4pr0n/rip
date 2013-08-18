@@ -46,6 +46,8 @@ def get_url(siteurl):
 		return get_site_fapmenow(siteurl)
 	if 'vimeo.com/' in siteurl:
 		return get_site_vimeo(siteurl)
+	if 'tumblr.com/' in siteurl:
+		return get_site_tumblr(siteurl)
 	site_key = None
 	for key in sites.keys():
 		if key in siteurl:
@@ -82,6 +84,13 @@ def get_site_vimeo(siteurl):
 	url += '&sig=%s' % sig
 	url += '&time=%s' % ts
 	url += '&quality=hd&codecs=H264,VP8,VP6&type=moogaloop_local&embed_location=&seek=0'
+	return url
+
+def get_site_tumblr(siteurl):
+	r = web.getter(siteurl)
+	if not 'source src=\\x22' in r:
+		raise Exception('could not find source src at %s' % siteurl)
+	url = web.between(r, 'source src=\\x22', '\\x22')[0]
 	return url
 
 def is_supported(url):
