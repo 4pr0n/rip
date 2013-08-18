@@ -48,6 +48,8 @@ def get_url(siteurl):
 		return get_site_vimeo(siteurl)
 	if 'tumblr.com/' in siteurl:
 		return get_site_tumblr(siteurl)
+	if '4tube.com/' in siteurl:
+		return get_site_4tube(siteurl)
 	site_key = None
 	for key in sites.keys():
 		if key in siteurl:
@@ -92,6 +94,15 @@ def get_site_tumblr(siteurl):
 		raise Exception('could not find source src at %s' % siteurl)
 	url = web.between(r, 'source src=\\x22', '\\x22')[0]
 	return url
+
+def get_site_4tube(siteurl):
+	r = web.getter(siteurl)
+	if "playerFallbackFile = '" in r:
+		return unquote(web.between(r, "playerFallbackFile = '", "'")[0])
+	elif 'sources: [{"file":"' in r:
+		return web.between(r, 'sources: [{"file":"', '"')[0].replace('\\/', '/')
+	else:
+		raise Exception('could not find soruces-file or playerFallbackFile')
 
 def is_supported(url):
 	for not_supported in ['pornhub.com/', 'youtube.com/', 'dailymotion.com/']:
