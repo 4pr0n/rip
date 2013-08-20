@@ -42,6 +42,7 @@ from sites.site_fapdu       import       fapdu
 from sites.site_fuskator    import    fuskator
 from sites.site_kodiefiles  import  kodiefiles
 from sites.site_pbase       import       pbase
+from sites.site_8muses      import  eightmuses
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -214,7 +215,8 @@ def get_ripper(url, urls_only):
 			fapdu,       \
 			fuskator,    \
 			kodiefiles,  \
-			pbase]
+			pbase,       \
+			eightmuses]
 	for site in sites:
 		try:
 			ripper = site(url, urls_only)
