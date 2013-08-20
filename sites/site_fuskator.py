@@ -9,6 +9,8 @@ class fuskator(basesite):
 	def sanitize_url(self, url):
 		if not 'fuskator.com/' in url:
 			raise Exception('')
+		if '/thumbs/' in url:
+			url = url.replace('/thumbs/', '/full/')
 		if not '/full/' in url:
 			raise Exception('required /full/ not found in URL')
 		return url
@@ -27,6 +29,7 @@ class fuskator(basesite):
 			key = bchunk[:bchunk.find(' ')]
 			value = unquote(bchunk[bchunk.find("'")+1:])
 			baseurls[key] = value
+			self.debug('baseurls[%s] = "%s"' % (key, value))
 		ichunks = self.web.between(r, '.src=base', "'<")
 		for index, ichunk in enumerate(ichunks):
 			key = ichunk[:ichunk.find('+')]
@@ -35,6 +38,7 @@ class fuskator(basesite):
 				self.debug('key "%s" not found in baseurls ("%s")' % (key, str(baseurls)))
 				continue
 			image = '%s%s' % (baseurls[key], img_index)
+			self.debug('image: %s' % image)
 			self.download_image(image, index + 1, total=len(ichunks))
 			if self.hit_image_limit(): break
 		self.wait_for_threads()
