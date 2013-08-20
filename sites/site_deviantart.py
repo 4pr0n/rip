@@ -86,7 +86,7 @@ class deviantart(basesite):
 		t.start()
 	
 	""" Downloads image from deviantart image page """
-	def download_image_thread(self, url, index, total):
+	def download_image_thread(self, url, index, total, retries=5):
 		r = self.web.getter(url)
 		img = None
 		if 'id="download-button"' in r:
@@ -96,6 +96,7 @@ class deviantart(basesite):
 				self.log('unable to download image at: %s' % url)
 				self.thread_count -= 1
 				return
+			self.debug('used download-button')
 			img = imgs[0]
 		if img == None and 'ResViewSizer_img"' in r:
 			sizer = self.web.between(r, 'ResViewSizer_img"', '>')[0]
@@ -104,18 +105,26 @@ class deviantart(basesite):
 				self.log('unable to download image at: %s' % url)
 				self.thread_count -= 1
 				return
+			self.debug('used ResViewSizer_img')
 			img = imgs[0]
 		if img == None and 'name="og:image" content="' in r:
 			img = self.web.between(r, 'name="og:image" content="', '"')[0]
+			self.debug('used og:image')
 		if img == None and '<div class="preview"' in r:
 			chunk = self.web.between(r, '<div class="preview"', '</div>')[0]
-			imgs = self.web.between(chunk, '" data-src="', '"')
+			imgs = self.web.between(chunk, '" data-super-img="', '"')
 			if len(imgs) == 0:
-				self.log('unable to download image at: %s' % url)
-				self.thread_count -= 1
-				return
-			img = imgs[0]
-			img = img.replace('://th', '://fc').replace('/150/f/', '/f/')
+				imgs = self.web.between(chunk, '" data-src="', '"')
+				if len(imgs) == 0:
+					self.log('unable to download image at: %s' % url)
+					self.thread_count -= 1
+					return
+				img = imgs[0]
+				img = img.replace('://th', '://fc').replace('/150/f/', '/f/')
+				self.debug('used preview data-src')
+			else:
+				img = imgs[0]
+				self.debug('used div class preview data-super-img')
 		if img == None:
 			self.log('image not found at: %s' % url)
 			self.thread_count -= 1
@@ -127,6 +136,16 @@ class deviantart(basesite):
 				splits.pop(i - 1)
 				img = '/'.join(splits)
 		if '&amp;' in img: img = img.replace('&amp;', '&')
+		if '/download/' in img and 'token=' in img:
+			# Need to get the real image?
+			if retries == 0:
+				self.debug('retried 5 times, no luck. giving up on %s' % url)
+				self.thread_count -= 1
+			else:
+				self.debug('got weird redirect page, waiting 3 seconds...')
+				time.sleep(3)
+				self.download_image_thread(url, index, total, retries=retries-1)
+			return
 		if self.urls_only:
 			self.add_url(index, img, total=total)
 			self.thread_count -= 1
