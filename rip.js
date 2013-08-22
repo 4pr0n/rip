@@ -372,6 +372,11 @@ function vidRequestHandler(req) {
 		stat += json.url;
 		stat += '\'></head><body><h1>redirecting...</h1></body></html>" ';
 		stat += 'rel="noreferrer">redirect to video</a>';
+		
+		stat += '&nbsp;<a class="download_box" href="';
+		stat += json.url;
+		stat += '" onclick="return false;">right click, save as</a>';
+		
 		stat += '<div style="padding-top: 10px;">';
 		stat += '<input type="text" class="textbox" value="';
 		stat += json.url;
