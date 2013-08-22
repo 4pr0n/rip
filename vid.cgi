@@ -52,6 +52,8 @@ def get_url(siteurl):
 		return get_site_4tube(siteurl)
 	if 'xtube.com' in siteurl:
 		return get_site_xtube(siteurl)
+	if 'youjizz.com' in siteurl:
+		return get_site_youjizz(siteurl)
 	site_key = None
 	for key in sites.keys():
 		if key in siteurl:
@@ -111,6 +113,22 @@ def get_site_xtube(siteurl):
 	if 'videoMp4 = "' in r:
 		return web.between(r, 'videoMp4 = "', '"')[0].replace('\\/', '/')
 	raise Exception('could not find videoMp4 at %s' % siteurl)
+
+def get_site_youjizz(siteurl):
+	u = siteurl
+	if '?' in u: u = u[:u.find('?')]
+	if '#' in u: u = u[:u.find('#')]
+	if not u.endswith('.html'):
+		raise Exception('could not find .html in %s' % siteurl)
+	num = u[u.rfind('-')+1:u.rfind('.html')]
+	if not num.isdigit():
+		raise Exception('video id not numeric at %s' % siteurl)
+	u = 'http://www.youjizz.com/videos/embed/%s' % num
+	r = web.getter(u)
+	if not 'encodeURIComponent("' in r:
+		raise Exception('could not find encodeURIComponent at %s' % u)
+	return web.between(r, 'encodeURIComponent("', '"')[0]
+
 
 def is_supported(url):
 	for not_supported in ['pornhub.com/', 'youtube.com/', 'dailymotion.com/']:
