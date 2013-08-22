@@ -22,6 +22,11 @@ function init() {
 		gebi('rip_cached').style.display =   'none';
 		gebi('label_cached').style.display = 'none';
 	}
+	refreshRecent();
+}
+
+function refreshRecent() {
+	gebi('recent_spinner').style.visibility = "visible";
 	sendRequest('rip.cgi?recent=y', recentHandler);
 }
 
@@ -48,11 +53,13 @@ function recentHandler(req) {
 		output.push(rec[i]);
 		output.push('">');
 		var url = rec[i].replace('http://www.', '').replace('http://', '').replace('https://', '');
-		output.push(truncate(url, 16));
+		output.push(truncate(url, 18));
 		output.push('</a>');
 	}
 	output.push('</ul>');
+	slowlyShow(gebi('recent'), 0.0);
 	gebi('recent').innerHTML = output.join('');
+	gebi('recent_spinner').style.visibility = "hidden";
 }
 
 // Loads URL in hash and refreshes page
