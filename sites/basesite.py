@@ -104,7 +104,9 @@ class basesite(object):
 	
 	""" Starts separate thread to download image from URL """
 	def download_image(self, url, index, total='?', subdir='', saveas=None):
+		unique_saveas = True
 		if saveas == None:
+			unique_saveas = False
 			saveas = url[url.rfind('/')+1:]
 			# Strip extraneous / non FS safe characters
 			if '?' in saveas: saveas = saveas[:saveas.find('?')]
@@ -122,7 +124,10 @@ class basesite(object):
 		savedir = '%s%s' % (self.working_dir, subdir)
 		if not os.path.exists(savedir): os.mkdir(savedir)
 		
-		saveas = '%s/%03d_%s' % (savedir, index, saveas)
+		if unique_saveas:
+			saveas = '%s/%s' % (savedir, saveas)
+		else:
+			saveas = '%s/%03d_%s' % (savedir, index, saveas)
 		if os.path.exists(saveas):
 			self.log('file exists: %s' % saveas)
 			self.image_count += 1
