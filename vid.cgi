@@ -31,7 +31,6 @@ def get_video_url(siteurl):
 def get_url(siteurl):
 	is_supported(siteurl)
 	sites = {
-			'xvideos.com/'  :  { 'begend' : ['url=',   '&amp;'],    'unquote' : 1 },
 			'videobam.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
 			'xhamster.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
 			'videarn.com/'  :  { 'begend' : ["src='",  "'"],        'unquote' : 1 },
@@ -42,6 +41,8 @@ def get_url(siteurl):
 			'motherless.com/': { 'begend' : ["__fileurl = '", '"'], 'unquote' : 1 },
 			'vine.co/'      :  { 'begend' : ['source src="', '"'],  'unquote' : 1 },
 		}
+	if 'xvideos.com/' in siteurl:
+		return get_site_xvideos(siteurl)
 	if 'fapmenow.com/' in siteurl:
 		return get_site_fapmenow(siteurl)
 	if 'vimeo.com/' in siteurl:
@@ -72,6 +73,12 @@ def get_url(siteurl):
 		sites[site_key]['unquote'] -= 1
 		url = unquote(url)
 	return url
+
+def get_site_xvideos(siteurl):
+	r = web.get(siteurl)
+	u = web.between(r, 'flv_url=', '&amp;')[0]
+	u = unquote(u)
+	return u
 
 def get_site_fapmenow(siteurl):
 	r = web.getter(siteurl)
