@@ -4,7 +4,7 @@ import cgitb#; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from urllib import unquote
-from json   import dumps
+from json   import dumps, loads
 
 from sites.Web import Web
 web = Web()
@@ -54,6 +54,8 @@ def get_url(siteurl):
 		return get_site_xtube(siteurl)
 	if 'youjizz.com' in siteurl:
 		return get_site_youjizz(siteurl)
+	if 'dailymotion.com' in siteurl:
+		return get_site_dailymotion(siteurl)
 	site_key = None
 	for key in sites.keys():
 		if key in siteurl:
@@ -129,9 +131,30 @@ def get_site_youjizz(siteurl):
 		raise Exception('could not find encodeURIComponent at %s' % u)
 	return web.between(r, 'encodeURIComponent("', '"')[0]
 
+def get_site_dailymotion(siteurl):
+	back = siteurl[siteurl.find('dailymotion.com')+len('dailymotion.com'):]
+	u = 'http://www.dailymotion.com/family_filter?enable=false&urlback=%s' % back
+	r = web.get(u, headers={'family_filter' : 'off', 'masscast' : 'null'} )
+	if not '<meta name="twitter:player" value="' in r:
+		raise Exception('unable to find embed at %s' % u)
+	embed = web.between(r, '<meta name="twitter:player" value="', '"')[0]
+	r = web.get(embed)
+	if not 'var info = ' in r:
+		raise Exception('unable to find var info at %s' % embed)
+	chunk = web.between(r, 'var info = ', 'fields = ')[0].strip()
+	while chunk.endswith(','): chunk = chunk[:-1]
+	json = loads(chunk)
+	video = None
+	for key in ['stream_h264_hd1080_url','stream_h264_hd_url', 'stream_h264_hq_url','stream_h264_url', 'stream_h264_ld_url']:
+		if key in json and json[key] != None:
+			video = json[key]
+			break
+	if video == None:
+		raise Exception('unable to find stream at %s' % embed)
+	return video
 
 def is_supported(url):
-	for not_supported in ['pornhub.com/', 'youtube.com/', 'dailymotion.com/']:
+	for not_supported in ['pornhub.com/', 'youtube.com/']:
 		if not_supported in url:
 			raise Exception('%s is not supported' % not_supported)
 

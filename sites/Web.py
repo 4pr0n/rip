@@ -69,7 +69,7 @@ class Web:
 			return False
 		return True
 	
-	def get(self, url):
+	def get(self, url, headers={}):
 		"""
 			Attempts GET request with web server.
 			
@@ -79,7 +79,8 @@ class Web:
 			Will attempt to repeatedly post if '504' response error is received
 			or 'getaddrinfo' fails.
 		"""
-		headers = {'User-agent' : self.user_agent}
+		if not 'User-agent' in headers:
+			headers['User-agent'] = self.user_agent
 		
 		try_again = True
 		while try_again:
