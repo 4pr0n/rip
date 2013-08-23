@@ -112,7 +112,10 @@ class fourchan(basesite):
 				out += '<table><tr>'
 				if 'tim' in post:
 					# Image
-					out += '<td><img src="%s%s" width="%d" height="%d">' % (post['tim'], post['ext'], post['tn_w'], post['tn_h'])
+					out += '<td>'
+					out += '<a href="%s%s" target="_BLANK">' % (post['tim'], post['ext'])
+					out += '<img src="%s%s" width="%d" height="%d">' % (post['tim'], post['ext'], post['tn_w'], post['tn_h'])
+					out += '</a>'
 					out += '</td>'
 				# Text
 				out += '<td class="reply">'
