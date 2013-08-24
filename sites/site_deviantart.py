@@ -25,12 +25,13 @@ class deviantart(basesite):
 		if not '.com/gallery/' in url:
 			url = 'http://%s.deviantart.com/gallery/?catpath=/' % user
 		else:
-			num = url[url.find('.com/gallery/')+len('.com/gallery/'):]
-			if '/' in num: num = num[:num.find('/')]
-			if len(num) == 0 or not num.isdigit():
-				url = 'http://%s.deviantart.com/gallery/?catpath=/' % user
-			else:
-				url = 'http://%s.deviantart.com/gallery/%s' % (user, num)
+			if not 'catpath=' in url:
+				num = url[url.find('.com/gallery/')+len('.com/gallery/'):]
+				if '/' in num: num = num[:num.find('/')]
+				if len(num) == 0 or not num.isdigit():
+					url = 'http://%s.deviantart.com/gallery/?catpath=/' % user
+				else:
+					url = 'http://%s.deviantart.com/gallery/%s' % (user, num)
 		return url
 
 	""" Discover directory based on URL """
@@ -42,6 +43,11 @@ class deviantart(basesite):
 			if '/' in num: num = num[:num.find('/')]
 			if len(num) > 0 and num.isdigit():
 				return 'deviantart_%s_%s' % (user, num)
+		if 'catpath=' in url:
+			cat = url[url.find('catpath=')+len('catpath='):]
+			if '?' in cat: cat = cat[:cat.find('?')]
+			if '#' in cat: cat = cat[:cat.find('#')]
+			if cat != '/': user = '%s_%s' % (user, cat.replace('/', '-'))
 		return 'deviantart_%s' % user
 
 	def download(self):
