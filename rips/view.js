@@ -67,7 +67,11 @@ function albumHandler(req) {
 }
 
 function loadAllAlbums() {
-	sendRequest('view.cgi?view_all=true', allAlbumsHandler);
+	var req = 'view.cgi';
+	req += '?view_all=true';
+	req += '&start=0';
+	req += '&count=5';
+	sendRequest(req, allAlbumsHandler);
 }
 
 function allAlbumsHandler(req) {

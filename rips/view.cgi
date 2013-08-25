@@ -45,9 +45,18 @@ def main():
 		print_error('unsupported method')
 
 def get_all_albums(start, count):
+	dstart = 0
+	dcount = 0
+	dtotal = 0
 	albums = []
 	for f in listdir('.'):
 		if not path.isdir(f): continue
+		if not path.exists('%s.zip' % f): continue
+		if dstart < start or (dcount >= count and count != -1):
+			dstart += 1
+			dtotal += 1
+			continue
+		dcount += 1
 		result = get_images_for_album(f, 0, -1)
 		images = result['images']
 		rand = []
@@ -67,7 +76,10 @@ def get_all_albums(start, count):
 			'images' : preview,
 			'count'  : result['count']
 		})
-	print dumps( { 'albums' : albums } )
+	print dumps( { 
+		'albums' : albums,
+		'count'  : dtotal
+		} )
 
 def get_thumb(img):
 	fs = img.split(sep)
