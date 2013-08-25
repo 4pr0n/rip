@@ -1,0 +1,145 @@
+body {
+	padding: 20px;
+	padding-top: 30px;
+	background-color: #666;
+	color: #eee;
+	font-family: Verdana, monospace;
+}
+
+a {
+	text-decoration: none;
+	color: #eee;
+}
+a:hover {
+	color: #fff;
+	text-decoration: underline;
+}
+
+.page {
+	background-color: #444;
+	border-radius: 30px;
+	padding: 15px;
+	padding-right: 20px;
+	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.6);
+	margin-bottom: 20px;
+}
+
+a.header {
+	text-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px  4px 10px rgba(150, 150, 150, 0.6),
+	             -4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px -4px 10px rgba(150, 150, 150, 0.6);
+}
+a.header:hover {
+	text-decoration: none;
+}
+div.supheader {
+	padding-top: 0px;
+	text-align: center;
+	font-size: 1.0em;
+	position: relative;
+	top: 28px;
+	left: -50px;
+	letter-spacing: 0.1em;
+}
+div.header {
+	padding-top: 0px;
+	text-align: center;
+	font-size: 4.0em;
+	font-weight: bold;
+	letter-spacing: -0.07em;
+}
+
+div.subheader {
+	text-align: center;
+}
+
+.download_box {
+	font-weight: bold;
+	background-color: #111;
+	color: #fff;
+	border-radius: 5px;
+	padding: 2px;
+	padding-left: 10px;
+	padding-right: 10px;
+	white-space: nowrap;
+	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px  4px 10px rgba(150, 150, 150, 0.6),
+	           -4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px -4px 10px rgba(150, 150, 150, 0.6),
+	            5px  5px  5px rgba( 10,  10,  10, 0.3);
+}
+.download_box:hover {
+	cursor: pointer;
+	color: #fff;
+	text-decoration: none;
+	box-shadow: 6px  0px 10px rgba(150, 150, 150, 0.8),
+	            0px  6px 10px rgba(150, 150, 150, 0.8),
+	           -6px  0px 10px rgba(150, 150, 150, 0.8),
+	            0px -6px 10px rgba(150, 150, 150, 0.8),
+	            5px  5px  5px rgba( 10,  10,  10, 0.3);
+
+}
+
+a.box {
+	font-weight: bold;
+	background-color: #111;
+	color: #fff;
+	border-radius: 5px;
+	padding: 5px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	box-shadow: 5px 5px 5px rgba(10, 10, 10, 0.3);
+}
+a.box:hover {
+	color: #fff;
+	background-color: #222;
+	text-decoration: none;
+	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px  4px 10px rgba(150, 150, 150, 0.6),
+	           -4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px -4px 10px rgba(150, 150, 150, 0.6),
+	            5px  5px  5px rgba( 10,  10,  10, 0.3);
+
+}
+
+.section_title {
+	padding: 0px;
+	padding-left: 15px;
+	padding-bottom: 5px;
+	font-size: 1.5em;
+	font-weight: bold;
+	letter-spacing: 0.01em;
+}
+.section_text {
+	padding-left: 15px;
+	font-size: 1.0em;
+	font-weight: normal;
+}
+
+img {
+	margin: 2px;
+	margin-bottom: 0px;
+	margin-top: 0px;
+	border: 2px solid white;
+	box-shadow: 1px  0px 10px rgba(150, 150, 150, 0.3),
+	            0px  1px 10px rgba(150, 150, 150, 0.3),
+	           -1px  0px 10px rgba(150, 150, 150, 0.3),
+	            0px -1px 10px rgba(150, 150, 150, 0.3);
+}
+img:hover {
+	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px  4px 10px rgba(150, 150, 150, 0.6),
+	           -4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px -4px 10px rgba(150, 150, 150, 0.6),
+	            5px  5px  5px rgba( 10,  10,  10, 0.3);
+}
+
+td {
+	vertical-align: middle;
+}
+
+td.stat_title {
+	font-weight: bold;
+	padding-right: 15px;
+}
