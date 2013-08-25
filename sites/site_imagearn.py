@@ -89,6 +89,7 @@ class imagearn(basesite):
 			text = 'downloaded (%d/%d)' % (index, total)
 			text += ' (%s)' % self.get_size(saveas)
 			text += ' - %s' % image
+			self.create_thumb(saveas)
 		else:
 			text = 'download (%d/%d) failed' % (index, total)
 			text += ' - %s' % image

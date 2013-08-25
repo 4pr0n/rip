@@ -57,6 +57,7 @@ class fapdu(basesite):
 				elif self.web.download(image, save_as):
 					self.image_count += 1
 					self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(save_as), image))
+					self.create_thumb(saveas)
 				else:
 					self.log('download failed (%d/%d) - %s' % (index, total, image))
 				

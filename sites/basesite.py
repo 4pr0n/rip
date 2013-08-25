@@ -7,6 +7,7 @@ from threading import Thread
 from zipfile   import ZipFile, ZIP_DEFLATED
 from Web       import Web
 from shutil    import rmtree
+from PIL       import Image
 
 LOG_NAME      = 'log.txt' 
 RIP_DIRECTORY = 'rips' # Directory to store rips in
@@ -154,6 +155,8 @@ class basesite(object):
 				text = 'downloaded (%d' % index
 				if total != '?': text += '/%s' % total
 				text += ') (%s) - %s' % (self.get_size(saveas), url)
+				# Create thumbnail
+				self.create_thumb(saveas)
 			else:
 				text = 'download failed (%d' % index
 				if total != '?': text += '/%s' % total
@@ -183,17 +186,21 @@ class basesite(object):
 			b /= 1024
 		return '0b'
 
-	
 	""" Returns path to zip file if it exists, otherwise None. """
 	def existing_zip_path(self):
 		extension = 'zip'
 		if self.urls_only:
 			extension = 'txt'
 		zipfile = '%s.%s' % (self.working_dir, extension)
-		if os.path.exists(zipfile) and not os.path.exists(self.working_dir):
-			return zipfile
-		else:
-			return None
+		if os.path.exists(zipfile):
+			if not os.path.exists(self.working_dir):
+				# No direcotry; only zip exists
+				return zipfile
+			else:
+				if not os.path.exists('%s%szipping.txt' % (self.working_dir, os.sep)):
+					# 'zipping' file/flag does not exist
+					return zipfile
+		return None
 	
 	""" 
 		Zips site's working directory,
@@ -202,6 +209,7 @@ class basesite(object):
 	"""
 	def zip(self):
 		if self.urls_only:
+			# Just URLs, need to store in order & store to a .txt file
 			if not os.path.exists('%s/log.txt' % self.working_dir):
 				raise Exception('no log found')
 			url_filename = '%s.txt' % self.working_dir
@@ -227,16 +235,41 @@ class basesite(object):
 		zip_filename = '%s.zip' % self.working_dir
 		z = ZipFile(zip_filename, "w", ZIP_DEFLATED)
 		for root, dirs, files in os.walk(self.working_dir):
-			# NOTE: ignore empty directories
+			# NOTE: ignore empty directories & thumbnails
+			if root.endswith('/thumbs'): continue
 			for fn in files:
 				#if 'log.txt' in fn: continue
 				absfn = os.path.join(root, fn)
 				zfn = absfn[len(self.working_dir)+len(os.sep):] #XXX: relative path
 				z.write(absfn, zfn)
 		z.close()
-		rmtree(self.working_dir) # Delete everything in working dir
+		#rmtree(self.working_dir) # Delete everything in working dir
 		return zip_filename
+
+	"""
+		Creates thumbnail based on file path
+		Creates /thumbs/ sub dir & stores thumbnail
+	"""
+	def create_thumb(self, inp):
+		fields = inp.split(os.sep)
+		fields.insert(-1, 'thumbs')
+		saveas = os.sep.join(fields)
+		if os.path.exists(saveas): return
+		thumbpath = os.sep.join(fields[:-1])
+		if not os.path.exists(thumbpath):
+			try: os.mkdir(thumbpath)
+			except: pass
+		try:
+			im = Image.open(inp)
+			if im.mode != 'RGB': im = im.convert('RGB')
+			im.thumbnail( (100,100), Image.ANTIALIAS)
+			im.save(saveas, 'JPEG')
+			del im
+		except: pass
 		
+	"""
+		Add url to list of URLs found. For "URLs Only" feature
+	"""
 	def add_url(self, index, url, total=0):
 		self.image_count += 1
 		string = '(%d' % index

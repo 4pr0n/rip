@@ -139,6 +139,7 @@ class getgonewild(basesite):
 						remove(saveas)
 						return False
 				self.image_count += 1
+				self.create_thumb(saveas)
 				return True
 			tries -= 1
 		remove(saveas)

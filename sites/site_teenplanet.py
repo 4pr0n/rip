@@ -73,6 +73,7 @@ class teenplanet(basesite):
 		elif self.web.download(img, saveas):
 			self.image_count += 1
 			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), img))
+			self.create_thumb(saveas)
 		else:
 			self.log('download failed (%d/%d) - %s' % (index, total, img))
 		self.thread_count -= 1

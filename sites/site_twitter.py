@@ -150,6 +150,7 @@ class twitter(basesite):
 				saveas = '%s/%03d_%s' % (self.working_dir, index, img[img.rfind('/')+1:])
 				if self.web.download(imgs[0], saveas):
 					self.log('downloaded (%d) (%s) - %s' % (index, self.get_size(saveas), img))
+					self.create_thumb(saveas)
 				else:
 					self.log('download failed (%d) - %s' % (index, img))
 				sleep(1)

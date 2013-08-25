@@ -86,6 +86,7 @@ class chickupload(basesite):
 			elif self.web.download(pic, saveas):
 				self.image_count += 1
 				self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), pic))
+				self.create_thumb(saveas)
 			else:
 				self.log('download failed (%d/%d) - %s' % (index, total, pic))
 		self.thread_count -= 1

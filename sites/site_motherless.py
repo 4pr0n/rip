@@ -77,6 +77,7 @@ class motherless(basesite):
 					text = 'downloaded (%d' % index
 					if total != '?': text += '/%s' % total
 					text += ') (%s) - %s' % (self.get_size(saveas), image)
+					self.create_thumb(saveas)
 				else:
 					text = 'download failed (%d' % index
 					if total != '?': text += '/%s' % total

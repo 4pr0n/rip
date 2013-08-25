@@ -4,7 +4,8 @@ import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from sys    import argv
-from os     import remove, path, stat, utime, SEEK_END
+from os     import remove, path, stat, utime, SEEK_END, sep
+from shutil import rmtree
 from stat   import ST_ATIME, ST_MTIME
 from time   import strftime
 from urllib import unquote
@@ -65,10 +66,10 @@ def main():
 	if  'start' in keys and \
 			'url'   in keys:
 		
-		cached = True # Default to cached
+		cached    = True # Default to cached
+		urls_only = False
 		if 'cached' in keys and keys['cached'] == 'false':
 			cached = False
-		urls_only = False
 		if 'urls_only' in keys and keys['urls_only'] == 'true':
 			urls_only = True
 		rip(keys['url'], cached, urls_only)
@@ -106,22 +107,29 @@ def rip(url, cached, urls_only):
 
 	# Check if there's already a zip for the album
 	if ripper.existing_zip_path() != None:
-		# If user specified the uncached version, remove the zip
 		if not cached:
+			# If user specified the uncached version, remove the zip
 			remove(ripper.existing_zip_path())
+			if path.exists(ripper.working_dir):
+				rmtree(ripper.working_dir)
 		else:
 			# Mark the file as recently-accessed (top of FIFO queue)
 			update_file_modified(ripper.existing_zip_path())
-			#add_recent(url)
-			print dumps( {
-				'zip'  : ripper.existing_zip_path(),
-				'size' : ripper.get_size(ripper.existing_zip_path())
-				} )
+			add_recent(url)
+			response = {}
+			response['zip']   = ripper.existing_zip_path()
+			response['size']  = ripper.get_size(ripper.existing_zip_path())
+			if path.exists(ripper.working_dir):
+				response['album'] = ripper.working_dir.replace('rips/', '')
+				response['url']   = 'http://rip.rarchives.com/%s' % ripper.working_dir.replace('rips/', 'rips/#')
+			print dumps( response )
 			return
 
+	'''
 	if ripper.is_downloading():
 		print_error("album rip is in progress. check back later")
 		return
+	'''
 	
 	# Rip it
 	try:
@@ -135,6 +143,16 @@ def rip(url, cached, urls_only):
 		print_error('unable to download album (empty? 404?)')
 		return
 	
+	response = {}
+	response['image_count'] = ripper.image_count
+	if ripper.hit_image_limit():
+		response['limit'] = ripper.max_images
+	
+	# Create zip flag
+	f = open('%s%szipping.txt' % (ripper.working_dir, sep), 'w')
+	f.write('\n')
+	f.close()
+
 	# Zip it
 	try:
 		ripper.zip()
@@ -142,17 +160,22 @@ def rip(url, cached, urls_only):
 		print_error('zip failed: %s' % str(e))
 		return
 	
+	# Delete zip flag
+	try: remove('%s%szipping.txt' % (ripper.working_dir, sep))
+	except: pass
+	
+	response['zip']  = ripper.existing_zip_path()
+	response['size'] = ripper.get_size(ripper.existing_zip_path())
+
+	response['album'] = ripper.working_dir
+	response['url']   = 'http://rip.rarchives.com/rips/#%s' % ripper.working_dir
+	
 	# Add to recently-downloaded list
 	add_recent(url)
 	
 	# Print it
-	response = {}
-	response['zip']         = ripper.existing_zip_path()
-	response['size']        = ripper.get_size(ripper.existing_zip_path())
-	response['image_count'] = ripper.image_count
-	if ripper.hit_image_limit():
-		response['limit']     = ripper.max_images
 	print dumps(response)
+
 
 """
 	Checks status of rip. Returns zip/size if finished, otherwise
@@ -234,7 +257,9 @@ def update_file_modified(f):
 	st = stat(f)
 	atime = int(strftime('%s'))
 	mtime = int(strftime('%s'))
-	utime(f, (atime, mtime))
+	try:
+		utime(f, (atime, mtime))
+	except: pass
 
 """ Retrieves key/value pairs from query, puts in dict """
 def get_keys():
