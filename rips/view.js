@@ -1,6 +1,6 @@
 function gebi(id) { return document.getElementById(id); }
 
-var SINGLE_ALBUM_IMAGE_BREAKS = 10;
+var SINGLE_ALBUM_IMAGE_BREAKS = 5;
 var ALBUM_PREVIEW_SIZE = 10;
 var ALBUMS_AT_ONCE = 5;
 var IMAGES_PER_PAGE = 20;
@@ -93,7 +93,7 @@ function getAllAlbumUrl(start) {
 	var req = 'view.cgi';
 	req += '?view_all=true';
 	req += '&start='   + start;
-	req += '&count='   + (start + ALBUMS_AT_ONCE);
+	req += '&count='   + ALBUMS_AT_ONCE;
 	req += '&preview=' + ALBUM_PREVIEW_SIZE;
 	return req;
 }
@@ -129,6 +129,9 @@ function allAlbumsHandler(req) {
 			out += '<img src="' + thumb + '">';
 			out += '</a>';
 			out += '</td>';
+			if ((i + 1) % SINGLE_ALBUM_IMAGE_BREAKS == 0 && i != album.images.length - 1) {
+				out += '</tr><tr>';
+			}
 		}
 		out += '</tr></table>';
 	}

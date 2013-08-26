@@ -45,7 +45,7 @@ def main():
 	else:
 		print_error('unsupported method')
 
-def get_all_albums(start, count, preview):
+def get_all_albums(start, count, preview_size):
 	dstart = 0
 	dcount = 0
 	dtotal = 0
@@ -61,10 +61,10 @@ def get_all_albums(start, count, preview):
 		result = get_images_for_album(f, 0, -1)
 		images = result['images']
 		rand = []
-		if len(images) <= preview:
+		if len(images) <= preview_size:
 			rand = xrange(0, len(images))
 		else:
-			while len(rand) < preview:
+			while len(rand) < preview_size:
 				i = randrange(len(images) - 1)
 				if not i in rand:
 					rand.append(i)
