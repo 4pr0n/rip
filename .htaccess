@@ -1,0 +1,8 @@
+RedirectMatch 404 ^.*\.py$
+
+## USER IP BANNING
+<Limit GET POST>
+ order allow,deny
+  deny from 254.254.252.251
+allow from all
+</Limit>
