@@ -137,7 +137,7 @@ def rip(url, cached, urls_only):
 	except Exception, e:
 		print_error('download failed: %s' % str(e))
 		return
-	
+
 	# If ripper fails silently, it will remove the directory of images
 	if not path.exists(ripper.working_dir):
 		print_error('unable to download album (empty? 404?)')
@@ -163,6 +163,12 @@ def rip(url, cached, urls_only):
 	# Delete zip flag
 	try: remove('%s%szipping.txt' % (ripper.working_dir, sep))
 	except: pass
+
+	# Mark album as completed
+	if not urls_only:
+		f = open('%s%scomplete.txt' % (ripper.working_dir, sep), 'w')
+		f.write('\n')
+		f.close()
 	
 	response['zip']  = ripper.existing_zip_path()
 	response['size'] = ripper.get_size(ripper.existing_zip_path())
