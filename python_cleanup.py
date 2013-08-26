@@ -76,6 +76,9 @@ def get_files_to_remove():
 			size = os.path.getsize(fp)
 		elif os.path.isdir(fp):
 			size = get_dir_size(fp)
+		else:
+			log('ERROR: neither file nor dir "%s"' % fp)
+			continue
 		all_files.append( (fp, os.path.getatime(fp), size) )
 	all_files.sort(key=lambda tup: tup[1], reverse=True)
 	to_remove = []
@@ -83,6 +86,7 @@ def get_files_to_remove():
 	for (filename, mtime, filesize) in all_files:
 		total += filesize
 		if total > max_size: 
+			total -= filesize
 			to_remove.append(filename)
 	return to_remove
 
