@@ -11,7 +11,7 @@
 	<body>
 		<table>
 			<tr><td>
-				<table class="page" style="padding-top: 0px;">
+				<table class="page header" style="padding-top: 0px;">
 					<tr><td style="padding: 0px;">
 							<a class="header" href="./">
 								<div class="supheader">rarchives.com</div>
@@ -21,25 +21,24 @@
 				</table>
 				
 			</td></tr><tr><td id="albums_area" style="display: none;">
-				<div id="albums_table"</div>
+				<span id="albums_table"></span>
+				
 			</td></tr><tr><td class="page" id="status_area" style="display: none;">
 				<div id="status_div" class="section">
 					<div class="section_title" id="album_title">title (0 images)</div>
-					<div class="section_text" id="stats">
-						<table>
-							<tr>
-								<td class="stat_title">archive:</td>
-								<td id="album_download">...</td>
-							</tr><tr>
-								<td class="stat_title">added:</td>
-								<td id="album_created">...</td>
-							</tr><tr>
-								<td class="stat_title">expires:</td>
-								<td id="album_expires">...</td>
-								<td><a class="download_box" id="album_update" album="" onclick="updateAlbum(this.album);">update</button></td>
-							</tr>
-						</table>
-					</div>
+					<table>
+						<tr>
+							<td class="stat_title">archive:</td>
+							<td id="album_download">...</td>
+						</tr><tr>
+							<td class="stat_title">modified:</td>
+							<td id="album_created">...</td>
+						</tr><tr>
+							<td class="stat_title">expires:</td>
+							<td id="album_expires">...</td>
+							<td><a class="download_box" id="album_update" album="" onclick="updateAlbum(this.album);">update</a></td>
+						</tr>
+					</table>
 				</div>
 				
 			</td></tr><tr><td class="page" id="thumbs_area" style="display: none;">
@@ -47,6 +46,12 @@
 
 				</table>
 
+			</td></tr><tr><td>
+				<span style="padding-top: 20px; padding-left: 20px;">
+					<span id="nav_info"></span><br>
+					<button class="nav_button" id="back" onclick="return false">back</button>
+					<button class="nav_button" id="next" onclick="return false">next</button>
+				</span>
 			</td></tr>
 		</table>
 		

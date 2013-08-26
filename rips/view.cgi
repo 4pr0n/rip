@@ -9,8 +9,6 @@ from random   import randrange
 from datetime import datetime
 from time     import strftime
 
-ALBUM_PREVIEW_SIZE = 5
-
 """ Print error in JSON format """
 def print_error(text):
 	print dumps( { 'error' : text } )
@@ -22,16 +20,19 @@ def print_error(text):
 def main():
 	keys = get_keys()
 	
-	start = 0
-	count = 20
+	start   = 0
+	count   = 20
+	preview = 10
 	if 'start' in keys and keys['start'].isdigit():
 		start = int(keys['start'])
 	if 'count' in keys and keys['count'].isdigit():
 		count = int(keys['count'])
+	if 'preview' in keys and keys['preview'].isdigit():
+		preview = int(keys['preview'])
 	
 	if  'view_all' in keys and keys['view_all'] == 'true':
 		# Retrieve list of all albums
-		get_all_albums(start, count)
+		get_all_albums(start, count, preview)
 	elif 'view' in keys:
 		album = keys['view']
 		get_album(album, start, count)
@@ -44,7 +45,7 @@ def main():
 	else:
 		print_error('unsupported method')
 
-def get_all_albums(start, count):
+def get_all_albums(start, count, preview):
 	dstart = 0
 	dcount = 0
 	dtotal = 0
@@ -52,18 +53,18 @@ def get_all_albums(start, count):
 	for f in listdir('.'):
 		if not path.isdir(f): continue
 		if not path.exists('%s.zip' % f): continue
+		dtotal += 1
 		if dstart < start or (dcount >= count and count != -1):
 			dstart += 1
-			dtotal += 1
 			continue
 		dcount += 1
 		result = get_images_for_album(f, 0, -1)
 		images = result['images']
 		rand = []
-		if len(images) <= ALBUM_PREVIEW_SIZE:
+		if len(images) <= preview:
 			rand = xrange(0, len(images))
 		else:
-			while len(rand) < ALBUM_PREVIEW_SIZE:
+			while len(rand) < preview:
 				i = randrange(len(images) - 1)
 				if not i in rand:
 					rand.append(i)
@@ -74,11 +75,13 @@ def get_all_albums(start, count):
 		albums.append( {
 			'album'  : f,
 			'images' : preview,
-			'count'  : result['count']
+			'total'  : result['total'],
 		})
 	print dumps( { 
 		'albums' : albums,
-		'count'  : dtotal
+		'total'  : dtotal,
+		'start'  : start,
+		'count'  : dcount
 		} )
 
 def get_thumb(img):
@@ -114,6 +117,8 @@ def get_images_for_album(album, start, count, thumbs=False):
 			dtotal += 1
 
 	result['images']  = images
+	result['total']   = dtotal
+	result['start']   = start
 	result['count']   = dcount
 	result['album']   = album
 	result['archive'] = './%s.zip' % album

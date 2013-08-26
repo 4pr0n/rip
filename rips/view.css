@@ -15,11 +15,16 @@ a:hover {
 	text-decoration: underline;
 }
 
+table.header {
+	padding: 15px;
+}
+
 .page {
 	background-color: #444;
 	border-radius: 30px;
-	padding: 15px;
 	padding-right: 20px;
+	padding: 15px;
+	padding-top: 0px;
 	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.6);
 	margin-bottom: 20px;
 }
@@ -104,9 +109,9 @@ a.box:hover {
 }
 
 .section_title {
-	padding: 0px;
+	padding: 10px;
 	padding-left: 15px;
-	padding-bottom: 5px;
+	margin-bottom: 10px;
 	font-size: 1.5em;
 	font-weight: bold;
 	letter-spacing: 0.01em;
@@ -135,11 +140,36 @@ img:hover {
 	            5px  5px  5px rgba( 10,  10,  10, 0.3);
 }
 
-td {
+td.image {
 	vertical-align: middle;
+	text-align: center;
 }
 
-td.stat_title {
+.nav_button {
+	margin-top: 10px;
 	font-weight: bold;
-	padding-right: 15px;
+	font-size: 1.0em;
+	background-color: #111;
+	color: #fff;
+	border-radius: 5px;
+	padding: 2px;
+	padding-left: 10px;
+	padding-right: 10px;
+	white-space: nowrap;
+	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px  4px 10px rgba(150, 150, 150, 0.6),
+	           -4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px -4px 10px rgba(150, 150, 150, 0.6),
+	            5px  5px  5px rgba( 10,  10,  10, 0.3);
+}
+.nav_button:hover {
+	cursor: pointer;
+	color: #fff;
+	text-decoration: none;
+	box-shadow: 6px  0px 10px rgba(150, 150, 150, 0.8),
+	            0px  6px 10px rgba(150, 150, 150, 0.8),
+	           -6px  0px 10px rgba(150, 150, 150, 0.8),
+	            0px -6px 10px rgba(150, 150, 150, 0.8),
+	            5px  5px  5px rgba( 10,  10,  10, 0.3);
+
 }
