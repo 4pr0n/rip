@@ -275,7 +275,7 @@ class basesite(object):
 		try:
 			im = Image.open(inp)
 			if im.mode != 'RGB': im = im.convert('RGB')
-			im.thumbnail( (100,100), Image.ANTIALIAS)
+			im.thumbnail( (200,200), Image.ANTIALIAS)
 			im.save(saveas, 'JPEG')
 			del im
 		except: pass
