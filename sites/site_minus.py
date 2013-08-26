@@ -9,7 +9,7 @@ class minus(basesite):
 	def sanitize_url(self, url):
 		if not 'minus.com' in url:
 			raise Exception('')
-		if 'i.minus.com' in url or \
+		if '/i.minus.com' in url or \
 				'/.minus.com' in url:
 			raise Exception('required <b>http://&lt;user&gt;.minus.com/</b> not found in URL')
 		if not '.minus.com' in url or 'www.minus.com' in url:
