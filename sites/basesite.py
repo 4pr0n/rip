@@ -188,10 +188,15 @@ class basesite(object):
 
 	""" Returns path to zip file if it exists, otherwise None. """
 	def existing_zip_path(self):
-		extension = 'zip'
 		if self.urls_only:
-			extension = 'txt'
-		zipfile = '%s.%s' % (self.working_dir, extension)
+			txtfile = '%s.txt' % self.working_dir
+			f = txtfile.split('/')
+			f.insert(-1, 'txt')
+			txtfile = '/'.join(f)
+			if os.path.exists(txtfile):
+				return txtfile
+			return None
+		zipfile = '%s.zip' % (self.working_dir)
 		if os.path.exists(zipfile):
 			if not os.path.exists(self.working_dir):
 				# No direcotry; only zip exists
@@ -212,7 +217,12 @@ class basesite(object):
 			# Just URLs, need to store in order & store to a .txt file
 			if not os.path.exists('%s/log.txt' % self.working_dir):
 				raise Exception('no log found')
-			url_filename = '%s.txt' % self.working_dir
+			if not os.path.exists('txt/'):
+				try: os.mkdir('txt')
+				except: pass
+			f = self.working_dir.split('/')
+			f.insert(-1, 'txt')
+			url_filename = '%s.txt' % '/'.join(f)
 			f = open('%s/log.txt' % self.working_dir, 'r')
 			lines = f.read().split('\n')[1:]
 			tuples = []
@@ -231,6 +241,7 @@ class basesite(object):
 			f.close()
 			rmtree(self.working_dir) # Delete everything in working dir
 			return url_filename
+		
 		self.log('zipping album...')
 		zip_filename = '%s.zip' % self.working_dir
 		z = ZipFile(zip_filename, "w", ZIP_DEFLATED)
@@ -239,6 +250,8 @@ class basesite(object):
 			if root.endswith('/thumbs'): continue
 			for fn in files:
 				#if 'log.txt' in fn: continue
+				if fn.endswith('zipping.txt'): continue
+				if fn.endswith('complete.txt'): continue
 				absfn = os.path.join(root, fn)
 				zfn = absfn[len(self.working_dir)+len(os.sep):] #XXX: relative path
 				z.write(absfn, zfn)
@@ -281,3 +294,4 @@ class basesite(object):
 	def debug(self, text):
 		if not self.debugging: return
 		sys.stderr.write('%s\n' % text)
+
