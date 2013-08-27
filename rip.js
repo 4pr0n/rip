@@ -164,6 +164,9 @@ function requestHandler(req) {
 			if (json.limit != null) {
 				result += '<br><div class="error" style="padding-top: 5px;">rip was capped at ' + json.limit + ' images</div>';
 			}
+			if (json.album != null) {
+				result += '<center><br><a class="download_box" href="' + json.url + '">view album</a></center>';
+			}
 			statusbar(result);
 			slowlyShow(gebi('status_bar'), 0.0);
 		}
