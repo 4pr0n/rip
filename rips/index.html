@@ -3,17 +3,16 @@
 	<head>
 		<title>rarchives' album viewer | rarchives.com</title>
 		<meta name="description" content="View albums ripped via the rarchives album ripper">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 		<meta content="utf-8" http-equiv="encoding">
 		<link href="view.css" rel="stylesheet" type="text/css">
 	</head>
 	<body>
-		<table>
+		<table id="main_table">
 			<tr><td>
 				<table class="page header" style="padding-top: 0px;">
 					<tr><td style="padding: 0px;">
-							<a class="header" href="./">
+							<a class="header" href="./#start=0">
 								<div class="supheader">rarchives.com</div>
 								<div class="header">album viewer</div>
 							</a>
@@ -33,18 +32,16 @@
 						</tr><tr>
 							<td class="stat_title">modified:</td>
 							<td id="album_created">...</td>
-						</tr><tr>
-							<td class="stat_title">expires:</td>
-							<td id="album_expires">...</td>
 							<td><a class="download_box" id="album_update" album="" onclick="updateAlbum(this.album);">update</a></td>
 						</tr>
 					</table>
 				</div>
-				
+		
 			</td></tr><tr><td class="page" id="thumbs_area" style="display: none; width: auto;">
 				<table class="thumbs" id="thumbs_table">
 
 				</table>
+				
 
 			</td></tr><tr><td>
 				<span style="padding-top: 20px; padding-left: 20px;">
@@ -54,6 +51,9 @@
 				</span>
 			</td></tr>
 		</table>
+		
+		<div class="bgimage" id="bgimage"></div>
+		<img class="fgimage" id="fgimage" />
 		
 		<script type="text/javascript" src="view.js"></script>
 	</body>
