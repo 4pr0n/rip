@@ -129,11 +129,11 @@ def get_album(album, start, count):
 	if path.exists(album):
 		ctime = path.getctime(album)
 		dtime = path.getmtime(album) + (3600 * 24 * 2)
+		result['ctime'] = utime_to_hrdate(ctime)
+		result['dtime'] = '%s (%s)' % (utime_to_hrdate(dtime), utime_to_hrdate2(dtime))
 	else:
-		ctime = 'never'
-		dtime = 'never'
-	result['ctime'] = utime_to_hrdate(ctime)
-	result['dtime'] = '%s (%s)' % (utime_to_hrdate(dtime), utime_to_hrdate2(dtime))
+		result['ctime'] = 'never'
+		result['dtime'] = 'never'
 	print dumps( { 'album' : result } )
 
 def utime_to_hrdate(utime):
