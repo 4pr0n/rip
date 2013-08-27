@@ -143,6 +143,8 @@ img:hover {
 td.image {
 	vertical-align: middle;
 	text-align: center;
+	min-width: 100px;
+	min-height: 100px;
 }
 
 .nav_button {

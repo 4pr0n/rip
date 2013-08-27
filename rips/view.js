@@ -126,7 +126,7 @@ function allAlbumsHandler(req) {
 			var thumb = album.images[i].thumb;
 			out += '<td class="image">';
 			out += '<a href="' + image + '">';
-			out += '<img src="' + thumb + '">';
+			out += '<img src="' + thumb + '" onload="if (this.width > 100) this.width*=0.5; this.onload=null">';
 			out += '</a>';
 			out += '</td>';
 			if ((i + 1) % SINGLE_ALBUM_IMAGE_BREAKS == 0 && i != album.images.length - 1) {
