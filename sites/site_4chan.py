@@ -3,6 +3,7 @@
 from basesite import basesite
 from os import path, remove
 from json import loads
+from unicodedata import normalize
 
 """
 	Rips images from an 4chan post.
@@ -41,11 +42,6 @@ class fourchan(basesite):
 		r = self.web.get(self.url)
 		board = self.url.replace('://', '').split('/')[1]
 		
-		if path.exists('%s/post.txt' % self.working_dir):
-			remove('%s/post.txt' % self.working_dir)
-		if not self.urls_only:
-			self.log_post('http://rip.rarchives.com - text log from %s\n' % self.url)
-		
 		try:
 			json = loads(r)
 			total = len(json['posts'])
@@ -68,6 +64,15 @@ class fourchan(basesite):
 		f.close()
 		
 		self.wait_for_threads()
+	
+	def safe(self, text):
+		''' Safely encode unicode strings '''
+		result = ''
+		if type(text) == unicode:
+			result = normalize('NFKD', text).encode('ascii', 'ignore')
+		else:
+			result = text
+		return result
 	
 	def json_to_text(self, json):
 		out  = '<!doctype html>'
@@ -133,8 +138,8 @@ class fourchan(basesite):
 		# Name & time
 		header += '<div class="postInfo">'
 		if 'sub' in post:
-			header += '<span class="sub">%s</span> ' % post['sub']
-		header += '<span class="name">%s</span> ' % post['name']
+			header += '<span class="sub">%s</span> ' % self.safe(post['sub'])
+		header += '<span class="name">%s</span> ' % self.safe(post['name'])
 		header += '%s No. %d' % (post['now'], post['no'])
 		header += '</div>'
 		header += '</td></tr></table>'
@@ -144,7 +149,7 @@ class fourchan(basesite):
 		if not 'tim' in post: return ''
 		out = '<div class="fileInfo">'
 		out += 'File: <a href="%s%s">%s%s</a>' % (post['tim'], post['ext'], post['tim'], post['ext'])
-		out += '-(%s, %dx%dx, %s%s)' % (str(post['fsize']), post['w'], post['h'], post['filename'], post['ext'])
+		out += '-(%s, %dx%d, %s%s)' % (str(post['fsize']), post['w'], post['h'], self.safe(post['filename']), post['ext'])
 		out += '</div>'
 		return out
 
@@ -152,32 +157,10 @@ class fourchan(basesite):
 		if not 'com' in post: return ''
 		out = '<div class="com">'
 		
-		com = post['com']
+		com = self.safe(post['com'])
 		com = com.replace('%d#' % post['resto'], '#')
 		out += com
 		
 		out += '</div>'
 		return out
-
-	
-	""" Strips HTML from a single post text, appends to text file """
-	def log_post(self, text):
-		while '<a href="' in text:
-			i = text.find('<a href="')
-			j = text.find('>', i)
-			text = text[:i] + text[j+1:] + ' '
-		for tag in ['a', 'body', 'html', 'p', 'strong']:
-			if  '<%s>' % tag in text: text = text.replace('<%s>' % tag, '')
-			if '</%s>' % tag in text: text = text.replace('</%s>' % tag, '')
-		if      '\r' in text: text = text.replace('\r',     '')
-		if      '  ' in text: text = text.replace('  ',    ' ')
-		if    '<br>' in text: text = text.replace('<br>', '\n')
-		while '\n\n' in text: text = text.replace('\n\n', '\n')
-		text = text.replace('&gt;', '>').replace('&nbsp;', ' ').replace('&#039;', "'").replace('&quot;', '"')
-		text = text.strip()
-		if text == '': return # Don't log empty posts
-		f = open('%s/post.txt' % self.working_dir, 'a')
-		f.write('%s\n' % text);
-		f.write('--------------------------\n')
-		f.close()
 
