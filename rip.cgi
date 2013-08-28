@@ -174,7 +174,7 @@ def rip(url, cached, urls_only):
 	response['size'] = ripper.get_size(ripper.existing_zip_path())
 
 	response['album'] = ripper.working_dir
-	response['url']   = './#%s' % ripper.working_dir
+	response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
 	
 	# Add to recently-downloaded list
 	add_recent(url)
