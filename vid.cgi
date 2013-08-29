@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import cgitb#; cgitb.enable() # for debugging
+import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from urllib import unquote
@@ -57,6 +57,13 @@ def get_url(siteurl):
 		return get_site_youjizz(siteurl)
 	if 'dailymotion.com' in siteurl:
 		return get_site_dailymotion(siteurl)
+	if 'mobypicture.com' in siteurl:
+		return get_site_mobypicture(siteurl)
+	if 'sexykarma.com' in siteurl:
+		return get_site_sexykarma(siteurl)
+	if 'fapjacks.com' in siteurl:
+		return get_site_fapjacks(siteurl)
+
 	site_key = None
 	for key in sites.keys():
 		if key in siteurl:
@@ -159,6 +166,28 @@ def get_site_dailymotion(siteurl):
 	if video == None:
 		raise Exception('unable to find stream at %s' % embed)
 	return video
+
+def get_site_mobypicture(siteurl):
+	r = web.get(siteurl)
+	fs = web.between(r, 'file: "', '"')
+	if len(fs) == 0:
+		raise Exception('could not find file: at %s' % siteurl)
+	return fs[0]
+
+def get_site_sexykarma(siteurl):
+	r = web.get(siteurl)
+	fs = web.between(r, "playlist = [ { url: escape('", "'")
+	if len(fs) == 0:
+		raise Exception('could not find playlist=[{url:escape( at %s' % siteurl)
+	return fs[0]
+
+def get_site_fapjacks(siteurl):
+	r = web.get(siteurl)
+	fs = web.between(r, 'type="video/mp4" src="', '"')
+	if len(fs) == 0:
+		raise Exception('could not find type=video/mp4 at %s' % siteurl)
+	return fs[0]
+
 
 def is_supported(url):
 	for not_supported in ['pornhub.com/', 'youtube.com/']:
