@@ -135,13 +135,10 @@ def get_images_for_album(album, start, count, thumbs=False):
 def get_album(album, start, count):
 	result = get_images_for_album(album, start, count)
 	if path.exists(album):
-		ctime = path.getctime(album)
-		dtime = path.getmtime(album) + (3600 * 24 * 2)
-		result['ctime'] = utime_to_hrdate(ctime)
-		result['dtime'] = '%s (%s)' % (utime_to_hrdate(dtime), utime_to_hrdate2(dtime))
-	else:
-		result['ctime'] = 'never'
-		result['dtime'] = 'never'
+		update_file_modified(album)
+		zipfile = '%s.zip' % album
+		if path.exists(zipfile):
+			update_file_modified(zipfile)
 	print dumps( { 'album' : result } )
 
 def utime_to_hrdate(utime):
@@ -169,12 +166,11 @@ def utime_to_hrdate2(utime):
 """ Updates system 'modified time' for file to current time. """
 def update_file_modified(f):
 	st = stat(f)
-	atime = int(st.st_atime) # int(strftime('%s'))
+	atime = int(st.st_atime)
 	mtime = int(strftime('%s'))
 	try:
 		utime(f, (atime, mtime))
 	except Exception, e:
-		print_error("unable to update time: %s" % str(e))
 		return False
 	return True
 

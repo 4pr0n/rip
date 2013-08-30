@@ -74,8 +74,6 @@ function albumHandler(req) {
 	var album = json.album;
 	gebi('album_title').innerHTML = album.album + ' (' + album.total + ' images)';
 	gebi('album_download').innerHTML = '<a class="download_box" href="' + album.archive + '">' + album.archive + '</a>';
-	gebi('album_created').innerHTML = album.ctime;
-	gebi('album_update').onclick = function() { updateAlbum(album.album) };
 	var images = album.images;
 	var out = '<tr><td>&nbsp;</td></tr><tr>';
 	for (var i = 0; i < images.length; i++) {
