@@ -169,12 +169,12 @@ def rip(url, cached, urls_only):
 		f = open('%s%scomplete.txt' % (ripper.working_dir, sep), 'w')
 		f.write('\n')
 		f.close()
+		response['album'] = ripper.working_dir
+		response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
 	
 	response['zip']  = ripper.existing_zip_path()
 	response['size'] = ripper.get_size(ripper.existing_zip_path())
-
-	response['album'] = ripper.working_dir
-	response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
+	
 	
 	# Add to recently-downloaded list
 	add_recent(url)
