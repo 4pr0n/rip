@@ -120,6 +120,7 @@ def rip(url, cached, urls_only):
 			response['zip']   = ripper.existing_zip_path()
 			response['size']  = ripper.get_size(ripper.existing_zip_path())
 			if path.exists(ripper.working_dir):
+				update_file_modified(ripper.working_dir)
 				response['album'] = ripper.working_dir.replace('rips/', '')
 				response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
 			print dumps( response )
