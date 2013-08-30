@@ -33,15 +33,23 @@ def main():
 	if  'view_all' in keys and keys['view_all'] == 'true':
 		# Retrieve list of all albums
 		get_all_albums(start, count, preview)
+
 	elif 'view' in keys:
 		album = keys['view']
 		get_album(album, start, count)
+
 	elif 'status' in keys:
 		album = keys['status']
 		get_status(album)
+
 	elif 'update' in keys:
 		if path.exists(keys['update']):
-			update_file_modified(keys['update'])
+			if not update_file_modified(keys['update']): return
+		zipfile = '%s.zip' % keys['update']
+		if path.exists(zipfile):
+			if not update_file_modified(zipfile): return
+		print dumps( { 'date' : utime_to_hrdate(int(strftime('%s'))) } )
+		
 	else:
 		print_error('unsupported method')
 
@@ -167,6 +175,8 @@ def update_file_modified(f):
 		utime(f, (atime, mtime))
 	except Exception, e:
 		print_error("unable to update time: %s" % str(e))
+		return False
+	return True
 
 """ Retrieves key/value pairs from query, puts in dict """
 def get_keys():

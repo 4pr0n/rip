@@ -240,7 +240,19 @@ function updateAlbum(album) {
 }
 
 function updateHandler(req) {
-	window.location.reload(true);
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		console.log('unable to parse response:\n' + req.responseText);
+		throw new Error('unable to parse response:\n' + req.responseText);
+		return;
+	}
+	if (json.error != null) throw new Error("error: " + json.error);
+	if (json.date != null) {
+		gebi('album_created').innerHTML = json.date;
+	}
+	//window.location.reload(true);
 }
 
 window.onload = init;
