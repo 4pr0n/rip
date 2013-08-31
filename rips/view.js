@@ -119,12 +119,14 @@ function getAllAlbumUrl(start) {
 	return req;
 }
 
-function loadAllAlbums(start) {
+function loadAllAlbums(start, startOver) {
 	if (!isNewPage()) { return true; }
 	gebi('albums_area').style.display = "block";
 	gebi('status_area').style.display = "none";
 	gebi('thumbs_area').style.display = "none";
 	gebi('main_table').style.width = "100%";
+	// Remove existing albums if needed
+	if (startOver == undefined || startOver) gebi('albums_table').innerHTML = '';
 	if (start == undefined) start = 0;
 	window.location.hash = 'start=' + start;
 	sendRequest(getAllAlbumUrl(start), allAlbumsHandler);
@@ -139,13 +141,10 @@ function allAlbumsHandler(req) {
 		throw new Error('unable to parse response:\n' + req.responseText);
 	}
 	if (json.error != null) throw new Error("error: " + json.error);
+
 	var maintable = dce('table');
 	maintable.setAttribute('width', '100%');
 	var mainrow = dce('tr');
-	/*
-	var out = '';
-	//out += '<table width="100%"><tr>';
-	*/
 	for (var a = 0; a < json.albums.length; a++) {
 		var maintd = dce('td');
 		maintd.setAttribute('valign', 'top');
@@ -157,21 +156,19 @@ function allAlbumsHandler(req) {
 		var album = json.albums[a];
 		var table = dce('table');
 		table.className = 'page album';
+		table.setAttribute('id',album.album);
 		table.album = album.album;
+		table.show_album = true;
 		table.onclick = function() {
-			//window.location.hash = table.album;
+			if (this.show_album) {
+				window.location.hash = this.album;
+			}
 		}
 		var titletr = dce('tr');
 		var titletd = dce('td');
 		titletd.className = 'section_title';
 		titletd.setAttribute('colspan', SINGLE_ALBUM_IMAGE_BREAKS);
-		var titlea = dce('a');
-		titlea.href = '#' + album.album;
-		titlea.text = album.album + ' (' + album.total + ' images)';
-		titlea.onclick = function() {
-			loadAlbum(album.album);
-		}
-		titletd.appendChild(titlea);
+		titletd.innerHTML = album.album + ' (' + album.total + ' images)';
 		titletr.appendChild(titletd);
 		table.appendChild(titletr);
 
@@ -192,9 +189,16 @@ function allAlbumsHandler(req) {
 			imgtd.className = 'image';
 			
 			var imga = dce('a');
+			imga.album = album.album;
 			imga.href = album.images[i].image;
 			imga.onclick = function() {
 				return loadImage(this.href);
+			}
+			imga.onmouseover = function() {
+				gebi(this.album).show_album = false;
+			}
+			imga.onmouseout = function() {
+				gebi(this.album).show_album = true;
 			}
 			var img = dce('img');
 			img.src = album.images[i].thumb;
