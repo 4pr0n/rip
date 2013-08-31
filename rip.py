@@ -37,6 +37,7 @@ from sites.site_fuskator    import    fuskator
 from sites.site_kodiefiles  import  kodiefiles
 from sites.site_pbase       import       pbase
 from sites.site_8muses      import  eightmuses
+from sites.site_setsdb      import      setsdb
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -74,7 +75,8 @@ sites = [        \
 		fuskator,    \
 		kodiefiles,  \
 		pbase,       \
-		eightmuses]
+		eightmuses,  \
+		setsdb]
 
 def main():
 	print '\nrarchives\' album ripper\n'

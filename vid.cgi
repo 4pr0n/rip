@@ -63,6 +63,8 @@ def get_url(siteurl):
 		return get_site_sexykarma(siteurl)
 	if 'fapjacks.com' in siteurl:
 		return get_site_fapjacks(siteurl)
+	if 'setsdb.org' in siteurl:
+		return get_site_setsdb(siteurl)
 
 	site_key = None
 	for key in sites.keys():
@@ -187,6 +189,20 @@ def get_site_fapjacks(siteurl):
 	if len(fs) == 0:
 		raise Exception('could not find type=video/mp4 at %s' % siteurl)
 	return fs[0]
+
+def get_site_setsdb(siteurl):
+	r = web.get(siteurl)
+	if not '<iframe src="' in r:
+		raise Exception('could not find iframe at %s' % siteurl)
+	embed = web.between(r, '<iframe src="', '"')[0]
+	embed = embed.replace('&#038;', '&')
+	r = web.get(embed)
+	hds = ['amp;url720=', 'amp;url=480', 'amp;url=360', 'amp;url=240']
+	for hd in hds:
+		if hd in r:
+			url = web.between(r, hd, '&amp;')[0]
+			return url
+	raise Exception('could not find video at %s' % embed)
 
 
 def is_supported(url):
