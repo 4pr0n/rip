@@ -1,7 +1,8 @@
 function gebi(id) { return document.getElementById(id); }
+function dce(el)  { return document.createElement(el);  }
 
 var SINGLE_ALBUM_IMAGE_BREAKS = 4;
-var ALBUM_PREVIEW_SIZE = 12;
+var ALBUM_PREVIEW_SIZE = 4;
 var ALBUMS_AT_ONCE = 6;
 var IMAGES_PER_PAGE = 20;
 
@@ -24,7 +25,6 @@ function init() {
 				start = parseInt(album.substring(s + 7, album.length));
 				album = album.substring(0, s);
 			}
-			console.log('loadAlbum(' + album + ', ' + start + ')');
 			loadAlbum(album, start)
 		}
 	} else {
@@ -45,13 +45,12 @@ function loadAlbum(album, start, count) {
 	req += '?start=' + start;
 	req += '&count=' + count;
 	req += '&view=' + album;
-	console.log(req);
 	sendRequest(req, albumHandler);
 	return true;
 }
 
 function isNewPage() {
-	if (CURRENT_URL === String(window.location)) { console.log('not a new page ' + CURRENT_URL); return false; }
+	if (CURRENT_URL === String(window.location)) { return false; }
 	CURRENT_URL = String(window.location);
 	return true;
 }
@@ -62,7 +61,6 @@ function albumHandler(req) {
 	try {
 		json = JSON.parse(req.responseText);
 	} catch (error) {
-		console.log('unable to parse response:\n' + req.responseText);
 		throw new Error('unable to parse response:\n' + req.responseText);
 		return;
 	}
@@ -86,7 +84,7 @@ function albumHandler(req) {
 			out += '</tr><tr>';
 		}
 	}
-	out = '<tr>' + out + '</tr>';
+	out = out; //'<tr>' + out + '</tr>';
 	gebi('thumbs_table').innerHTML = out;
 	
 	gebi('nav_info').innerHTML = 'images ' + (album.start + 1) + '-' + (album.start + album.count) + ' of ' + album.total;
@@ -129,7 +127,6 @@ function loadAllAlbums(start) {
 	gebi('main_table').style.width = "100%";
 	if (start == undefined) start = 0;
 	window.location.hash = 'start=' + start;
-	console.log(getAllAlbumUrl(start));
 	sendRequest(getAllAlbumUrl(start), allAlbumsHandler);
 	return true;
 }
@@ -139,70 +136,96 @@ function allAlbumsHandler(req) {
 	try {
 		json = JSON.parse(req.responseText);
 	} catch (error) {
-		console.log('unable to parse response:\n' + req.responseText);
 		throw new Error('unable to parse response:\n' + req.responseText);
-		return;
 	}
 	if (json.error != null) throw new Error("error: " + json.error);
+	var maintable = dce('table');
+	maintable.setAttribute('width', '100%');
+	var mainrow = dce('tr');
+	/*
 	var out = '';
-	out += '<table width="100%"><tr>';
+	//out += '<table width="100%"><tr>';
+	*/
 	for (var a = 0; a < json.albums.length; a++) {
+		var maintd = dce('td');
+		maintd.setAttribute('valign', 'top');
 		if (a % 2 == 0) {
-			out += '<td valign="top" style="text-align: left;">';
+			maintd.setAttribute('style', 'text-align: left;');
 		} else {
-			out += '<td valign="top" style="text-align: right; padding-left: 20px;">';
+			maintd.setAttribute('style', 'text-align: right; padding-left: 20px;');
 		}
-		album = json.albums[a];
-		out += '<table class="page"><tr><td class="section_title" colspan="20">';
-		out += '<a class="album_title" href="#' + album.album + '" onclick="console.log(\'wtf\'); loadAlbum(\'' + album.album + '\');">';
-		out += '' + album.album + ' (' + album.total + ' images)';
-		out += '</a><br>';
-		out += '</td></tr><tr>';
+		var album = json.albums[a];
+		var table = dce('table');
+		table.className = 'page album';
+		table.album = album.album;
+		table.onclick = function() {
+			//window.location.hash = table.album;
+		}
+		var titletr = dce('tr');
+		var titletd = dce('td');
+		titletd.className = 'section_title';
+		titletd.setAttribute('colspan', SINGLE_ALBUM_IMAGE_BREAKS);
+		var titlea = dce('a');
+		titlea.href = '#' + album.album;
+		titlea.text = album.album + ' (' + album.total + ' images)';
+		titlea.onclick = function() {
+			loadAlbum(album.album);
+		}
+		titletd.appendChild(titlea);
+		titletr.appendChild(titletd);
+		table.appendChild(titletr);
+
+		// Spacing so table doesn't resize when images load
+		var spacetr = dce('tr');
+		for (var i = 0; i < SINGLE_ALBUM_IMAGE_BREAKS; i++) {
+			var spacetd = dce('td');
+			spacetd.style.width = '105px';
+			spacetd.style.height = '0px';
+			spacetr.appendChild(spacetd);
+		}
+		table.appendChild(spacetr);
+
+		var imgrow = dce('tr');
 		for (var i = 0; i < album.images.length; i++) {
-			var image = album.images[i].image;
-			var thumb = album.images[i].thumb;
-			out += '<td class="image">';
-			out += '<a href="' + image + '" onclick="return loadImage(\'' + image + '\')">';
-			out += '<img src="' + thumb + '" onload="if (this.width > 100) this.width*=0.5; this.onload=null; this.style.display=\'inline\';">';
-			out += '</a>';
-			out += '</td>';
+			
+			var imgtd = dce('td');
+			imgtd.className = 'image';
+			
+			var imga = dce('a');
+			imga.href = album.images[i].image;
+			imga.onclick = function() {
+				return loadImage(this.href);
+			}
+			var img = dce('img');
+			img.src = album.images[i].thumb;
+			img.onload = function() {
+				if (this.width > 100) 
+					this.width *= 0.5;
+				this.onload = null;
+				this.style.display = 'inline';
+			}
+			imga.appendChild(img);
+			imgtd.appendChild(imga);
+			imgrow.appendChild(imgtd);
 			if ((i + 1) % SINGLE_ALBUM_IMAGE_BREAKS == 0 && i != album.images.length - 1) {
-				out += '</tr><tr>';
+				table.appendChild(imgrow);
+				imgrow = dce('tr');
 			}
 		}
-		out += '</tr></table>';
-		out += '</td>';
+		var spacetdh = dce('td');
+		spacetdh.style.height = '105px';
+		spacetdh.style.width = '0px';
+		imgrow.appendChild(spacetdh);
+		table.appendChild(imgrow);
+		maintd.appendChild(table);
+		mainrow.appendChild(maintd);
 		if ((a + 1) % 2 == 0 && a < json.albums.length - 1) {
-			out += '</tr><tr>';
+			maintable.appendChild(mainrow);
+			mainrow = dce('tr');
 		}
+		maintable.appendChild(mainrow);
 	}
-	out += '</tr></table>';
-	gebi('albums_table').innerHTML = out;
-	
-	gebi('nav_info').innerHTML = 'albums ' + (json.start + 1) + '-' + (json.start + json.albums.length) + ' of ' + json.total;
-	var back = gebi('back');
-	if (json.start > 0) {
-		back.onclick = function() { loadAllAlbums(json.start - ALBUMS_AT_ONCE) };
-		back.onclick = function() { 
-			window.location.hash = 'start=' + (json.start - ALBUMS_AT_ONCE);
-			loadAllAlbums(json.start - ALBUMS_AT_ONCE)
-		};
-		back.style.visibility = 'visible';
-	} else {
-		back.style.visibility = 'hidden';
-	}
-	var next = gebi('next');
-	if (json.start + IMAGES_PER_PAGE < json.total) {
-		next.onclick = function() { loadAllAlbums(json.start + ALBUMS_AT_ONCE) };
-		next.onclick = function() { 
-			window.location.hash = 'start=' + (json.start + ALBUMS_AT_ONCE);
-			loadAllAlbums(json.start + ALBUMS_AT_ONCE) 
-		};
-		next.style.visibility = 'visible';
-	} else {
-		next.style.visibility = 'hidden';
-	}
-	
+	gebi('albums_table').appendChild(maintable);
 }
 
 // Create new XML/AJAX request object
@@ -226,7 +249,6 @@ function sendRequest(url, handler) {
 			if (req.status == 200) {
 				handler(req);
 			} else {
-				console.log('request status ' + req.status + ' for URL ' + url);
 				throw new Error('request status ' + req.status + ' for URL ' + url);
 			}
 		}
@@ -242,15 +264,12 @@ function updateHandler(req) {
 	try {
 		json = JSON.parse(req.responseText);
 	} catch (error) {
-		console.log('unable to parse response:\n' + req.responseText);
 		throw new Error('unable to parse response:\n' + req.responseText);
-		return;
 	}
 	if (json.error != null) throw new Error("error: " + json.error);
 	if (json.date != null) {
 		gebi('album_created').innerHTML = json.date;
 	}
-	//window.location.reload(true);
 }
 
 window.onload = init;
