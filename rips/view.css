@@ -112,7 +112,7 @@ a.box:hover {
 	padding: 10px;
 	padding-left: 15px;
 	margin-bottom: 10px;
-	font-size: 1.5em;
+	font-size: 1.2em;
 	font-weight: bold;
 	letter-spacing: 0.01em;
 }
@@ -146,6 +146,8 @@ td.image {
 	text-align: center;
 	min-width: 100px;
 	min-height: 100px;
+	padding: 0px;
+	margin: 0px;
 }
 
 .nav_button {
@@ -206,4 +208,9 @@ td.image {
 
 .stat_title {
 	padding-left: 20px;
+}
+
+table.album:hover {
+	cursor: pointer;
+	background-color: #555;
 }
