@@ -69,6 +69,7 @@ def get_all_albums(start, count, preview_size):
 		result = get_images_for_album(f, 0, -1)
 		images = result['images']
 		rand = []
+		if len(images) == 0: continue
 		if len(images) <= preview_size:
 			rand = xrange(0, len(images))
 		else:
@@ -84,7 +85,9 @@ def get_all_albums(start, count, preview_size):
 			'album'  : f,
 			'images' : preview,
 			'total'  : result['total'],
+			'time'   : path.getctime(f)
 		})
+	albums = sorted(albums, key=lambda k: k['time'], reverse=True)
 	print dumps( { 
 		'albums' : albums,
 		'total'  : dtotal,
