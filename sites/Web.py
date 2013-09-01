@@ -198,7 +198,7 @@ class Web:
 		if postdict == None:
 			encoded_data = ''
 		elif type(postdict) == dict:
-			encoded_data = urlencode(postdict)
+			encoded_data = urllib.urlencode(postdict)
 		elif type(postdict) == str:
 			encoded_data = postdict
 		try:
@@ -251,7 +251,10 @@ class Web:
 			if resp.status == 200:
 				return resp.read()
 			else:
-				stderr.write('Web.py: HTTPS status %s: %s: %s\n' % (resp.status, resp.reason, resp.read()))
+				stderr.write('Web.py: HTTP status %s: %s: %s\n' % (resp.status, resp.reason, resp.read()))
+				stderr.write('Web.py: Response headers:\n')
+				for name, value in resp.getheaders():
+					stderr.write('Web.py: \t"%s"="%s"\n' % (name, value))
 				return ''
 		except Exception, e:
 			stderr.write('Web.py: %s: %s\n' % (url, str(e)))
@@ -315,13 +318,13 @@ class Web:
 		"""
 		result = []
 		i = source.find(start)
-		j = source.find(finish, i + len(start) + 1)
+		j = source.find(finish, i + len(start))
 		
 		while i >= 0 and j >= 0:
 			i = i + len(start)
 			result.append(source[i:j])
-			i = source.find(start, i + len(start) + 1)
-			j = source.find(finish, i + len(start) + 1)
+			i = source.find(start, j + len(finish))
+			j = source.find(finish, i + len(start))
 		
 		return result
 
