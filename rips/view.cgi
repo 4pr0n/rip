@@ -36,11 +36,8 @@ def main():
 
 	elif 'view' in keys:
 		album = keys['view']
+		album = album.replace(' ', '%20')
 		get_album(album, start, count)
-
-	elif 'status' in keys:
-		album = keys['status']
-		get_status(album)
 
 	elif 'update' in keys:
 		if path.exists(keys['update']):
@@ -122,6 +119,7 @@ def get_images_for_album(album, start, count, thumbs=False):
 			if f.endswith('.txt'): continue
 			if dstart >= start and (dcount < count or count == -1):
 				image = '%s%s%s' % (roots, sep, f)
+				image = image.replace('%', '%25')
 				images.append( { 'image' : image, 'thumb' : get_thumb(image) } )
 				dcount += 1
 			dstart += 1
