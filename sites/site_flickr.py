@@ -5,6 +5,12 @@ from threading import Thread
 from os import path
 import time
 
+# Path to file containing yahoo login credentials
+# Only used for albums that are not 'safe'
+# File contains username and password separated by a colon
+# username1:password2
+YAHOO_CREDENTIAL_PATH = 'sites/yahoo.login'
+
 """
 	Downloads flickr albums
 """
@@ -34,6 +40,12 @@ class flickr(basesite):
 	def download(self):
 		self.init_dir()
 		r = self.web.get(self.url)
+		if 'You must be signed in' in r:
+			if not self.signin():
+				self.wait_for_threads()
+				raise Exception('unable to signin to yahoo')
+			r = self.web.get(self.url)
+			
 		total = '?'
 		if '<div class="vsNumbers">' in r:
 			count = self.web.between(r, '<div class="vsNumbers">', 'photos')[0].strip()
@@ -125,3 +137,42 @@ class flickr(basesite):
 			elif text[i] in [' ', '_', '\n']:
 				result += '-'
 		return result
+
+	def signin(self):
+		global YAHOO_CREDENTIAL_PATH
+		if not path.exists(YAHOO_CREDENTIAL_PATH):
+			YAHOO_CREDENTIAL_PATH = YAHOO_CREDENTIAL_PATH.replace('sites/', '')
+		if not path.exists(YAHOO_CREDENTIAL_PATH): 
+			self.debug('login credentials required at %s' % YAHOO_CREDENTIAL_PATH)
+			raise Exception('login credentials required at %s' % YAHOO_CREDENTIAL_PATH)
+			self.wait_for_threads()
+		f = open(YAHOO_CREDENTIAL_PATH, 'r')
+		logcred = f.read().replace('\n', '')
+		f.close()
+		if not ':' in logcred: 
+			self.debug('login credentials are not valid')
+			self.wait_for_threads()
+			raise Exception('login credentials are not valid')
+			return False
+		(username, password) = logcred.split(':')
+		r = self.web.get('http://www.flickr.com/signin/')
+		if not '<form method="post"' in r:
+			self.wait_for_threads()
+			raise Exception('no form found at flickr.com/signin/')
+		postdata = {}
+		form = self.web.between(r, '<form method="post"', '</fieldset>')[0]
+		for inp in self.web.between(form, '<input type="hidden"', '>'):
+			name = self.web.between(inp, 'name="', '"')[0]
+			value = self.web.between(inp, 'value="', '"')[0]
+			postdata[name] = value
+		postdata['passwd_raw'] = ''
+		postdata['.save'] = ''
+		postdata['login'] = username
+		postdata['passwd'] = password
+		posturl = self.web.between(form, 'action="', '"')[0]
+		r = self.web.oldpost(posturl, postdict=postdata)
+		if 'window.location.replace("' in r:
+			newurl = self.web.between(r, 'window.location.replace("', '"')[0]
+			r = self.web.get(newurl)
+			return True
+		return False
