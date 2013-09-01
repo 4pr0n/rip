@@ -38,6 +38,7 @@ from sites.site_kodiefiles  import  kodiefiles
 from sites.site_pbase       import       pbase
 from sites.site_8muses      import  eightmuses
 from sites.site_setsdb      import      setsdb
+from sites.site_nfsfw       import       nfsfw
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -76,7 +77,8 @@ sites = [        \
 		kodiefiles,  \
 		pbase,       \
 		eightmuses,  \
-		setsdb]
+		setsdb,      \
+		nfsfw]
 
 def main():
 	print '\nrarchives\' album ripper\n'
