@@ -145,9 +145,9 @@ class basesite(object):
 		m = self.web.get_meta(url)
 		if 'Content-Type' not in m:
 			text = 'no Content-Type found at URL %s' % (url)
-		elif ('image' not in m['Content-Type'] and \
-			 'video' not in m['Content-Type'] and \
-			 'octet-stream' not in m['Content-Type']):
+		elif ('image'        not in m['Content-Type'] and \
+		      'video'        not in m['Content-Type'] and \
+		      'octet-stream' not in m['Content-Type']):
 			text = 'no "image"/"video"/"octet-stream" in Content-Type (found "%s") for URL %s' % (m['Content-Type'], url)
 		else:
 			if self.web.download(url, saveas):
