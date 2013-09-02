@@ -17,17 +17,22 @@ function init() {
 		startRip();
 	}
 	if (getCookie('cache_enabled') == 'true') {
-		gebi('rip_cached').style.display =   'inline-block';
-		gebi('label_cached').style.display = 'inline-block';
+		gebi('rip_cached').style.display                = 'inline-block';
+		gebi('rip_cached').setAttribute('style', 'display: inline-block');
+		gebi('label_cached').style.display                = 'inline-block';
+		gebi('label_cached').setAttribute('style', 'display: inline-block');
 	} else {
-		gebi('rip_cached').style.display =   'none';
-		gebi('label_cached').style.display = 'none';
+		gebi('rip_cached').style.display =                'none';
+		gebi('rip_cached').setAttribute('style', 'display: none');
+		gebi('label_cached').style.display =                'none';
+		gebi('label_cached').setAttribute('style', 'display: none');
 	}
 	refreshRecent();
 }
 
 function refreshRecent() {
-	gebi('recent_spinner').style.visibility = "visible";
+	gebi('recent_spinner').style.visibility =                "visible";
+	gebi('recent_spinner').setAttribute('style', 'visibility: visible');
 	sendRequest('rip.cgi?recent=y', recentHandler);
 }
 
@@ -40,7 +45,8 @@ function recentHandler(req) {
 	}
 	var rec = json['recent'];
 	var ul = dce('ul');
-	ul.style = 'padding-left: 15px;';
+	ul.style =               'padding-left: 15px';
+	ul.setAttribute('style', 'padding-left: 15px');
 	for (var i = 0; i < rec.length; i++) {
 		var li = dce('li');
 		li.className = 'recent';
@@ -48,34 +54,35 @@ function recentHandler(req) {
 		var inpdl = dce('input');
 		inpdl.className = 'download_box download_arrow';
 		inpdl.style = 'margin: 0px; margin-left: 2px; margin-right: 2px;';
+		inpdl.setAttribute('style', 'margin: 0px; margin-left: 2px; margin-right: 2px;');
 		inpdl.type = 'button';
 		inpdl.album = rec[i].url.replace('http://', '').replace('https://', '');
-		inpdl.onclick = function() {
-			loadAlbum(this.album);
-		}
+		inpdl.setAttribute('onclick', 'loadAlbum("' + inpdl.album + '")');
+		inpdl.onclick = function() { return loadAlbum(this.album) };
+		li.appendChild(inpdl);
 		
 		var inpview = dce('input');
 		inpview.value = 'view';
 		inpview.className = 'download_box';
 		inpview.style = 'margin-left: 2px; margin-right: 2px;';
+		inpview.setAttribute('style', 'margin-left: 2px; margin-right: 2px;');
 		inpview.type = 'button';
 		inpview.album = rec[i].view_url;
-		inpview.onclick = function() {
-			window.open(this.album);
-		}
+		inpview.setAttribute('onclick', 'window.open("' + inpview.album + '")');
+		inpview.onclick = function() {   window.open(this.album) };
+		li.appendChild(inpview);
 		
 		var a = dce('a');
 		a.style = 'padding-left: 3px';
+		a.setAttribute('style', 'padding-left: 3px');
 		a.href = rec[i].url;
 		a.target = '_BLANK';
 		
 		var url = rec[i].url.replace('http://www.', '').replace('http://', '').replace('https://', '');
 		url = truncate(url, 18);
 		a.innerHTML = url;
-		
-		li.appendChild(inpdl);
-		li.appendChild(inpview);
 		li.appendChild(a);
+		
 		ul.appendChild(li);
 	}
 	var recent = gebi('recent');
@@ -84,6 +91,7 @@ function recentHandler(req) {
 	recent.innerHTML += '';
 	slowlyShow(recent, 0.0);
 	gebi('recent_spinner').style.visibility = "hidden";
+	gebi('recent_spinner').setAttribute('style', 'visibility: hidden');
 }
 
 function albumViewHandler(req) {
@@ -204,6 +212,7 @@ function requestHandler(req) {
 			
 			var span = dce('span');
 			span.style = 'font-size: 0.8em;';
+			span.setAttribute('style', 'font-size: 0.8em');
 			span.innerHTML = '&nbsp;(';
 			if (json['image_count'] != null) {
 				span.innerHTML += json['image_count'] + '&nbsp;pics,&nbsp;';
@@ -216,6 +225,7 @@ function requestHandler(req) {
 				var diverr = dce('div');
 				diverr.className = 'error';
 				diverr.style = 'padding-top: 5px';
+				diverr.setAttribute('style', 'padding-top: 5px');
 				diverr.innerHTML = 'rip was capped at ' + json.limit + ' images';
 				center.appendChild(diverr);
 			}
@@ -263,6 +273,7 @@ function requestHandler(req) {
 			var img = dce('img');
 			img.src = 'spinner_dark.gif';
 			img.style = 'padding-left: 10px; padding-right: 10px';
+			img.setAttribute('style', 'padding-left: 10px; padding-right: 10px');
 			div.appendChild(img);
 			var span = dce('span');
 			span.innerHTML = update;
@@ -377,9 +388,11 @@ function setExample(site) {
 
 function darker(obj, alpha) {
 	obj.style.color = "rgba(0, 0, 0, " + alpha + ")";
+	obj.setAttribute('style', 'color: rgba(0, 0, 0, ' + alpha + ')');
 	alpha += 0.01;
 	if (alpha > 1) {
 		obj.style.color = "#000";
+		obj.setAttribute('style', 'color: #000');;
 	} else {
 		setTimeout(function() { darker(obj, alpha); } , 5);
 	}
@@ -388,9 +401,12 @@ function darker(obj, alpha) {
 function slowlyShow(obj, alpha) {
 	obj.style.opacity = alpha;
 	obj.style.filter  = "alpha(opacity=" + (alpha * 100) + ")";
+	obj.setAttribute('style', 'opacity: ' + alpha + '; ' + 
+		                        'filter: alpha(opacity=' + (alpha * 100) + ');');
 	alpha += 0.02;
 	if (alpha > 1) {
 		obj.style.opacity = "1";
+		obj.setAttribute('style', '1');
 	} else {
 		setTimeout(function() { slowlyShow(obj, alpha); } , 5);
 	}
@@ -406,9 +422,11 @@ function setProgress(perc) {
 		value = "" + (100 * perc);
 	}
 	if (value == "0") {
-		gebi('progress_bar_div').style.display = "none";
+		gebi('progress_bar_div').style.display                = "none";
+		gebi('progress_bar_div').setAttribute('style', 'display: none');
 	} else if (!isNaN(parseFloat(value)) && isFinite(value)) {
-		gebi('progress_bar_div').style.display = "inline-block";
+		gebi('progress_bar_div').style.display                = "inline-block";
+		gebi('progress_bar_div').setAttribute('style', 'display: inline-block');
 		gebi('progress_bar').value = value;
 	}
 }
@@ -422,6 +440,7 @@ function vidstatusbar(text) {
 	var vsb = gebi('vid_status_bar');
 	vsb.innerHTML = '';
 	vsb.appendChild(center);
+	vsb.innerHTML += '';
 }
 
 // Start vid download when user presses enter key in textbox
@@ -455,31 +474,66 @@ function vidRequestHandler(req) {
 		vidstatusbar('<div class="error">error: ' + json.error + '</div>');
 	} else if (json.url != null) {
 		// do stuff
-		var stat = '';
-		stat += '<a class="download_box" href="';
-		stat += 'data:text/html;charset=utf-8, ';
-		stat += '<html><head><meta http-equiv=\'REFRESH\' content=\'0;url=';
-		stat += json.url;
-		stat += '\'></head><body><h1>redirecting...</h1></body></html>" ';
-		stat += 'rel="noreferrer">redirect to video</a>';
+		var vida = dce('a');
+		vida.className = 'download_box';
+		vida.style =              'padding: 5px';
+		vida.setAttribute('style','padding: 5px');
+		vida.href = 'data:text/html;charset=utf-8, ' +
+			          '<html><head><meta http-equiv=\'REFRESH\' content=\'0;url=' +
+								json.url + 
+								'\'></head><body<h1>redirection...</h1></body></html>" ';
+		vida.rel = 'noreferrer';
+		vida.innerHTML = 'redirect to video';
 		
-		stat += '&nbsp;<a class="download_box" href="';
-		stat += json.url;
-		stat += '" onclick="return false;">right click, save as</a>';
+		var vidb = dce('a');
+		vidb.className = 'download_box';
+		vidb.style =              'padding: 5px; margin-left: 15px;';
+		vidb.setAttribute('style','padding: 5px; margin-left: 15px;');
+		vidb.href = json.url;
+		vidb.onclick = function() { return false; }
+		vidb.setAttribute('onclick', 'return false;');
+		vidb.innerHTML = 'right click, save as';
 		
-		stat += '<div style="padding-top: 10px;">';
-		stat += '<input type="text" class="textbox" value="';
-		stat += json.url;
-		stat += '" id="video_textarea" onfocus="this.select()" onmouseup="return false" readonly></textarea>';
-		vidstatusbar(stat);
+		var vidd = dce('div');
+		vidd.style =                'margin-top: 10px';
+		vidd.setAttribute('style', 'padding-top: 10px;');
+		
+		var vidi = dce('input');
+		vidi.className = 'textbox';
+		vidi.style =                   'padding: 5px;';
+		vidi.setAttribute('style',     'padding: 5px');
+		vidi.setAttribute('type',      'text');
+		vidi.setAttribute('id',        'video_textarea');
+		vidi.setAttribute('onfocus',   'this.select()');
+		vidi.setAttribute('onmouseup', 'return false');
+		vidi.onfocus   = function() { this.select() }
+		vidi.onmouseup = function() { return false }
+		vidi.value     = json.url;
+		vidi.text      = json.url;
+		vidd.appendChild(vidi);
+		vidi.setAttribute('readonly', 'true');
+		
+		var center = dce('center');
+		center.appendChild(vida);
+		center.appendChild(vidb);
+		center.appendChild(vidd);
+		var vidstat = gebi('vid_status_bar');
+		vidstat.innerHTML = '';
+		vidstat.appendChild(center);
+		vidstat.innerHTML += '';
+		gebi('video_textarea').value = json.url;
 	} else {
 		vidstatusbar("unexpected stuff!");
 	}
 }
 
 function showMoreNews() {
-	gebi('more_news_link').style.display = 'none';
-	gebi('more_news').style.display = 'block';
+	gebi('more_news_link').style.display =                'none';
+	gebi('more_news_link').setAttribute('style', 'display: none;');
+	gebi('more_news').style.display =                'block';
+	gebi('more_news').setAttribute('style', 'display: block;');
+	gebi('more_news').appendChild(document.createTextNode(' '));
+	gebi('more_news').innerHTML += '';
 }
 
 // Call initialization function after entire JS file is parsed
