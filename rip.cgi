@@ -261,7 +261,7 @@ def get_ripper(url, urls_only):
 			if error == '': continue
 			# If Exception isn't blank, then it's the right ripper but an error occurred
 			raise e
-	raise Exception('Ripper can not rip given URL')
+	raise Exception('Ripper can not rip given URL<br><a href="http://www.reddit.com/message/compose/?to=4_pr0n&subject=rip.rarchives.com&message=Support%%20this%%20image%%20site:%%20`%s`">click here to ask 4_pr0n to support it</a>' % url)
 
 """ Updates system 'modified time' for file to current time. """
 def update_file_modified(f):
