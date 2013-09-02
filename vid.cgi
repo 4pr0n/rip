@@ -65,6 +65,8 @@ def get_url(siteurl):
 		return get_site_fapjacks(siteurl)
 	if 'setsdb.org' in siteurl:
 		return get_site_setsdb(siteurl)
+	if 'ashemaletube.com' in siteurl:
+		return get_site_ast(siteurl)
 
 	site_key = None
 	for key in sites.keys():
@@ -203,6 +205,12 @@ def get_site_setsdb(siteurl):
 			url = web.between(r, hd, '&amp;')[0]
 			return url
 	raise Exception('could not find video at %s' % embed)
+
+def get_site_ast(siteurl):
+	r = web.get(siteurl)
+	if not "'file': \"" in r:
+		raise Exception('could not find file: at %s' % siteurl)
+	return web.between(r, "'file': \"", '"')[0]
 
 
 def is_supported(url):
