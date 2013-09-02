@@ -4,7 +4,7 @@ import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from sys    import argv
-from os     import remove, path, stat, utime, SEEK_END, sep
+from os     import remove, path, stat, utime, SEEK_END, sep, walk
 from shutil import rmtree
 from stat   import ST_ATIME, ST_MTIME
 from time   import strftime
@@ -123,8 +123,16 @@ def rip(url, cached, urls_only):
 			response['size']  = ripper.get_size(ripper.existing_zip_path())
 			if path.exists(ripper.working_dir):
 				update_file_modified(ripper.working_dir)
+				image_count = 0
+				for root, subdirs, files in walk(ripper.working_dir):
+					if 'thumbs' in root: continue
+					for f in files:
+						if f.endswith('.txt'): continue
+						image_count += 1
+							
 				response['album'] = ripper.working_dir.replace('rips/', '')
 				response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
+				response['image_count'] = image_count
 			print dumps( response )
 			return
 
@@ -278,7 +286,7 @@ def get_keys():
 	keys = {}
 	for key in form.keys():
 		keys[key] = form[key].value
-	if not 'url' in keys and len(argv) > 1:
+	if not 'url' in keys and not 'recent' in keys and len(argv) > 1:
 		keys['url'] = argv[1]
 		keys['start'] = 'true'
 	return keys
@@ -292,10 +300,19 @@ def recent(lines):
 		f = open('recent_rips.lst', 'r')
 		recents = tail(f, lines=lines)
 		f.close()
-	except:  pass
+	except: pass
 	
+	result = []
+	for rec in recents:
+		d = {}
+		try: ripper = get_ripper(rec, False)
+		except: continue
+		d['url'] = rec
+		d['view_url'] = ripper.working_dir.replace('rips/', 'rips/#')
+		result.append(d)
+		
 	print dumps( { 
-		'recent' : recents
+		'recent' : result
 		} )
 
 """ Tail a file and get X lines from the end """
@@ -319,7 +336,6 @@ def tail(f, lines=1, _buffer=4098):
 
 """ Adds url to list of recently-downloaded albums """
 def add_recent(url):
-	if '.ru/' in url: return
 	if path.exists('recent_rips.lst'):
 		already_added = False
 		f = open('recent_rips.lst', 'r')

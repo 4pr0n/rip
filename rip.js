@@ -1,4 +1,5 @@
 function gebi(id)        { return document.getElementById(id);    }
+function dce(el)         { return document.createElement(el);     }
 function strip(text)     { return text.replace(/^\s+|\s+$/g, ''); }
 function statusbar(text) { 
 	gebi('status_bar').innerHTML = text;
@@ -35,31 +36,66 @@ function recentHandler(req) {
 	try {
 		json = JSON.parse(req.responseText);
 	} catch (error) {
-		console.log('unable to parse response:\n' + req.responseText);
 		throw new Error('unable to parse response:\n' + req.responseText);
-		return;
 	}
 	var rec = json['recent'];
-	var output = new Array();
-	output.push('<ul style="padding-left: 30px;">');
+	var ul = dce('ul');
+	ul.style = 'padding-left: 15px;';
 	for (var i = 0; i < rec.length; i++) {
-		output.push('<li class="recent">');
-		output.push('<input class="download_box" type="button" onclick=loadAlbum(');
-		output.push("'");
-		output.push(rec[i].replace('http://', '').replace('https://', ''));
-		output.push("'");
-		output.push('); value="download" /> ');
-		output.push(' <a href="');
-		output.push(rec[i]);
-		output.push('">');
-		var url = rec[i].replace('http://www.', '').replace('http://', '').replace('https://', '');
-		output.push(truncate(url, 18));
-		output.push('</a>');
+		var li = dce('li');
+		li.className = 'recent';
+		
+		var inpdl = dce('input');
+		inpdl.className = 'download_box download_arrow';
+		inpdl.style = 'margin: 0px; margin-left: 2px; margin-right: 2px;';
+		inpdl.type = 'button';
+		inpdl.album = rec[i].url.replace('http://', '').replace('https://', '');
+		inpdl.onclick = function() {
+			loadAlbum(this.album);
+		}
+		
+		var inpview = dce('input');
+		inpview.value = 'view';
+		inpview.className = 'download_box';
+		inpview.style = 'margin-left: 2px; margin-right: 2px;';
+		inpview.type = 'button';
+		inpview.album = rec[i].view_url;
+		inpview.onclick = function() {
+			window.open(this.album);
+		}
+		
+		var a = dce('a');
+		a.style = 'padding-left: 3px';
+		a.href = rec[i].url;
+		a.target = '_BLANK';
+		
+		var url = rec[i].url.replace('http://www.', '').replace('http://', '').replace('https://', '');
+		url = truncate(url, 18);
+		a.innerHTML = url;
+		
+		li.appendChild(inpdl);
+		li.appendChild(inpview);
+		li.appendChild(a);
+		ul.appendChild(li);
 	}
-	output.push('</ul>');
-	slowlyShow(gebi('recent'), 0.0);
-	gebi('recent').innerHTML = output.join('');
+	var recent = gebi('recent');
+	recent.innerHTML = '';
+	recent.appendChild(ul);
+	recent.innerHTML += '';
+	slowlyShow(recent, 0.0);
 	gebi('recent_spinner').style.visibility = "hidden";
+}
+
+function albumViewHandler(req) {
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		throw new Error('unable to parse response:\n' + req.responseText);
+	}
+	if (json.zip != null) {
+		window.open(json.zip.replace('rips/', './rips/#'));
+	}
 }
 
 // Loads URL in hash and refreshes page
@@ -123,6 +159,7 @@ function enableControls() {
 
 // Start ripping album
 function startRip() {
+	gebi('status_bar').has_download_link = false;
 	disableControls();
 	setHash(gebi('rip_text').value);
 	statusbar('<img src="spinner_dark.gif">&nbsp;loading...');
@@ -137,39 +174,69 @@ function requestHandler(req) {
 	try {
 		json = JSON.parse(req.responseText);
 	} catch (error) {
-		console.log('unable to parse response:\n' + req.responseText);
 		throw new Error('unable to parse response:\n' + req.responseText);
-		return;
 	}
 	
+	var statbar = gebi('status_bar');
 	if (json.error != null) {
 		// ERROR
-		statusbar('<div class="error">error: ' + json.error + '</div>');
+		var div = dce('div');
+		div.className = 'error';
+		div.innerHTML = 'error: ' + json.error;
+		statbar.innerHTML = '';
+		statbar.appendChild(div);
+		statbar.innerHTML += '';
 		enableControls();
 		setProgress(0);
+		
 	} else if (json.zip != null) {
 		// ZIPPED
 		var zipurl = json.zip;
-		var title  = truncate(json.zip.replace("rips/", ""), 15);
-		if (gebi('status_bar').innerHTML.indexOf('class="download_box" href="') < 0) {
-			var result = '<center><a class="download_box" href="' + zipurl + '">';
-			result += title;
-			result += '<span style="font-size: 0.8em;">';
+		var title  = truncate(json.zip.replace("rips/", ""), 12);
+		if (!statbar.has_download_link) {
+			statbar.has_download_link = true;
+			var center = dce('center');
+			
+			var adl = dce('a');
+			adl.className = 'download_box';
+			adl.href = zipurl;
+			adl.innerHTML = title;
+			
+			var span = dce('span');
+			span.style = 'font-size: 0.8em;';
+			span.innerHTML = '&nbsp;(';
 			if (json['image_count'] != null) {
-				result += '&nbsp;(' + json['image_count'] + '&nbsp;pics,&nbsp;' + json.size + ')';
-			} else {
-				result += ' (' + json.size + ')';
+				span.innerHTML += json['image_count'] + '&nbsp;pics,&nbsp;';
 			}
-			result += '</span></a>';
+			span.innerHTML += json.size + ')';
+			adl.appendChild(span);
+			center.appendChild(adl);
+			
 			if (json.limit != null) {
-				result += '<br><div class="error" style="padding-top: 5px;">rip was capped at ' + json.limit + ' images</div>';
+				var diverr = dce('div');
+				diverr.className = 'error';
+				diverr.style = 'padding-top: 5px';
+				diverr.innerHTML = 'rip was capped at ' + json.limit + ' images';
+				center.appendChild(diverr);
 			}
+			
 			if (json.album != null) {
-				result += '<center><br><a class="download_box" href="' + json.url + '">view album</a></center>';
+				var divdl = dce('div');
+				divdl.innerHTML = '<br>';
+				var aview = dce('a');
+				aview.className = 'download_box';
+				aview.href = json.url;
+				aview.innerHTML = 'view album';
+				divdl.appendChild(aview);
+				center.appendChild(divdl);
 			}
-			statusbar(result);
-			slowlyShow(gebi('status_bar'), 0.0);
+			
+			statbar.innerHTML = '';
+			statbar.appendChild(center);
+			statbar.innerHTML += '';
+			slowlyShow(statbar, 0.0);
 		}
+			
 		enableControls();
 		setProgress(0);
 		
@@ -177,9 +244,11 @@ function requestHandler(req) {
 		// LOGS
 		var update = json.log;
 		update = update.replace(/\n/g, '');
-		if (update !== '' && gebi('rip_button').hasAttribute('disabled')) {
+		if (update !== '' && 
+				gebi('rip_button').hasAttribute('disabled') &&
+				!statbar.has_download_link) {
 			if (update.indexOf(' - ') >= 0) {
-				update = update.substr(0,update.indexOf(' - '));
+				update = update.substr(0, update.indexOf(' - '));
 			}
 			i = update.indexOf('(');
 			j = update.indexOf(')', i);
@@ -190,9 +259,19 @@ function requestHandler(req) {
 				setProgress(num / denom);
 			}
 
-			update = '&nbsp;<img src="spinner_dark.gif">&nbsp;' + update;
-			statusbar(update);
+			var div = dce('div');
+			var img = dce('img');
+			img.src = 'spinner_dark.gif';
+			img.style = 'padding-left: 10px; padding-right: 10px';
+			div.appendChild(img);
+			var span = dce('span');
+			span.innerHTML = update;
+			div.appendChild(span);
+			statbar.innerHTML = '';
+			statbar.appendChild(div);
+			statbar.innerHTML += '';
 		}
+		
 		// We only get logs if the file isn't done downloading.
 		// Restart the 'check rip' function
 		if (gebi('rip_button').hasAttribute('disabled')) {
@@ -246,7 +325,6 @@ function sendRequest(url, handler) {
 			if (req.status == 200) {
 				handler(req);
 			} else {
-				console.log('request status ' + req.status + ' for URL ' + url);
 				throw new Error('request status ' + req.status + ' for URL ' + url);
 			}
 		}
@@ -339,7 +417,11 @@ function setProgress(perc) {
  * Video stuff
  */
 function vidstatusbar(text) { 
-	gebi('vid_status_bar').innerHTML = '<center>' + text + '</center>';
+	var center = dce('center');
+	center.innerHTML = text;
+	var vsb = gebi('vid_status_bar');
+	vsb.innerHTML = '';
+	vsb.appendChild(center);
 }
 
 // Start vid download when user presses enter key in textbox
@@ -365,9 +447,7 @@ function vidRequestHandler(req) {
 	try {
 		json = JSON.parse(req.responseText);
 	} catch (error) {
-		console.log('unable to parse response:\n' + req.responseText);
 		throw new Error('unable to parse response:\n' + req.responseText);
-		return;
 	}
 	
 	if (json.error != null) {
@@ -395,6 +475,11 @@ function vidRequestHandler(req) {
 	} else {
 		vidstatusbar("unexpected stuff!");
 	}
+}
+
+function showMoreNews() {
+	gebi('more_news_link').style.display = 'none';
+	gebi('more_news').style.display = 'block';
 }
 
 // Call initialization function after entire JS file is parsed

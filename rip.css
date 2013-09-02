@@ -323,3 +323,10 @@ li {
 	padding-bottom: 0px;
 }
 
+.download_arrow {
+	background-image: url(download.png);
+	background-repeat: no-repeat;
+	background-size: 100% auto;
+	width: 25px;
+	height: 25px;
+}
