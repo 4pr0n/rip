@@ -4,6 +4,7 @@ from basesite import basesite
 from json import loads
 from time import sleep
 
+CLIENT_ID = 'a9b7c98b06ac7ba6cb5ac5b68c7454b3'
 """
 	Downloads instagram albums
 """
@@ -33,7 +34,7 @@ class instagram(basesite):
 
 	def download(self):
 		self.init_dir()
-		baseurl = '%s/media' % self.url
+		baseurl = '%s/media?client_id=%s' % (self.url, CLIENT_ID)
 		url = baseurl
 		index = 0
 		while True:
@@ -64,6 +65,6 @@ class instagram(basesite):
 				if self.hit_image_limit(): break
 			if not json['more_available'] or last_id == 0: break
 			sleep(2)
-			url = '%s?max_id=%s' % (baseurl, last_id)
+			url = '%s&max_id=%s' % (baseurl, last_id)
 		self.wait_for_threads()
 	
