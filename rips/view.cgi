@@ -104,7 +104,7 @@ def get_thumb(img):
 	fs = img.split(sep)
 	fs.insert(-1, 'thumbs')
 	f = sep.join(fs)
-	if not path.exists(f):
+	if not path.exists(f.replace('%25', '%')):
 		return 'nothumb.png'
 	return sep.join(fs)
 	
