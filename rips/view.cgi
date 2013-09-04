@@ -82,7 +82,7 @@ def get_all_albums(start, count, preview_size):
 			'album'  : f,
 			'images' : preview,
 			'total'  : result['total'],
-			'time'   : path.getctime(f)
+			'time'   : path.getmtime(f)
 		})
 	albums = sorted(albums, key=lambda k: k['time'], reverse=True)
 	print dumps( { 
@@ -95,6 +95,9 @@ def get_all_albums(start, count, preview_size):
 def get_thumb(img):
 	fs = img.split(sep)
 	fs.insert(-1, 'thumbs')
+	f = sep.join(fs)
+	if not path.exists(f):
+		return 'nothumb.png'
 	return sep.join(fs)
 	
 def get_images_for_album(album, start, count, thumbs=False):
@@ -120,7 +123,10 @@ def get_images_for_album(album, start, count, thumbs=False):
 			if dstart >= start and (dcount < count or count == -1):
 				image = '%s%s%s' % (roots, sep, f)
 				image = image.replace('%', '%25')
-				images.append( { 'image' : image, 'thumb' : get_thumb(image) } )
+				images.append( { 
+						'image' : image, 
+						'thumb' : get_thumb(image) 
+					})
 				dcount += 1
 			dstart += 1
 			dtotal += 1
