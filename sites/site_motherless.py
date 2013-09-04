@@ -3,7 +3,7 @@
 from basesite  import basesite
 from time      import sleep
 from threading import Thread
-from os        import path
+from os        import path, remove
 
 class motherless(basesite):
 	
@@ -72,13 +72,15 @@ class motherless(basesite):
 					self.thread_count -= 1
 					return
 				saveas = '%s/%03d_%s%s' % (self.working_dir, index, url[url.rfind('/')+1:], image[image.rfind('.'):])
-				if self.web.download(image, saveas):
+				if self.web.download(image, saveas) and path.getsize(saveas) > 0:
 					self.image_count += 1
 					text = 'downloaded (%d' % index
 					if total != '?': text += '/%s' % total
 					text += ') (%s) - %s' % (self.get_size(saveas), image)
 					self.create_thumb(saveas)
 				else:
+					if path.exists(saveas):
+						remove(saveas)
 					text = 'download failed (%d' % index
 					if total != '?': text += '/%s' % total
 					text += ') - %s' % url
