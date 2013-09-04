@@ -118,6 +118,7 @@ function albumHandler(req) {
 		var remaining = album.total - (album.start + album.count);
 		next.innerHTML = 'load more (' + remaining + ' images remaining)';
 		next.onclick = function() {
+			gebi('next').setAttribute('style', 'visibility: hidden');
 			loadAlbum(this.album, this.image_index, IMAGES_PER_PAGE, false);
 		}
 	}
