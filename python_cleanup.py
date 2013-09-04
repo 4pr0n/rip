@@ -9,7 +9,7 @@
 import os, time, datetime
 from shutil import rmtree
 
-max_size = 100 * 1024 * 1024 * 1024   # 100 gb
+max_size = 150 * 1024 * 1024 * 1024   # 100 gb
 max_incomplete_time   = 3600 * 2      # 2 hours
 max_orphaned_zip_time = 3600 * 2      # 2 hours
 max_album_time        = 3600 * 24 * 2 # 2 days
