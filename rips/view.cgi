@@ -54,10 +54,18 @@ def get_all_albums(start, count, preview_size):
 	dstart = 0
 	dcount = 0
 	dtotal = 0
-	albums = []
+	
+	# Get directories, sorted by most-recent
+	thedirs = []
 	for f in listdir('.'):
 		if not path.isdir(f): continue
 		if not path.exists('%s.zip' % f): continue
+		thedirs.append( (f, path.getmtime(f) ) )
+	thedirs = sorted(thedirs, key=lambda k: k[1], reverse=True)
+	
+	# Iterate over directories
+	albums = []
+	for (f, mtime) in thedirs:
 		dtotal += 1
 		if dstart < start or (dcount >= count and count != -1):
 			dstart += 1
@@ -84,7 +92,7 @@ def get_all_albums(start, count, preview_size):
 			'total'  : result['total'],
 			'time'   : path.getmtime(f)
 		})
-	albums = sorted(albums, key=lambda k: k['time'], reverse=True)
+	#albums = sorted(albums, key=lambda k: k['time'], reverse=True)
 	print dumps( { 
 		'albums' : albums,
 		'total'  : dtotal,
