@@ -92,12 +92,15 @@ class minus(basesite):
 		albumid = url[url.rfind('/')+1:]
 		r = self.web.get(url)
 		if not '"items": [' in r:
+			self.debug('no "items" in r at %s' % url)
 			self.wait_for_threads()
 			raise Exception('could not find items in minus album - %s' % url)
-		json = self.web.between(r, '"items": [', ']')[0]
+		json = self.web.between(r, '"items": [', '};')[0]
 		chunks = self.web.between(json, '{', '}')
 		for index, chunk in enumerate(chunks):
-			if not '"id": "' in chunk or not '"name": "' in chunk: continue
+			if not '"id": "' in chunk or not '"name": "' in chunk: 
+				self.debug('no "id" or "name" in chunk')
+				continue
 			image = self.web.between(chunk, '"id": "',   '"')[0]
 			name  = self.web.between(chunk, '"name": "', '"')[0]
 			if '.' in name:
