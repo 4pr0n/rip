@@ -52,7 +52,10 @@ def get_orphan_zips():
 		if now - mtime > (max_orphaned_zip_time): # Stale orphan
 			zips.append(fp)
 	return zips
-		
+
+'''
+	Albums older than max_album_time
+'''
 def get_stale_albums():
 	empties = []
 	for f in os.listdir('rips'):
@@ -70,9 +73,11 @@ def get_files_to_remove():
 	all_files = []
 	for f in os.listdir('rips'):
 		if f == 'txt': continue
+		if f.startswith('gonewild_'): continue # ignore gonewild albums
+		
 		fp = os.path.join('rips', f)
 		if os.path.isfile(fp):
-			if not fp.endswith('.zip'): continue
+			if not fp.endswith('.zip'): continue # Ignore non-zip files (don't delete .html, .cgi, etc)
 			size = os.path.getsize(fp)
 		elif os.path.isdir(fp):
 			size = get_dir_size(fp)
@@ -118,8 +123,8 @@ def main():
 		l = get_orphan_zips()
 		removed += remove_files(l, 'orphan zips (> %d hours)' % (max_orphaned_zip_time / 3600))
 		
-		l = get_stale_albums()
-		removed += remove_files(l, 'stale album (> %d hours)' % (max_album_time / 3600))
+		#l = get_stale_albums()
+		#removed += remove_files(l, 'stale album (> %d hours)' % (max_album_time / 3600))
 		
 		l = get_files_to_remove()
 		removed += remove_files(l, 'max file size reached (> %d gb)' % (max_size / (1024 * 1024 * 1024)))
