@@ -22,6 +22,7 @@ def main():
 	
 	start   = 0
 	count   = 20
+	after   = ''
 	preview = 10
 	if 'start' in keys and keys['start'].isdigit():
 		start = int(keys['start'])
@@ -29,10 +30,12 @@ def main():
 		count = int(keys['count'])
 	if 'preview' in keys and keys['preview'].isdigit():
 		preview = int(keys['preview'])
+	if 'after' in keys:
+		after = keys['after']
 	
 	if  'view_all' in keys and keys['view_all'] == 'true':
 		# Retrieve list of all albums
-		get_all_albums(start, count, preview)
+		get_all_albums(count, preview, after)
 
 	elif 'view' in keys:
 		album = keys['view']
@@ -50,31 +53,55 @@ def main():
 	else:
 		print_error('unsupported method')
 
-def get_all_albums(start, count, preview_size):
-	dstart = 0
-	dcount = 0
-	dtotal = 0
+def get_all_albums(count, preview_size, after):
+	dcount = 0 # Number of albums retrieved & returned to user
+	dtotal = 0 # Total number of albums
+	dindex = 0 # Current index of last_after
 	
+	found_after = False # User-specified 'after' was found in list of directories
 	# Get directories, sorted by most-recent
 	thedirs = []
 	for f in listdir('.'):
 		if not path.isdir(f): continue
 		if not path.exists('%s.zip' % f): continue
+		if not found_after and after != '' and f == after: found_after = True
 		thedirs.append( (f, path.getmtime(f) ) )
 	thedirs = sorted(thedirs, key=lambda k: k[1], reverse=True)
 	
-	# Iterate over directories
+	if not found_after: after = '' # Requested 'after' not found, don't look for it
+	
+	if after == '': 
+		hit_after = True
+	else:
+		hit_after = False
+	
+	last_after = '' # Last album retrieved
 	albums = []
+	# Iterate over directories
 	for (f, mtime) in thedirs:
 		dtotal += 1
-		if dstart < start or (dcount >= count and count != -1):
-			dstart += 1
+		
+		# User specified an 'after' and we haven't hit it yet
+		if not hit_after:
+			if f == after:
+				hit_after = True
+			dindex += 1
 			continue
-		dcount += 1
-		result = get_images_for_album(f, 0, -1)
+		
+		# We hit the number of albums we're supposed to grab
+		if (dcount >= count and count != -1):
+			break
+		dindex += 1
+		
+		result = get_images_for_album(f, 0, -1) # Get all images
 		images = result['images']
+		if len(images) == 0: continue # Don't consider empty albums
+		
+		dcount += 1
+		last_after = f
+		
+		# Randomless pick 'preview_size' number of thumbnails
 		rand = []
-		if len(images) == 0: continue
 		if len(images) <= preview_size:
 			rand = xrange(0, len(images))
 		else:
@@ -86,18 +113,24 @@ def get_all_albums(start, count, preview_size):
 		preview = []
 		for i in rand:
 			preview.append( images[i] )
+		# Add album to response
 		albums.append( {
 			'album'  : f,
 			'images' : preview,
 			'total'  : result['total'],
 			'time'   : path.getmtime(f)
 		})
-	#albums = sorted(albums, key=lambda k: k['time'], reverse=True)
+	
+	if dindex == len(thedirs):
+		last_after = ''
+	
+	# Dump response
 	print dumps( { 
 		'albums' : albums,
-		'total'  : dtotal,
-		'start'  : start,
-		'count'  : dcount
+		'total'  : len(thedirs),
+		'after'  : last_after,
+		'index'  : dindex,
+		'count'  : dtotal
 		} )
 
 def get_thumb(img):

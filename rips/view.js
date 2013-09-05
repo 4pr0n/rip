@@ -124,19 +124,21 @@ function albumHandler(req) {
 	}
 }
 
-function getAllAlbumUrl(start) {
+function getAllAlbumUrl(after) {
 	var req = 'view.cgi';
 	req += '?view_all=true';
-	req += '&start='   + start;
+	if (after != undefined) {
+		req += '&after=' + after;
+	}
 	req += '&count='   + ALBUMS_AT_ONCE;
 	req += '&preview=' + ALBUM_PREVIEW_SIZE;
 	return req;
 }
 
-function loadAllAlbums(start, startOver) {
+function loadAllAlbums(after, startOver) {
 	if (!isNewPage() && (startOver == undefined || startOver)) { return true; }
 	if (gebi('albums_table').loading == true) { return true; }
-	if (start == undefined) start = 0;
+	if (after == undefined) after = '';
 	gebi('albums_area').style.display = "block";
 	gebi('status_area').style.display = "none";
 	gebi('thumbs_area').style.display = "none";
@@ -146,7 +148,7 @@ function loadAllAlbums(start, startOver) {
 	if (startOver == undefined || startOver) { 
 		gebi('albums_table').innerHTML = '';
 	}
-	sendRequest(getAllAlbumUrl(start), allAlbumsHandler);
+	sendRequest(getAllAlbumUrl(after), allAlbumsHandler);
 	return true;
 }
 
@@ -204,7 +206,7 @@ function allAlbumsHandler(req) {
 		for (var i = 0; i < album.images.length; i++) {
 			
 			var imgtd = dce('td');
-			imgtd.className = 'image';
+			imgtd.className = 'image_small';
 			
 			var imga = dce('a');
 			imga.album = album.album;
@@ -219,6 +221,7 @@ function allAlbumsHandler(req) {
 				gebi(this.album).show_album = true;
 			}
 			var img = dce('img');
+			img.className = 'image_small';
 			img.src = album.images[i].thumb;
 			img.onload = function() {
 				if (this.width > 100) {
@@ -254,15 +257,16 @@ function allAlbumsHandler(req) {
 	
 	// "Next" button
 	var next = gebi('next');
-	if (json.start + json.count >= json.total) {
+	if (json.after == '') {
 		next.style.visibility = 'hidden';
 	} else {
 		next.style.visibility = 'visible';
-		next.album_index = json.start + json.count
-		var remaining = json.total - (json.start + json.count);
+		next.after = json.after;
+		var remaining = json.total - json.index;
 		next.innerHTML = 'load more (' + remaining + ' albums remaining)';
+		next.setAttribute('onclick', 'loadAllAlbums("' + json.after + '", false)');
 		next.onclick = function() {
-			loadAllAlbums(this.album_index, false);
+			loadAllAlbums(this.after, false);
 		}
 	}
 }

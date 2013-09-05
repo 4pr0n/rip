@@ -152,10 +152,23 @@ img:hover {
 td.image {
 	vertical-align: middle;
 	text-align: center;
+	min-width: 200px;
+	min-height: 200px;
+	padding: 0px;
+	margin: 0px;
+}
+
+td.image_small {
+	vertical-align: middle;
+	text-align: center;
 	min-width: 100px;
 	min-height: 100px;
 	padding: 0px;
 	margin: 0px;
+}
+img.image_small {
+	max-width: 100px;
+	max-height: 100px;
 }
 
 .nav_button {
