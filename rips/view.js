@@ -66,6 +66,7 @@ function albumHandler(req) {
 		gebi('album_download_title').style.display = 'none';
 		gebi('album_download').style.display = 'none';
 		gebi('thumbs_area').style.display = 'none';
+		gebi('next').setAttribute('style', 'visibility: hidden');
 		gebi('next').style.visibility = 'hidden';
 		return;
 	}
@@ -110,15 +111,18 @@ function albumHandler(req) {
 	
 	var next = gebi('next');
 	if (album.start + album.count >= album.total) {
+		next.setAttribute('style', 'visibility: hidden');
 		next.style.visibility = 'hidden';
 	} else {
+		next.setAttribute('style', 'visibility: visible');
 		next.style.visibility = 'visible';
 		next.album = album.album;
 		next.image_index = album.start + album.count;
 		var remaining = album.total - (album.start + album.count);
 		next.innerHTML = 'load more (' + remaining + ' images remaining)';
 		next.onclick = function() {
-			gebi('next').setAttribute('style', 'visibility: hidden');
+			gebi('next').setAttribute('style', 'visibility: hidden;');
+			gebi('next').style.visibility = 'hidden';
 			loadAlbum(this.album, this.image_index, IMAGES_PER_PAGE, false);
 		}
 	}
@@ -259,14 +263,18 @@ function allAlbumsHandler(req) {
 	// "Next" button
 	var next = gebi('next');
 	if (json.after == '') {
+		next.setAttribute('style', 'visibility: hidden;');
 		next.style.visibility = 'hidden';
 	} else {
+		next.setAttribute('style', 'visibility: visible;');
 		next.style.visibility = 'visible';
 		next.after = json.after;
 		var remaining = json.total - json.index;
 		next.innerHTML = 'load more (' + remaining + ' albums remaining)';
 		next.setAttribute('onclick', 'loadAllAlbums("' + json.after + '", false)');
 		next.onclick = function() {
+			next.setAttribute('style', 'visibility: hidden;');
+			next.style.visibility = 'hidden';
 			loadAllAlbums(this.after, false);
 		}
 	}
