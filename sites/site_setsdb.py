@@ -41,6 +41,7 @@ class setsdb(basesite):
 	
 	def download_image(self, url, index, total):
 		r = self.web.get(url)
+		before = None
 		if 'sharenxs' in url:
 			before = 'imgsize()\'><img src="'
 			after = '"'
@@ -51,7 +52,7 @@ class setsdb(basesite):
 			before = '      src="'
 			after = '"'
 		
-		if not before in r:
+		if before == None or not before in r:
 			self.log('unable to download image at: %s' % url)
 			self.thread_count -= 1
 			return
