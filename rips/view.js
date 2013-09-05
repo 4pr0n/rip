@@ -178,6 +178,7 @@ function allAlbumsHandler(req) {
 		table.setAttribute('id',album.album);
 		table.album = album.album;
 		table.show_album = true;
+		table.setAttribute('onclick', 'if (this.show_album) window.open(window.location.origin + window.location.pathname + "#' + album.album + '")');
 		table.onclick = function() {
 			if (this.show_album) {
 				// Open albums in new tab
