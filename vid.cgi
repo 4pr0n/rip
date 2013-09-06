@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import cgitb; cgitb.enable() # for debugging
+import cgitb #; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from urllib import unquote
