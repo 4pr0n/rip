@@ -36,7 +36,7 @@ class basesite(object):
 	"""
 	def __init__(self, url, urls_only=False, debugging=False):
 		self.debugging = debugging
-		self.web = Web() # Web object for downloading/parsing
+		self.web = Web(debugging=self.debugging) # Web object for downloading/parsing
 		self.base_dir = RIP_DIRECTORY
 		if not os.path.exists(self.base_dir):
 			os.mkdir(self.base_dir)
@@ -82,7 +82,8 @@ class basesite(object):
 		if self.first_log:
 			self.first_log = False
 			self.log('http://rip.rarchives.com - file log for URL %s' % self.url, overwrite=True)
-		sys.stderr.write('%s\n' % text)
+		if self.debugging:
+			sys.stderr.write('%s\n' % text)
 		text = text.replace('"', '\\"')
 		if overwrite:
 			f = open(self.logfile, 'w')

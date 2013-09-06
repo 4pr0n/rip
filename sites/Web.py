@@ -19,10 +19,11 @@ class Web:
 		Class used for communicating with web servers.
 	"""
 	
-	def __init__(self, user_agent=None):
+	def __init__(self, user_agent=None, debugging=False):
 		"""
 			Sets this class's user agent.
 		"""
+		self.debugging = debugging
 		self.cj      = cookielib.CookieJar()
 		self.opener  = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
 		self.Request = urllib2.Request
@@ -125,35 +126,35 @@ class Web:
 			headers['User-agent'] = self.user_agent
 		
 		(https, host, path) = self.get_https_host_path(url)
-		stderr.write('Web.py: GET http%s://%s%s\n' % ('s' if https else '', host, path))
+		if self.debugging: stderr.write('Web.py: GET http%s://%s%s\n' % ('s' if https else '', host, path))
 		try:
 			if https:
 				req = httplib.HTTPSConnection(host)
 			else:
 				req = httplib.HTTPConnection(host)
 			req.putrequest('GET', path)
-			stderr.write('Web.py: headers:\n')
+			if self.debugging: stderr.write('Web.py: headers:\n')
 			for hkey in headers.keys():
-				stderr.write('        %s:\t%s\n' % (hkey, headers[hkey]))
+				if self.debugging: stderr.write('        %s:\t%s\n' % (hkey, headers[hkey]))
 				req.putheader(hkey, headers[hkey])
 			req.endheaders()
 			resp = req.getresponse()
-			stderr.write('Web.py: response headers:')
+			if self.debugging: stderr.write('Web.py: response headers:')
 			for h,v in resp.getheaders():
-				stderr.write('        %s: "%s"\n' % (h, v))
+				if self.debugging: stderr.write('        %s: "%s"\n' % (h, v))
 			if resp.status == 200:
 				return resp.read()
 			elif resp.status in [301, 302] and resp.getheader('Location') != None:
-				stderr.write('Web.py: Got %d to %s' % (resp.status, resp.getheader('Location')))
+				if self.debugging: stderr.write('Web.py: Got %d to %s' % (resp.status, resp.getheader('Location')))
 				return self.getter(resp.getheader('Location'), headers=headers, retry=retry-1)
 			else:
 				result = ''
 				try: result = resp.read()
 				except: pass
-				stderr.write('Web.py: HTTP status %s: %s\n' % (resp.status, resp.reason))
+				if self.debugging: stderr.write('Web.py: HTTP status %s: %s\n' % (resp.status, resp.reason))
 				return result
 		except Exception, e:
-			stderr.write('Web.py: %s: %s\n' % (url, str(e)))
+			stderr.write('Web.py: Exception: %s: %s\n' % (url, str(e)))
 			if retry > 0:
 				return self.getter(url, headers=headers, retry=retry-1)
 		return ''
@@ -206,7 +207,7 @@ class Web:
 			handle = self.urlopen(req)
 			result = handle.read()
 		except Exception, e:
-			stderr.write('Web.py: %s: %s\n' % (url, str(e)))
+			stderr.write('Web.py: Exception: %s: %s\n' % (url, str(e)))
 		return result
 		
 	def post(self, url, postdict=None, headers={}):
@@ -232,11 +233,11 @@ class Web:
 		
 		host = url[url.find('//')+2:]
 		host = host[:host.find('/')]
-		stderr.write('Web.py: host: "%s"\n' % host)
+		if self.debugging: stderr.write('Web.py: host: "%s"\n' % host)
 		path = url[url.find(host)+len(host):]
-		stderr.write('Web.py: path: "%s"\n' % path)
-		stderr.write('Web.py: headers: %s\n' % str(headers))
-		stderr.write('Web.py: postdata: "%s"\n' % data)
+		if self.debugging: stderr.write('Web.py: path: "%s"\n' % path)
+		if self.debugging: stderr.write('Web.py: headers: %s\n' % str(headers))
+		if self.debugging: stderr.write('Web.py: postdata: "%s"\n' % data)
 		try:
 			if url.startswith('https'):
 				req = httplib.HTTPSConnection(host)
@@ -257,7 +258,7 @@ class Web:
 					stderr.write('Web.py: \t"%s"="%s"\n' % (name, value))
 				return ''
 		except Exception, e:
-			stderr.write('Web.py: %s: %s\n' % (url, str(e)))
+			stderr.write('Web.py: Exception: %s: %s\n' % (url, str(e)))
 			return ''
 	
 	def download(self, url, save_as):
