@@ -20,6 +20,13 @@ all site rippers extend the [basesite.py](https://github.com/4pr0n/rip/blob/mast
 
 a simple site ripper example is [site_instagram.py](https://github.com/4pr0n/rip/blob/master/sites/site_instagram.py) which is (currently) less than 50 lines long and uses lots of the helper methods in basesite.
 
+installation
+------------
+
+Some webdevs have had issues installing the site on their own Apache servers. This guide clears up some known issues:
+
+* [wiki/Installation](https://github.com/4pr0n/rip/wiki/Installation)
+
 license
 -------
 
