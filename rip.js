@@ -17,21 +17,16 @@ function init() {
 		startRip();
 	}
 	if (getCookie('cache_enabled') == 'true') {
-		gebi('rip_cached').style.display                = 'inline-block';
 		gebi('rip_cached').setAttribute('style', 'display: inline-block');
-		gebi('label_cached').style.display                = 'inline-block';
 		gebi('label_cached').setAttribute('style', 'display: inline-block');
 	} else {
-		gebi('rip_cached').style.display =                'none';
 		gebi('rip_cached').setAttribute('style', 'display: none');
-		gebi('label_cached').style.display =                'none';
 		gebi('label_cached').setAttribute('style', 'display: none');
 	}
 	refreshRecent();
 }
 
 function refreshRecent() {
-	gebi('recent_spinner').style.visibility =                "visible";
 	gebi('recent_spinner').setAttribute('style', 'visibility: visible');
 	sendRequest('rip.cgi?recent=y', recentHandler);
 }
@@ -45,7 +40,6 @@ function recentHandler(req) {
 	}
 	var rec = json['recent'];
 	var ul = dce('ul');
-	ul.style =               'padding-left: 15px';
 	ul.setAttribute('style', 'padding-left: 15px');
 	for (var i = 0; i < rec.length; i++) {
 		var li = dce('li');
@@ -53,7 +47,6 @@ function recentHandler(req) {
 		
 		var inpdl = dce('input');
 		inpdl.className = 'download_box download_arrow';
-		inpdl.style = 'margin: 0px; margin-left: 2px; margin-right: 2px;';
 		inpdl.setAttribute('style', 'margin: 0px; margin-left: 2px; margin-right: 2px;');
 		inpdl.type = 'button';
 		inpdl.album = rec[i].url.replace('http://', '').replace('https://', '');
@@ -64,7 +57,6 @@ function recentHandler(req) {
 		var inpview = dce('input');
 		inpview.value = 'view';
 		inpview.className = 'download_box';
-		inpview.style = 'margin-left: 2px; margin-right: 2px;';
 		inpview.setAttribute('style', 'margin-left: 2px; margin-right: 2px;');
 		inpview.type = 'button';
 		inpview.album = rec[i].view_url;
@@ -73,7 +65,6 @@ function recentHandler(req) {
 		li.appendChild(inpview);
 		
 		var a = dce('a');
-		a.style = 'padding-left: 3px';
 		a.setAttribute('style', 'padding-left: 3px');
 		a.href = rec[i].url;
 		a.target = '_BLANK';
@@ -90,7 +81,6 @@ function recentHandler(req) {
 	recent.appendChild(ul);
 	recent.innerHTML += '';
 	slowlyShow(recent, 0.0);
-	gebi('recent_spinner').style.visibility = "hidden";
 	gebi('recent_spinner').setAttribute('style', 'visibility: hidden');
 }
 
@@ -211,7 +201,6 @@ function requestHandler(req) {
 			adl.innerHTML = title;
 			
 			var span = dce('span');
-			span.style = 'font-size: 0.8em;';
 			span.setAttribute('style', 'font-size: 0.8em');
 			span.innerHTML = '&nbsp;(';
 			if (json['image_count'] != null) {
@@ -224,7 +213,6 @@ function requestHandler(req) {
 			if (json.limit != null) {
 				var diverr = dce('div');
 				diverr.className = 'error';
-				diverr.style = 'padding-top: 5px';
 				diverr.setAttribute('style', 'padding-top: 5px');
 				diverr.innerHTML = 'rip was capped at ' + json.limit + ' images';
 				center.appendChild(diverr);
@@ -272,7 +260,6 @@ function requestHandler(req) {
 			var div = dce('div');
 			var img = dce('img');
 			img.src = 'spinner_dark.gif';
-			img.style = 'padding-left: 10px; padding-right: 10px';
 			img.setAttribute('style', 'padding-left: 10px; padding-right: 10px');
 			div.appendChild(img);
 			var span = dce('span');
@@ -387,11 +374,9 @@ function setExample(site) {
 }
 
 function darker(obj, alpha) {
-	obj.style.color = "rgba(0, 0, 0, " + alpha + ")";
 	obj.setAttribute('style', 'color: rgba(0, 0, 0, ' + alpha + ')');
 	alpha += 0.01;
 	if (alpha > 1) {
-		obj.style.color = "#000";
 		obj.setAttribute('style', 'color: #000');;
 	} else {
 		setTimeout(function() { darker(obj, alpha); } , 5);
@@ -399,14 +384,11 @@ function darker(obj, alpha) {
 }
 
 function slowlyShow(obj, alpha) {
-	obj.style.opacity = alpha;
-	obj.style.filter  = "alpha(opacity=" + (alpha * 100) + ")";
 	obj.setAttribute('style', 'opacity: ' + alpha + '; ' + 
 		                        'filter: alpha(opacity=' + (alpha * 100) + ');');
 	alpha += 0.02;
 	if (alpha > 1) {
-		obj.style.opacity = "1";
-		obj.setAttribute('style', '1');
+		obj.setAttribute('style', 'opacity: 1');
 	} else {
 		setTimeout(function() { slowlyShow(obj, alpha); } , 5);
 	}
@@ -422,10 +404,8 @@ function setProgress(perc) {
 		value = "" + (100 * perc);
 	}
 	if (value == "0") {
-		gebi('progress_bar_div').style.display                = "none";
 		gebi('progress_bar_div').setAttribute('style', 'display: none');
 	} else if (!isNaN(parseFloat(value)) && isFinite(value)) {
-		gebi('progress_bar_div').style.display                = "inline-block";
 		gebi('progress_bar_div').setAttribute('style', 'display: inline-block');
 		gebi('progress_bar').value = value;
 	}
@@ -476,7 +456,6 @@ function vidRequestHandler(req) {
 		// do stuff
 		var vida = dce('a');
 		vida.className = 'download_box';
-		vida.style =              'padding: 5px';
 		vida.setAttribute('style','padding: 5px');
 		vida.href = 'data:text/html;charset=utf-8, ' +
 			          '<html><head><meta http-equiv=\'REFRESH\' content=\'0;url=' +
@@ -487,7 +466,6 @@ function vidRequestHandler(req) {
 		
 		var vidb = dce('a');
 		vidb.className = 'download_box';
-		vidb.style =              'padding: 5px; margin-left: 15px;';
 		vidb.setAttribute('style','padding: 5px; margin-left: 15px;');
 		vidb.href = json.url;
 		vidb.onclick = function() { return false; }
@@ -495,12 +473,10 @@ function vidRequestHandler(req) {
 		vidb.innerHTML = 'right click, save as';
 		
 		var vidd = dce('div');
-		vidd.style =                'margin-top: 10px';
-		vidd.setAttribute('style', 'padding-top: 10px;');
+		vidd.setAttribute('style', 'margin-top: 10px;');
 		
 		var vidi = dce('input');
 		vidi.className = 'textbox';
-		vidi.style =                   'padding: 5px;';
 		vidi.setAttribute('style',     'padding: 5px');
 		vidi.setAttribute('type',      'text');
 		vidi.setAttribute('id',        'video_textarea');
@@ -528,9 +504,7 @@ function vidRequestHandler(req) {
 }
 
 function showMoreNews() {
-	gebi('more_news_link').style.display =                'none';
 	gebi('more_news_link').setAttribute('style', 'display: none;');
-	gebi('more_news').style.display =                'block';
 	gebi('more_news').setAttribute('style', 'display: block;');
 	gebi('more_news').appendChild(document.createTextNode(' '));
 	gebi('more_news').innerHTML += '';

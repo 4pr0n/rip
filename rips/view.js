@@ -31,9 +31,9 @@ function init() {
 function loadAlbum(album, start, count, startOver) {
 	if (!isNewPage() && (startOver == undefined || startOver)) { return true; }
 	if (gebi('albums_table').loading == true) { return true; }
-	gebi('albums_area').style.display = "none";
-	gebi('status_area').style.display = "block";
-	gebi('thumbs_area').style.display = "block";
+	gebi('albums_area').setAttribute('style', 'display: none');
+	gebi('status_area').setAttribute('style', 'display: block');
+	gebi('thumbs_area').setAttribute('style', 'display: block');
 	if (start == undefined) start = 0;
 	if (count == undefined) count = IMAGES_PER_PAGE;
 	if (startOver == undefined || startOver) {
@@ -63,17 +63,15 @@ function albumHandler(req) {
 	var album = json.album;
 	if (album.images.length == 0) {
 		gebi('album_title').innerHTML = 'album not found';
-		gebi('album_download_title').style.display = 'none';
-		gebi('album_download').style.display = 'none';
-		gebi('thumbs_area').style.display = 'none';
+		gebi('album_download_title').setAttribute('style', 'display: none');
+		gebi('album_download').setAttribute('style', 'display: none');
+		gebi('thumbs_area').setAttribute('style', 'display: none');
 		gebi('next').setAttribute('style', 'visibility: hidden');
-		gebi('next').style.visibility = 'hidden';
 		return;
 	}
 	gebi('album_title').innerHTML = album.album + ' (' + album.total + ' images)';
-	gebi('album_download').style.display = 'inline';
-	gebi('album_download_title').style.display = 'inline';
-	gebi('thumbs_area').style.display = 'table';
+	gebi('album_download').setAttribute('style', 'display: inline');
+	gebi('thumbs_area').setAttribute('style', 'display: table');
 	var albuma = dce('a');
 	albuma.className = 'download_box';
 	albuma.href = album.archive;
@@ -97,7 +95,7 @@ function albumHandler(req) {
 		var thumbi = dce('img');
 		thumbi.src = images[i].thumb;
 		thumbi.onload = function() {
-			this.style.display = 'inline';
+			this.setAttribute('style', 'display: inline');
 		};
 		thumba.appendChild(thumbi);
 		thumbtd.appendChild(thumba);
@@ -112,17 +110,14 @@ function albumHandler(req) {
 	var next = gebi('next');
 	if (album.start + album.count >= album.total) {
 		next.setAttribute('style', 'visibility: hidden');
-		next.style.visibility = 'hidden';
 	} else {
 		next.setAttribute('style', 'visibility: visible');
-		next.style.visibility = 'visible';
 		next.album = album.album;
 		next.image_index = album.start + album.count;
 		var remaining = album.total - (album.start + album.count);
 		next.innerHTML = 'load more (' + remaining + ' images remaining)';
 		next.onclick = function() {
 			gebi('next').setAttribute('style', 'visibility: hidden;');
-			gebi('next').style.visibility = 'hidden';
 			loadAlbum(this.album, this.image_index, IMAGES_PER_PAGE, false);
 		}
 	}
@@ -143,10 +138,10 @@ function loadAllAlbums(after, startOver) {
 	if (!isNewPage() && (startOver == undefined || startOver)) { return true; }
 	if (gebi('albums_table').loading == true) { return true; }
 	if (after == undefined) after = '';
-	gebi('albums_area').style.display = "block";
-	gebi('status_area').style.display = "none";
-	gebi('thumbs_area').style.display = "none";
-	gebi('main_table').style.width = "100%";
+	gebi('albums_area').setAttribute('style', 'display: block');
+	gebi('status_area').setAttribute('style', 'display: none');
+	gebi('thumbs_area').setAttribute('style', 'display: none');
+	gebi('main_table').setAttribute('style', 'width: 100%');
 	gebi('albums_table').loading = true;
 	// Remove existing albums if needed
 	if (startOver == undefined || startOver) { 
@@ -201,8 +196,8 @@ function allAlbumsHandler(req) {
 		var spacetr = dce('tr');
 		for (var i = 0; i < ALBUM_PREVIEW_IMAGE_BREAKS; i++) {
 			var spacetd = dce('td');
-			spacetd.style.width = '105px';
-			spacetd.style.height = '0px';
+			spacetd.setAttribute('style', 'width: 105px');
+			spacetd.setAttribute('style', 'height: 0px');
 			spacetr.appendChild(spacetd);
 		}
 		table.appendChild(spacetr);
@@ -233,7 +228,7 @@ function allAlbumsHandler(req) {
 					this.width *= 0.5;
 				}
 				this.onload = null;
-				this.style.display = 'inline';
+				this.setAttribute('style', 'display: inline');
 			}
 			imga.appendChild(img);
 			imgtd.appendChild(imga);
@@ -244,8 +239,8 @@ function allAlbumsHandler(req) {
 			}
 		}
 		var spacetdh = dce('td');
-		spacetdh.style.height = '105px';
-		spacetdh.style.width = '0px';
+		spacetdh.setAttribute('style', 'height: 105px');
+		spacetdh.setAttribute('style', 'width: 0px');
 		imgrow.appendChild(spacetdh);
 		table.appendChild(imgrow);
 		maintd.appendChild(table);
@@ -264,17 +259,14 @@ function allAlbumsHandler(req) {
 	var next = gebi('next');
 	if (json.after == '') {
 		next.setAttribute('style', 'visibility: hidden;');
-		next.style.visibility = 'hidden';
 	} else {
 		next.setAttribute('style', 'visibility: visible;');
-		next.style.visibility = 'visible';
 		next.after = json.after;
 		var remaining = json.total - json.index;
 		next.innerHTML = 'load more (' + remaining + ' albums remaining)';
 		next.setAttribute('onclick', 'loadAllAlbums("' + json.after + '", false)');
 		next.onclick = function() {
 			next.setAttribute('style', 'visibility: hidden;');
-			next.style.visibility = 'hidden';
 			loadAllAlbums(this.after, false);
 		}
 	}
@@ -351,18 +343,18 @@ fg.onload = function() {
 	if (height > sheight) { width  = width  * (sheight / height); height = sheight; }
 	fg.style.left = ((swidth / 2) - (width / 2)) + 'px';
 	fg.style.top = ((sheight / 2) - (height / 2)) + 'px';
-	fg.style.display = 'block';
+	fg.setAttribute('style', 'display: block');
 }
 fg.onclick = function() {
 	// hide it
-	fg.style.display = 'none';
-	bg.style.display = 'none';
+	fg.setAttribute('style', 'display: none');
+	bg.setAttribute('style', 'display: none');
 	fg.src = '';
 }
 bg.onclick = fg.onclick;
 
 function loadImage(url) {
-	bg.style.display = 'block';
+	bg.setAttribute('style', 'display: block');
 	fg.src = url;
 	fg.alt = 'loading...';
 	return false;
