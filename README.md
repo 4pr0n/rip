@@ -18,7 +18,9 @@ rippers for various sites are in the [/sites/](https://github.com/4pr0n/rip/tree
 
 all site rippers extend the [basesite.py](https://github.com/4pr0n/rip/blob/master/sites/basesite.py) super class. this file contains documentation about required overrides and other helper methods.
 
-a simple site ripper example is [site_instagram.py](https://github.com/4pr0n/rip/blob/master/sites/site_instagram.py) which is (currently) less than 50 lines long and uses lots of the helper methods in basesite.
+#### Wiki outlining the process of creating a new ripper:
+
+### [wiki/Supporting-a-new-site](https://github.com/4pr0n/rip/wiki/Supporting-a-new-site)
 
 installation
 ------------
