@@ -1,6 +1,7 @@
 function gebi(id) { return document.getElementById(id); }
 function dce(el)  { return document.createElement(el);  }
 
+// CONSTANTS
 var ALBUMS_AT_ONCE             = 6; // Number of albums to return per request
 var ALBUM_PREVIEW_SIZE         = 4; // Number of thumbnails per album
 var ALBUM_PREVIEW_IMAGE_BREAKS = 4; // Thumbnails per row (all-albums view)
@@ -28,9 +29,12 @@ function init() {
 	}
 }
 
+//////////////////////
+// SINGLE ALBUM
+
 function loadAlbum(album, start, count, startOver) {
 	if (!isNewPage() && (startOver == undefined || startOver)) { return true; }
-	if (gebi('albums_table').loading == true) { return true; }
+	if (gebi('albums_table').getAttribute('loading')) { return true; }
 	gebi('albums_area').setAttribute('style', 'display: none');
 	gebi('status_area').setAttribute('style', 'display: block');
 	gebi('thumbs_area').setAttribute('style', 'display: block');
@@ -112,16 +116,21 @@ function albumHandler(req) {
 		next.setAttribute('style', 'visibility: hidden');
 	} else {
 		next.setAttribute('style', 'visibility: visible');
-		next.album = album.album;
-		next.image_index = album.start + album.count;
+		next.setAttribute('album', album.album);
+		next.setAttribute('image_index', (album.start + album.count));
 		var remaining = album.total - (album.start + album.count);
 		next.innerHTML = 'load more (' + remaining + ' images remaining)';
 		next.onclick = function() {
 			gebi('next').setAttribute('style', 'visibility: hidden;');
-			loadAlbum(this.album, this.image_index, IMAGES_PER_PAGE, false);
+			var al = this.getAttribute('album');
+			var ii = this.getAttribute('image_index');
+			loadAlbum(al, ii, IMAGES_PER_PAGE, false);
 		}
 	}
 }
+
+/////////////////////////
+// ALL ALBUMS
 
 function getAllAlbumUrl(after) {
 	var req = 'view.cgi';
@@ -136,13 +145,13 @@ function getAllAlbumUrl(after) {
 
 function loadAllAlbums(after, startOver) {
 	if (!isNewPage() && (startOver == undefined || startOver)) { return true; }
-	if (gebi('albums_table').loading == true) { return true; }
+	if (gebi('albums_table').getAttribute('loading')) { return true; }
 	if (after == undefined) after = '';
 	gebi('albums_area').setAttribute('style', 'display: block');
 	gebi('status_area').setAttribute('style', 'display: none');
 	gebi('thumbs_area').setAttribute('style', 'display: none');
 	gebi('main_table').setAttribute('style', 'width: 100%');
-	gebi('albums_table').loading = true;
+	gebi('albums_table').setAttribute('loading', 'true');
 	// Remove existing albums if needed
 	if (startOver == undefined || startOver) { 
 		gebi('albums_table').innerHTML = '';
@@ -171,17 +180,19 @@ function allAlbumsHandler(req) {
 		} else {
 			maintd.setAttribute('style', 'text-align: right; padding-left: 20px;');
 		}
+		maintd.setAttribute('width', '50%');
 		var album = json.albums[a];
 		var table = dce('table');
 		table.className = 'page album';
 		table.setAttribute('id',album.album);
-		table.album = album.album;
-		table.show_album = true;
-		table.setAttribute('onclick', 'if (this.show_album) window.open(window.location.origin + window.location.pathname + "#' + album.album + '")');
+		table.setAttribute('album', album.album);
+		table.setAttribute('show_album', 'true');
+		table.setAttribute('onclick', 'if (this.getAttribute("show_album")) window.open(window.location.origin + window.location.pathname + "#' + album.album + '")');
+		table.setAttribute('width', '100%');
 		table.onclick = function() {
-			if (this.show_album) {
+			if (this.getAttribute('show_album')) {
 				// Open albums in new tab
-				window.open(window.location.origin + window.location.pathname + '#' + this.album);
+				window.open(window.location.origin + window.location.pathname + '#' + this.getAttribute('album'));
 			}
 		}
 		var titletr = dce('tr');
@@ -209,27 +220,30 @@ function allAlbumsHandler(req) {
 			imgtd.className = 'image_small';
 			
 			var imga = dce('a');
-			imga.album = album.album;
+			imga.setAttribute('album', album.album);
 			imga.href = album.images[i].image;
 			imga.onclick = function() {
 				return loadImage(this.href);
 			}
 			imga.onmouseover = function() {
-				gebi(this.album).show_album = false;
+				gebi(this.getAttribute('album')).removeAttribute('show_album');
 			}
 			imga.onmouseout = function() {
-				gebi(this.album).show_album = true;
+				gebi(this.getAttribute('album')).setAttribute('show_album', 'true');
 			}
+			
 			var img = dce('img');
 			img.className = 'image_small';
 			img.src = album.images[i].thumb;
 			img.onload = function() {
-				if (this.width > 100) {
-					this.width *= 0.5;
+				var w = parseInt(this.getAttribute('width'));
+				if (w > 100) {
+					this.setAttribute('width') = w * 0.5;
 				}
 				this.onload = null;
 				this.setAttribute('style', 'display: inline');
 			}
+			
 			imga.appendChild(img);
 			imgtd.appendChild(imga);
 			imgrow.appendChild(imgtd);
@@ -253,7 +267,7 @@ function allAlbumsHandler(req) {
 	}
 	var albums_table = gebi('albums_table');
 	albums_table.appendChild(maintable);
-	albums_table.loading = false;
+	albums_table.removeAttribute('loading');
 	
 	// "Next" button
 	var next = gebi('next');
@@ -261,16 +275,39 @@ function allAlbumsHandler(req) {
 		next.setAttribute('style', 'visibility: hidden;');
 	} else {
 		next.setAttribute('style', 'visibility: visible;');
-		next.after = json.after;
+		next.setAttribute('after', json.after);
 		var remaining = json.total - json.index;
 		next.innerHTML = 'load more (' + remaining + ' albums remaining)';
 		next.setAttribute('onclick', 'loadAllAlbums("' + json.after + '", false)');
 		next.onclick = function() {
 			next.setAttribute('style', 'visibility: hidden;');
-			loadAllAlbums(this.after, false);
+			loadAllAlbums(this.getAttribute('after'), false);
 		}
 	}
 }
+
+/////////////////
+// UPDATE
+
+// Mark album as recently-viewed
+function updateAlbum(album) {
+	sendRequest('view.cgi?update=' + album, updateHandler);
+}
+function updateHandler(req) {
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		throw new Error('unable to parse response:\n' + req.responseText);
+	}
+	if (json.error != null) throw new Error("error: " + json.error);
+	if (json.date != null) {
+		gebi('album_created').innerHTML = json.date;
+	}
+}
+
+/////////////////////
+// HELPER FUNCTIONS
 
 // Create new XML/AJAX request object
 function makeHttpObject() {
@@ -299,62 +336,51 @@ function sendRequest(url, handler) {
 	}
 }
 
-function updateAlbum(album) {
-	sendRequest('view.cgi?update=' + album, updateHandler);
-}
+/////////////////////
+// INFINITE SCROLLING
+// TODO
 
-function updateHandler(req) {
-	var json;
-	try {
-		json = JSON.parse(req.responseText);
-	} catch (error) {
-		throw new Error('unable to parse response:\n' + req.responseText);
-	}
-	if (json.error != null) throw new Error("error: " + json.error);
-	if (json.date != null) {
-		gebi('album_created').innerHTML = json.date;
-	}
-}
 
+/////////////////////
+// WINDOW FUNCTIONS
 window.onload = init;
 
 window.onpopstate = function(event) {
 	init();
 };
 
-// Image functions
 
-var w = window,
-		d = document,
-		e = d.documentElement,
-		g = d.getElementsByTagName('body')[0],
-		SCREEN_WIDTH  = w.innerWidth || e.clientWidth || g.clientWidth,
-		SCREEN_HEIGHT = w.innerHeight|| e.clientHeight|| g.clientHeight;
+//////////////////
+// IMAGE DISPLAY
+
 /* Image functions */
-var bg = document.getElementById('bgimage');
-var fg = document.getElementById('fgimage');
-fg.onload = function() {
-	if (bg.style.display === 'none') { return; }
-	var width  = fg.width;
-	var height = fg.height;
-	var swidth = SCREEN_WIDTH;
-	var sheight = SCREEN_HEIGHT;
-	if (width  > swidth)  { height = height * (swidth  / width);  width  = swidth; }
-	if (height > sheight) { width  = width  * (sheight / height); height = sheight; }
-	fg.style.left = ((swidth / 2) - (width / 2)) + 'px';
-	fg.style.top = ((sheight / 2) - (height / 2)) + 'px';
-	fg.setAttribute('style', 'display: block');
-}
-fg.onclick = function() {
-	// hide it
-	fg.setAttribute('style', 'display: none');
-	bg.setAttribute('style', 'display: none');
-	fg.src = '';
-}
-bg.onclick = fg.onclick;
-
 function loadImage(url) {
+	var bg = document.getElementById('bgimage');
+	var fg = document.getElementById('fgimage');
+	
+	fg.onload = function() {
+		var w = window, d = document, e = d.documentElement, g = d.getElementsByTagName('body')[0],
+				SCREEN_WIDTH  = w.innerWidth || e.clientWidth || g.clientWidth,
+				SCREEN_HEIGHT = w.innerHeight|| e.clientHeight|| g.clientHeight;
+		var fg = document.getElementById('fgimage');
+		if (fg.src === '') { return; }
+		var width  = fg.width,  height = fg.height; // Image width/height
+		var swidth = SCREEN_WIDTH, sheight = SCREEN_HEIGHT; // Screen width/height
+		if (width  > swidth)  { height = height * (swidth  / width);  width  = swidth; }
+		else if (height > sheight) { width  = width  * (sheight / height); height = sheight; }
+		var ileft = (swidth  / 2) - (width  / 2);
+		var itop  = (sheight / 2) - (height / 2);
+		fg.setAttribute('style', 'display: block; left: ' + ileft + 'px; top: '  + itop  + 'px');
+	}
+	fg.onclick = function() {
+		// hide it
+		gebi('fgimage').setAttribute('style', 'display: none');
+		gebi('bgimage').setAttribute('style', 'display: none');
+		gebi('fgimage').src = '';
+	}
 	bg.setAttribute('style', 'display: block');
+	bg.onclick = fg.onclick;
+	
 	fg.src = url;
 	fg.alt = 'loading...';
 	return false;
