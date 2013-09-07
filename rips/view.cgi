@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import cgitb; cgitb.enable() # for debugging
+import cgitb #; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from os       import listdir, path, sep, walk, utime, stat
@@ -9,20 +9,16 @@ from random   import randrange
 from datetime import datetime
 from time     import strftime
 
-""" Print error in JSON format """
-def print_error(text):
-	print dumps( { 'error' : text } )
+##################
+# MAIN
 
-"""
-	Where the magic happens.
-	Prints JSON response to query.
-"""
+# Prints JSON response to query
 def main():
 	keys = get_keys()
 	
-	start   = 0
-	count   = 20
-	after   = ''
+	start   = 0  # Starting index
+	count   = 20 # Number of images/albums to grab
+	after   = '' # Last album to retrieve
 	preview = 10
 	if 'start' in keys and keys['start'].isdigit():
 		start = int(keys['start'])
@@ -38,20 +34,43 @@ def main():
 		get_all_albums(count, preview, after)
 
 	elif 'view' in keys:
-		album = keys['view']
-		album = album.replace(' ', '%20')
+		# Retrieve images from one album
+		album = keys['view'].replace(' ', '%20')
 		get_album(album, start, count)
 
 	elif 'update' in keys:
-		if path.exists(keys['update']):
-			if not update_file_modified(keys['update']): return
-		zipfile = '%s.zip' % keys['update']
-		if path.exists(zipfile):
-			if not update_file_modified(zipfile): return
+		update_album(keys['update'])
 		print dumps( { 'date' : utime_to_hrdate(int(strftime('%s'))) } )
 		
 	else:
 		print_error('unsupported method')
+
+##################
+# HELPER FUNCTIONS
+
+# Print error in JSON format
+def print_error(text):
+	print dumps( { 'error' : text } )
+
+# Retrieves key/value pairs from query, puts in dict
+def get_keys():
+	form = cgi.FieldStorage()
+	keys = {}
+	for key in form.keys():
+		keys[key] = form[key].value
+	return keys
+
+# Get thumbnail based on image, or 'nothumb.png' if not found
+def get_thumb(img):
+	fs = img.split(sep)
+	fs.insert(-1, 'thumbs')
+	f = sep.join(fs)
+	if not path.exists(f.replace('%25', '%')):
+		return 'nothumb.png'
+	return sep.join(fs)
+
+###################
+# ALBUMS
 
 def get_all_albums(count, preview_size, after):
 	dcount = 0 # Number of albums retrieved & returned to user
@@ -81,10 +100,12 @@ def get_all_albums(count, preview_size, after):
 	for (f, mtime) in thedirs:
 		dtotal += 1
 		
-		# User specified an 'after' and we haven't hit it yet
+		# Check if we hit the 'after' specified by request
+		if f == after:
+			hit_after = True
+		
 		if not hit_after:
-			if f == after:
-				hit_after = True
+			# Haven't hit 'after' yet, keep iterating
 			dindex += 1
 			continue
 		
@@ -98,9 +119,9 @@ def get_all_albums(count, preview_size, after):
 		images = result['images']
 		if len(images) == 0: continue # Don't consider empty albums
 		
-		dcount += 1
+		dcount += 1 # Increment number of albums retrieved
 		
-		# Randomless pick 'preview_size' number of thumbnails
+		# Randomly pick 'preview_size' number of thumbnails from the album
 		rand = []
 		if len(images) <= preview_size:
 			rand = xrange(0, len(images))
@@ -113,6 +134,7 @@ def get_all_albums(count, preview_size, after):
 		preview = []
 		for i in rand:
 			preview.append( images[i] )
+		
 		# Add album to response
 		albums.append( {
 			'album'  : f,
@@ -133,13 +155,8 @@ def get_all_albums(count, preview_size, after):
 		'count'  : dtotal
 		} )
 
-def get_thumb(img):
-	fs = img.split(sep)
-	fs.insert(-1, 'thumbs')
-	f = sep.join(fs)
-	if not path.exists(f.replace('%25', '%')):
-		return 'nothumb.png'
-	return sep.join(fs)
+##################
+# SINGLE ALBUM
 	
 def get_images_for_album(album, start, count, thumbs=False):
 	if not path.exists(album):
@@ -182,17 +199,18 @@ def get_images_for_album(album, start, count, thumbs=False):
 
 def get_album(album, start, count):
 	result = get_images_for_album(album, start, count)
-	if path.exists(album):
-		update_file_modified(album)
-		zipfile = '%s.zip' % album
-		if path.exists(zipfile):
-			update_file_modified(zipfile)
+	update_album(album) # Mark album as recently-viewed
 	print dumps( { 'album' : result } )
 
+##############
+# TIME
+
+# Epoch seconds to date (YYYY-MM-DD HH:MM:SS)
 def utime_to_hrdate(utime):
 	dt = datetime.fromtimestamp(utime)
 	return dt.strftime('%Y-%m-%d %H:%M:%S')
 
+# Epoch seconds to human-readable (1d 12h 30m 15s)
 def utime_to_hrdate2(utime):
 	dt = datetime.fromtimestamp(utime)
 	delta = dt - datetime.now()
@@ -209,9 +227,19 @@ def utime_to_hrdate2(utime):
 	if s > 0:
 		result += ' %ds' % (s)
 	return result
-		
+
+##############
+# UPDATE
+
+# Mark album as recently-viewed
+def update_album(album):
+	if path.exists(album):
+		update_file_modified(album)
+	zipfile = '%s.zip' % album
+	if path.exists(zipfile):
+		update_file_modified(zipfile)
 	
-""" Updates system 'modified time' for file to current time. """
+# Updates system 'modified time' for file to current time.
 def update_file_modified(f):
 	st = stat(f)
 	atime = int(st.st_atime)
@@ -222,14 +250,10 @@ def update_file_modified(f):
 		return False
 	return True
 
-""" Retrieves key/value pairs from query, puts in dict """
-def get_keys():
-	form = cgi.FieldStorage()
-	keys = {}
-	for key in form.keys():
-		keys[key] = form[key].value
-	return keys
+################
+# LOGS
 
+# Retrieve lines from an album's log file
 def get_logs(album, lines):
 	recents = []
 	try:
@@ -239,10 +263,10 @@ def get_logs(album, lines):
 	except:  pass
 	
 	print dumps( { 
-		'recent' : recents
+		'log' : recents
 		} )
 
-""" Tail a file and get X lines from the end """
+# Tail a file and get X lines from the end
 def tail(f, lines=1, _buffer=4098):
 	lines_found = []
 	block_counter = -1
@@ -261,7 +285,7 @@ def tail(f, lines=1, _buffer=4098):
 	result.reverse()
 	return result
 
-""" Entry point. Print leading/trailing characters, executes main() """
+# Entry point. Print leading/trailing characters, executes main()
 if __name__ == '__main__':
 	print "Content-Type: application/json"
 	print ""
