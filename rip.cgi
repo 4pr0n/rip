@@ -358,6 +358,8 @@ def add_recent(url):
 """ Entry point. Print leading/trailing characters, executes main() """
 if __name__ == '__main__':
 	print "Content-Type: application/json"
+	print "Keep-Alive: timeout=300"
+	print "Connection: Keep-Alive"
 	print ""
 	stdout.flush()
 	main()
