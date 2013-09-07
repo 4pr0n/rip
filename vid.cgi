@@ -67,6 +67,8 @@ def get_url(siteurl):
 		return get_site_setsdb(siteurl)
 	if 'ashemaletube.com' in siteurl:
 		return get_site_ast(siteurl)
+	if 'spankbang.com' in siteurl:
+		return get_site_spankbang(siteurl)
 
 	site_key = None
 	for key in sites.keys():
@@ -212,6 +214,19 @@ def get_site_ast(siteurl):
 		raise Exception('could not find file: at %s' % siteurl)
 	return web.between(r, "'file': \"", '"')[0]
 
+def get_site_spankbang(siteurl):
+	r = web.get(siteurl)
+	if not 'jwplayer("video_container")' in r:
+		raise Exception('could not find video_container at %s' % siteurl)
+	chunks = web.between(r, 'jwplayer("video_container")', '});')
+	url = ''
+	for chunk in chunks:
+		if not 'file: "' in chunk: continue
+		url = web.between(chunk, 'file: "', '"')[0]
+		url = 'http://spankbang.com%s' % url
+	if url == '':
+		raise Exception('unable to find file: at %s' % siteurl)
+	return url
 
 def is_supported(url):
 	for not_supported in ['pornhub.com/', 'youtube.com/']:
