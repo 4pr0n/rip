@@ -10,7 +10,7 @@ class shareimage(basesite):
 			raise Exception('')
 		# Ensure URL points to image-share album
 		if not re.compile('^.*share-image\.com\/\d*-?[a-zA-Z0-9\-]*$').match(url):
-			raise Exception('required /something/ not found in URL')
+			raise Exception('required share-image.com/[numbers]-... not found in URL')
 		# Strip excess fields from URL
 		if '#' in url: url = url[:url.find('#')]
 		if '?' in url: url = url[:url.find('?')]
