@@ -41,7 +41,9 @@ function loadAlbum(album, start, count, startOver) {
 	if (start == undefined) start = 0;
 	if (count == undefined) count = IMAGES_PER_PAGE;
 	if (startOver == undefined || startOver) {
-		gebi('thumbs_table').innerHTML = '';
+		try{
+			gebi('thumbs_table').innerHTML = '';
+		} catch (error) { }
 	}
 	var req = 'view.cgi';
 	req += '?start=' + start;
@@ -187,12 +189,12 @@ function allAlbumsHandler(req) {
 		table.setAttribute('id',album.album);
 		table.setAttribute('album', album.album);
 		table.setAttribute('show_album', 'true');
-		table.setAttribute('onclick', 'if (this.getAttribute("show_album")) window.open(window.location.origin + window.location.pathname + "#' + album.album + '")');
+		table.setAttribute('onclick', 'if (this.getAttribute("show_album")) window.open(window.location.href + "#' + album.album + '")');
 		table.setAttribute('width', '100%');
 		table.onclick = function() {
 			if (this.getAttribute('show_album')) {
 				// Open albums in new tab
-				window.open(window.location.origin + window.location.pathname + '#' + this.getAttribute('album'));
+				window.open(window.location.href + '#' + this.getAttribute('album'));
 			}
 		}
 		var titletr = dce('tr');
@@ -238,7 +240,7 @@ function allAlbumsHandler(req) {
 			img.onload = function() {
 				var w = parseInt(this.getAttribute('width'));
 				if (w > 100) {
-					this.setAttribute('width') = w * 0.5;
+					this.setAttribute('width', w * 0.5);
 				}
 				this.onload = null;
 				this.setAttribute('style', 'display: inline');
@@ -353,7 +355,6 @@ window.onpopstate = function(event) {
 //////////////////
 // IMAGE DISPLAY
 
-/* Image functions */
 function loadImage(url) {
 	var bg = document.getElementById('bgimage');
 	var fg = document.getElementById('fgimage');
