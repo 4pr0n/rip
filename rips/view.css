@@ -241,3 +241,9 @@ table.album:hover {
 	padding: 10px;
 	padding-top: 20px;
 }
+
+div.footer {
+	padding-left: 30px;
+	padding-top: 20px;
+	font-size: 0.7em;
+}

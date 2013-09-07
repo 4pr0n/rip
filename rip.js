@@ -45,24 +45,25 @@ function recentHandler(req) {
 		var li = dce('li');
 		li.className = 'recent';
 		
-		var inpdl = dce('input');
-		inpdl.className = 'download_box download_arrow';
-		inpdl.setAttribute('style', 'margin: 0px; margin-left: 2px; margin-right: 2px;');
-		inpdl.type = 'button';
-		inpdl.album = rec[i].url.replace('http://', '').replace('https://', '');
-		inpdl.setAttribute('onclick', 'loadAlbum("' + inpdl.album + '")');
-		inpdl.onclick = function() { return loadAlbum(this.album) };
-		li.appendChild(inpdl);
+		var adl = dce('a');
+		adl.className = 'download_box download_arrow';
+		adl.setAttribute('album', rec[i].url.replace('http://', '').replace('https://', ''));
+		adl.href = '#' + adl.getAttribute('album');
+		adl.setAttribute('onclick', 'loadAlbum("' + adl.getAttribute('album') + '")');
+		adl.onclick = function() {
+			loadAlbum(this.getAttribute('album'));
+			return false;
+		};
+		adl.innerHTML = '&nbsp;&nbsp;';
+		li.appendChild(adl);
 		
-		var inpview = dce('input');
-		inpview.value = 'view';
-		inpview.className = 'download_box';
-		inpview.setAttribute('style', 'margin-left: 2px; margin-right: 2px;');
-		inpview.type = 'button';
-		inpview.album = rec[i].view_url;
-		inpview.setAttribute('onclick', 'window.open("' + inpview.album + '")');
-		inpview.onclick = function() {   window.open(this.album) };
-		li.appendChild(inpview);
+		var aview = dce('a');
+		aview.className = 'download_box';
+		aview.setAttribute('style', 'margin-right: 5px;');
+		aview.href = rec[i].view_url;
+		aview.target = '_BLANK';
+		aview.innerHTML = 'view';
+		li.appendChild(aview);
 		
 		var a = dce('a');
 		a.setAttribute('style', 'padding-left: 3px');

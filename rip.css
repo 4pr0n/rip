@@ -291,7 +291,7 @@ td.recent {
 	font-size: 0.9em;
 }
 li.recent {
-	padding-top: 5px;
+	padding-top: 15px;
 	list-style: none;
 }
 
@@ -326,7 +326,9 @@ li {
 .download_arrow {
 	background-image: url(download.png);
 	background-repeat: no-repeat;
-	background-size: 100% auto;
+	background-size: 90% auto;
+	background-position: center center;
 	width: 25px;
 	height: 25px;
+	margin-right: 5px;
 }
