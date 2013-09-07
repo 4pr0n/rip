@@ -5,6 +5,11 @@ function statusbar(text) {
 	gebi('status_bar').innerHTML = text;
 }
 
+// Safari is BAD. 
+// I have to append a blank style element to get the darn thing to refresh
+// More info: http://stackoverflow.com/questions/3485365
+document.body.removeChild(document.body.appendChild(dce('style')));
+
 // Executes when document has loaded
 function init() {
 	var url = String(window.location);
