@@ -47,14 +47,13 @@ function recentHandler(req) {
 		
 		var adl = dce('a');
 		adl.className = 'download_box download_arrow';
+		adl.innerHTML = '&nbsp;&nbsp;';
 		adl.setAttribute('album', rec[i].url.replace('http://', '').replace('https://', ''));
 		adl.href = '#' + adl.getAttribute('album');
-		adl.setAttribute('onclick', 'loadAlbum("' + adl.getAttribute('album') + '")');
+		adl.setAttribute('onclick', 'return loadAlbum("' + rec[i].url.replace('http://', '').replace('https://', '') + '")');
 		adl.onclick = function() {
-			loadAlbum(this.getAttribute('album'));
-			return false;
+			return loadAlbum(this.getAttribute('album'));
 		};
-		adl.innerHTML = '&nbsp;&nbsp;';
 		li.appendChild(adl);
 		
 		var aview = dce('a');
@@ -102,7 +101,7 @@ function loadAlbum(url) {
 	if (url.indexOf('#') > -1) {
 		url = url.substr(0, url.indexOf('#'));
 	}
-	window.location.href = window.location.pathname + '#' + url;
+	window.location.hash = url;
 	window.location.reload(true);
 }
 
@@ -140,7 +139,7 @@ function getQueryString(start) {
 function setHash(url) {
 	url = url.replace('http://', '').replace('https://', '')
 	url = escape(url).replace(/\//g, '%2F');
-	window.location = String(window.location).replace(/\#.*$/, "") + '#' + url;
+	window.location.hash = url;
 }
 
 function disableControls() {
