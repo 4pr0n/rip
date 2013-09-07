@@ -28,6 +28,10 @@ table.header {
 	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.6);
 	margin-bottom: 20px;
 }
+.clickable:active {
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.6);
+}
+	
 
 a.header {
 	text-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6),
@@ -161,44 +165,22 @@ td.image {
 td.image_small {
 	vertical-align: middle;
 	text-align: center;
-	min-width: 100px;
-	min-height: 100px;
+	min-width: 120px;
+	min-height: 120px;
 	padding: 0px;
 	margin: 0px;
 }
 img.image_small {
-	max-width: 100px;
-	max-height: 100px;
+	max-width: 120px;
+	max-height: 120px;
 }
 
-.nav_button {
-	visibility: hidden;
-	margin-top: 10px;
-	font-weight: bold;
+div.load_content {
 	font-size: 1.2em;
-	background-color: #111;
-	color: #fff;
-	border-radius: 5px;
-	padding: 5px;
-	padding-left: 10px;
-	padding-right: 10px;
-	white-space: nowrap;
-	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.6),
-	            0px  4px 10px rgba(150, 150, 150, 0.6),
-	           -4px  0px 10px rgba(150, 150, 150, 0.6),
-	            0px -4px 10px rgba(150, 150, 150, 0.6),
-	            5px  5px  5px rgba( 10,  10,  10, 0.3);
-}
-.nav_button:hover {
-	cursor: pointer;
-	color: #fff;
-	text-decoration: none;
-	box-shadow: 6px  0px 10px rgba(150, 150, 150, 0.8),
-	            0px  6px 10px rgba(150, 150, 150, 0.8),
-	           -6px  0px 10px rgba(150, 150, 150, 0.8),
-	            0px -6px 10px rgba(150, 150, 150, 0.8),
-	            5px  5px  5px rgba( 10,  10,  10, 0.3);
-
+	text-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px  4px 10px rgba(150, 150, 150, 0.6),
+	             -4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px -4px 10px rgba(150, 150, 150, 0.6);
 }
 
 .bgimage {
@@ -233,6 +215,9 @@ img.image_small {
 	padding-left: 20px;
 }
 
+table.album {
+	height: 180px;
+}
 table.album:hover {
 	cursor: pointer;
 	background-color: #555;
