@@ -90,6 +90,7 @@ def get_all_albums(count, preview_size, after):
 		
 		# We hit the number of albums we're supposed to grab
 		if (dcount >= count and count != -1):
+			last_after = f
 			break
 		dindex += 1
 		
@@ -98,7 +99,6 @@ def get_all_albums(count, preview_size, after):
 		if len(images) == 0: continue # Don't consider empty albums
 		
 		dcount += 1
-		last_after = f
 		
 		# Randomless pick 'preview_size' number of thumbnails
 		rand = []
