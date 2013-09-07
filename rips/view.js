@@ -367,8 +367,8 @@ function loadImage(url) {
 		if (fg.src === '') { return; }
 		var width  = fg.width,  height = fg.height; // Image width/height
 		var swidth = SCREEN_WIDTH, sheight = SCREEN_HEIGHT; // Screen width/height
-		if (width  > swidth)  { height = height * (swidth  / width);  width  = swidth; }
-		else if (height > sheight) { width  = width  * (sheight / height); height = sheight; }
+		if (width  > swidth)  { height = height * (swidth  / width);  width  = swidth;  }
+		if (height > sheight) { width  = width  * (sheight / height); height = sheight; }
 		var ileft = (swidth  / 2) - (width  / 2);
 		var itop  = (sheight / 2) - (height / 2);
 		fg.setAttribute('style', 'display: block; left: ' + ileft + 'px; top: '  + itop  + 'px');
