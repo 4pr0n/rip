@@ -3,7 +3,7 @@
 import cgitb #; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
-from sys    import argv
+from sys    import argv, stdout
 from os     import remove, path, stat, utime, SEEK_END, sep, walk
 from shutil import rmtree
 from stat   import ST_ATIME, ST_MTIME
@@ -101,6 +101,9 @@ def rip(url, cached, urls_only):
 		if blacklisted_url.lower() in url.lower():
 			print_error("specific URL not supported")
 			return
+	if 'twitter.com' in url:
+		print_error('twitter rips temporarily disabled due to overuse')
+		return
 	try:
 		# Get domain-specific ripper for URL
 		ripper = get_ripper(url, urls_only)
@@ -120,7 +123,7 @@ def rip(url, cached, urls_only):
 			update_file_modified(ripper.existing_zip_path())
 			add_recent(url)
 			response = {}
-			response['zip']   = ripper.existing_zip_path()
+			response['zip']   = ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520')
 			response['size']  = ripper.get_size(ripper.existing_zip_path())
 			if path.exists(ripper.working_dir):
 				update_file_modified(ripper.working_dir)
@@ -131,7 +134,7 @@ def rip(url, cached, urls_only):
 						if f.endswith('.txt'): continue
 						image_count += 1
 							
-				response['album'] = ripper.working_dir.replace('rips/', '')
+				response['album'] = ripper.working_dir.replace('rips/', '').replace('%20', '%2520')
 				response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
 				response['image_count'] = image_count
 			print dumps( response )
@@ -181,10 +184,10 @@ def rip(url, cached, urls_only):
 		f = open('%s%scomplete.txt' % (ripper.working_dir, sep), 'w')
 		f.write('\n')
 		f.close()
-		response['album'] = ripper.working_dir
+		response['album'] = ripper.working_dir.replace(' ', '%20').replace('%20', '%2520')
 		response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
 	
-	response['zip']  = ripper.existing_zip_path()
+	response['zip']  = ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520')
 	response['size'] = ripper.get_size(ripper.existing_zip_path())
 	
 	
@@ -201,6 +204,9 @@ def rip(url, cached, urls_only):
 """
 def check(url, urls_only):
 	url = unquote(url).replace(' ', '%20')
+	if 'twitter.com' in url:
+		print_error('twitter rips temporarily disabled due to overuse')
+		return
 	try:
 		ripper = get_ripper(url, urls_only)
 	except Exception, e:
@@ -211,7 +217,7 @@ def check(url, urls_only):
 	if ripper.existing_zip_path() != None:
 		# Return link to zip
 		print dumps( {
-			'zip'  : ripper.existing_zip_path(),
+			'zip'  : ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520'),
 			'size' : ripper.get_size(ripper.existing_zip_path())
 			} )
 	else:
@@ -353,6 +359,7 @@ def add_recent(url):
 if __name__ == '__main__':
 	print "Content-Type: application/json"
 	print ""
+	stdout.flush()
 	main()
 	print "\n"
 

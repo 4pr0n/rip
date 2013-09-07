@@ -193,8 +193,8 @@ def get_images_for_album(album, start, count, thumbs=False):
 	result['total']   = dtotal
 	result['start']   = start
 	result['count']   = dcount
-	result['album']   = album
-	result['archive'] = './%s.zip' % album
+	result['album']   = album.replace('%20', ' ')
+	result['archive'] = './%s.zip' % album.replace(' ', '%20').replace('%20', '%2520')
 	return result
 
 def get_album(album, start, count):
