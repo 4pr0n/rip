@@ -12,7 +12,7 @@ from PIL       import Image
 LOG_NAME      = 'log.txt' 
 RIP_DIRECTORY = 'rips' # Directory to store rips in
 MAX_THREADS   = 3
-MAX_IMAGES    = 1000
+MAX_IMAGES    = 500
 
 """
 	Abstract Python 'interface' for a site ripper.
