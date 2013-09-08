@@ -12,7 +12,9 @@ document.body.removeChild(document.body.appendChild(dce('style')));
 
 // Executes when document has loaded
 function init() {
+	handleResize();
 	over18();
+	if (gebi('rip_text') === null) { return; }
 	var url = String(window.location);
   if (url.lastIndexOf('#') >= 0) {
     var link = unescape(url.substring(url.lastIndexOf('#')+1));
@@ -25,11 +27,12 @@ function init() {
 	if (getCookie('cache_enabled') == 'true') {
 		gebi('rip_cached').setAttribute('style', 'display: inline-block');
 		gebi('label_cached').setAttribute('style', 'display: inline-block');
+		refreshRecent();
 	} else {
 		gebi('rip_cached').setAttribute('style', 'display: none');
 		gebi('label_cached').setAttribute('style', 'display: none');
+		refreshRecent();
 	}
-	refreshRecent();
 }
 
 function refreshRecent() {
@@ -532,10 +535,10 @@ function getCookie(key) {
 }
 var TOS_VERSION = '1';
 function over18() {
+	if (gebi('rip_text') == undefined) { return; }
 	if (getCookie('rip_tos_v' + TOS_VERSION) === 'true') { return; }
-	gebi('top_bar').setAttribute(  'style', 'display: none');
-	gebi('maintable').setAttribute('style', 'display: none');
-	gebi('footer').setAttribute(   'style', 'display: none');
+	gebi('maintable').setAttribute( 'style', 'display: none');
+	gebi('footer').setAttribute(    'style', 'display: none');
 	// User hasn't agreed to TOS or verified age.
 	var maindiv = dce('div');
 	maindiv.setAttribute('style', 'margin: 20px');
@@ -545,12 +548,12 @@ function over18() {
 	maindiv.appendChild(h1);
 
 	var div = dce('div');
+	div.className = 'warning';
 	div.innerHTML  = 'This website contains adult content and is intended for persons over the age of 18.';
 	div.innerHTML += '<p>';
 	div.innerHTML += 'By entering this site, you agree to the following terms of use:';
 	
 	var ul = dce('ul');
-	ul.setAttribute('style', 'margin-bottom: 30px');
 	
 	var li = dce('li');
 	li.innerHTML = 'I am over eighteen years old.';
@@ -569,7 +572,6 @@ function over18() {
 	ul.appendChild(li);
 	
 	div.appendChild(ul);
-	maindiv.appendChild(div);
 	
 	var agree = dce('input');
 	agree.type = 'button';
@@ -584,23 +586,31 @@ function over18() {
 	disagree.setAttribute('style', 'margin-left: 20px');
 	disagree.setAttribute('onclick', 'i_disagree()');
 	disagree.onclick = function() { i_disagree(); };
-	maindiv.appendChild(agree);
-	maindiv.appendChild(disagree);
+	div.appendChild(agree);
+	div.appendChild(disagree);
+	maindiv.appendChild(div);
 	document.body.appendChild(maindiv);
 }
 
 function i_agree() {
 	setCookie('rip_tos_v' + TOS_VERSION, 'true');
-	gebi('top_bar').setAttribute(  'style', 'display: block');
-	gebi('maintable').setAttribute('style', 'display: table');
-	gebi('footer').setAttribute(   'style', 'display: table');
-	gebi('maindiv').setAttribute(  'style', 'display: none');
+	gebi('maintable').setAttribute( 'style', 'display: table');
+	gebi('footer').setAttribute(    'style', 'display: table');
+	gebi('maindiv').setAttribute(   'style', 'display: none');
 }
 
 function i_disagree() {
 	window.location.href = 'about:blank';
 }
 
+////////////////
+// BOTTOM BAR
+function handleResize() {
+	var bb = gebi('bottom_bar');
+	var t = document.documentElement.clientHeight - bb.clientHeight;
+	bb.setAttribute('style', 'top: ' + t + 'px');
+}
+window.onresize = handleResize;
 
 // Call initialization function after entire JS file is parsed
 window.onload = init;

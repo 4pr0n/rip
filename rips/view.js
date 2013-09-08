@@ -8,17 +8,12 @@ var ALBUM_PREVIEW_IMAGE_BREAKS = 4; // Thumbnails per row (all-albums view)
 var SINGLE_ALBUM_IMAGE_BREAKS  = 4; // Thumbnails per row (single-album view)
 var IMAGES_PER_PAGE           = 12; // Thumbnails per page
 
-// Check if current page has already been loaded
-// Some browsers don't call the popupstate event properly, this hopefully fixes it.
-var CURRENT_URL = '';
-function isNewPage() {
-	if (CURRENT_URL === String(window.location)) { return false; }
-	CURRENT_URL = String(window.location);
-	return true;
-}
-
 // Executes when document has loaded
 function init() {
+	handleResize();
+	if (over18()) {
+		return;
+	}
 	var url = String(window.location);
 	if (window.location.hash !== '') {
 		// Viewing specific album
@@ -34,7 +29,6 @@ function init() {
 // SINGLE ALBUM
 
 function loadAlbum(album, start, count, startOver) {
-	if (!isNewPage() && (startOver == undefined || startOver)) { return true; }
 	gebi('albums_area').setAttribute('style', 'display: none');
 	gebi('status_area').setAttribute('style', 'display: block');
 	gebi('thumbs_area').setAttribute('style', 'display: block');
@@ -163,12 +157,10 @@ function getAllAlbumUrl(after) {
 }
 
 function loadAllAlbums(after, startOver) {
-	if (!isNewPage() && (startOver == undefined || startOver)) { return true; }
 	if (after == undefined) after = '';
 	gebi('albums_area').setAttribute('style', 'display: block');
 	gebi('status_area').setAttribute('style', 'display: none');
 	gebi('thumbs_area').setAttribute('style', 'display: none');
-	gebi('main_table').setAttribute('style', 'width: 100%');
 	gebi('albums_table').setAttribute('loading', 'true');
 	// Remove existing albums if needed
 	if (startOver == undefined || startOver) { 
@@ -316,10 +308,10 @@ function loadNextAlbum() {
 	}
 	
 	// Load next album
-	gebi('albums_table').setAttribute('loading', 'true');
-	gebi('next').innerHTML += '<br>loading...'; // Give them hope
+	albums.setAttribute('loading', 'true');
+	next.innerHTML += '<br>loading...'; // Give them hope
 	setTimeout(function() {
-		loadAllAlbums(next.getAttribute('after'), false);
+		loadAllAlbums(gebi('next').getAttribute('after'), false);
 	}, 500);
 }
 	
@@ -397,11 +389,6 @@ function scrollHandler() {
 // WINDOW FUNCTIONS
 window.onload = init;
 
-window.onpopstate = function(event) {
-	init();
-};
-
-
 //////////////////
 // IMAGE DISPLAY
 
@@ -436,3 +423,99 @@ function loadImage(url) {
 	fg.alt = 'loading...';
 	return false;
 }
+
+
+///////////////////////////
+// COOKIES & TOS
+function setCookie(key, value) {
+	document.cookie = key + '=' + value + '; expires=Fri, 27 Dec 2999 00:00:00 UTC; path=/';
+}
+function getCookie(key) {
+	var cookies = document.cookie.split('; ');
+	for (var i in cookies) {
+		var pair = cookies[i].split('=');
+		if (pair[0] == key)
+			return pair[1];
+	}
+	return "";
+}
+
+var TOS_VERSION = '1';
+function over18() {
+	if (getCookie('rip_tos_v' + TOS_VERSION) === 'true') { return false; }
+	gebi('main_table').setAttribute('style', 'display: none');
+	gebi('albums_table').setAttribute('loading', 'true');
+	// User hasn't agreed to TOS or verified age.
+	var maindiv = dce('div');
+	maindiv.setAttribute('style', 'margin: 20px');
+	maindiv.setAttribute('id', 'maindiv');
+	var h1 = dce('h1');
+	h1.innerHTML = 'Warning: This site contains explicit content';
+	maindiv.appendChild(h1);
+
+	var div = dce('div');
+	div.className = 'warning';
+	div.innerHTML  = 'This website contains adult content and is intended for persons over the age of 18.';
+	div.innerHTML += '<p>';
+	div.innerHTML += 'By entering this site, you agree to the following terms of use:';
+	
+	var ul = dce('ul');
+	
+	var li = dce('li');
+	li.innerHTML = 'I am over eighteen years old.';
+	ul.appendChild(li);
+	
+	li = dce('li');
+	li.innerHTML = 'I will not use this site to download illegal material, or to acquire illegal material in any way.';
+	ul.appendChild(li);
+	
+	li = dce('li');
+	li.innerHTML = 'I will report illegal content to the site administrator immediately via reddit or email';
+	ul.appendChild(li);
+	
+	li = dce('li');
+	li.innerHTML = 'I will not hog the resources of this site, and will not rip more than 20 albums per day.';
+	ul.appendChild(li);
+	
+	div.appendChild(ul);
+	
+	var agree = dce('input');
+	agree.type = 'button';
+	agree.value = 'Agree & Enter';
+	agree.className = 'button';
+	agree.setAttribute('onclick', 'i_agree()');
+	agree.onclick = function() { i_agree(); };
+	var disagree = dce('input');
+	disagree.type = 'button';
+	disagree.value = 'Leave';
+	disagree.className = 'button';
+	disagree.setAttribute('style', 'margin-left: 20px');
+	disagree.setAttribute('onclick', 'i_disagree()');
+	disagree.onclick = function() { i_disagree(); };
+	div.appendChild(agree);
+	div.appendChild(disagree);
+	maindiv.appendChild(div);
+	document.body.appendChild(maindiv);
+	return true;
+}
+
+function i_agree() {
+	setCookie('rip_tos_v' + TOS_VERSION, 'true');
+	gebi('main_table').setAttribute('style', 'display: table');
+	gebi('maindiv').setAttribute('style', 'display: none');
+	gebi('albums_table').removeAttribute('loading');
+	init();
+}
+function i_disagree() {
+	window.location.href = 'about:blank';
+}
+
+////////////////
+// BOTTOM BAR
+function handleResize() {
+	var bb = gebi('bottom_bar');
+	var t = document.documentElement.clientHeight - bb.clientHeight;
+	bb.setAttribute('style', 'top: ' + t + 'px');
+}
+window.onresize = handleResize;
+

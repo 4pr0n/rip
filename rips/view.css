@@ -234,3 +234,88 @@ div.footer {
 	padding-top: 20px;
 	font-size: 0.7em;
 }
+
+#main_table {
+	width: 100%;
+}
+
+input.button {
+	font-size: 1.9em;
+	font-weight: bold;
+	background-color: #eee;
+	letter-spacing: -0.03em;
+	border-radius: 10px;
+	padding: 5px;
+	padding-left: 35px;
+	padding-right: 35px;
+	cursor: pointer;
+	box-shadow: 5px  5px  5px rgba(  0,   0,   0, 0.6);
+}
+input.button:hover {
+	box-shadow:   4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px  4px 10px rgba(150, 150, 150, 0.6),
+	             -4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px -4px 10px rgba(150, 150, 150, 0.6);
+}
+input.button:active {
+	background-color: #ccc;
+}
+
+#bottom_bar {
+	background-color: #444;
+	width: 100%;
+	position: fixed;
+	left: 0px;
+	top: 2000px;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	box-shadow: 0px -5px 5px rgba(0, 0, 0, 0.6);
+}
+table.bottom {
+	max-height: 10px;
+}
+td.bottom:hover {
+	background-color: #555;
+}
+a.bottom {
+	font-size: 0.8em;
+	font-weight: bold;
+	margin-top: 0px;
+	padding: 0px;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+a.bottom:hover {
+	background-color: #555;
+	text-shadow:  4px  0px 5px rgba(130, 130, 130, 0.9),
+	              0px  4px 5px rgba(130, 130, 130, 0.9),
+	             -4px  0px 5px rgba(130, 130, 130, 0.9),
+	              0px -4px 5px rgba(130, 130, 130, 0.9);
+	text-decoration: none;
+}
+
+div.donate_button input {
+	background: transparent url(../donate.png);
+	cursor: pointer;
+	width:  92px;
+	height: 26px;
+	border: none;
+}
+div.donate_button input:hover {
+	background: transparent url(../donate_color.png);
+}
+
+h1 {
+	text-shadow:  4px  0px 5px rgba(0, 0, 0, 0.9),
+	              0px  4px 5px rgba(0, 0, 0, 0.9),
+	             -4px  0px 5px rgba(0, 0, 0, 0.9),
+	              0px -4px 5px rgba(0, 0, 0, 0.9);
+}
+div.warning {
+	background-color: #444;
+	border-radius: 30px;
+	padding: 25px;
+	width: auto;
+	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.6);
+	margin-bottom: 30px;
+}

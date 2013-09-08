@@ -51,7 +51,9 @@ from sites.site_shareimage  import  shareimage
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
 
-blacklisted_urls = ['butttoucher.com/users/Crimson_in_Red', 'reddit.com/user/crimson_in_red']
+blacklisted_urls = ['butttoucher.com/users/Crimson_in_Red', \
+                    'reddit.com/user/crimson_in_red', \
+                    'http://imgbox.com/g/xXIWnIuGWg']
 
 """ Print error in JSON format """
 def print_error(text):
