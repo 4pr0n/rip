@@ -25,6 +25,8 @@ class tumblr(basesite):
 			raise Exception('')
 		if 'www.tumblr.com' in url:
 			raise Exception('Required user.tumblr.com format')
+		if not '/tagged/' in url:
+			raise Exception('Tumblr rip required /tagged/ in URL')
 		return url
 
 	""" Discover directory path based on URL """
