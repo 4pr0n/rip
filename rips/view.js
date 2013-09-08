@@ -101,11 +101,8 @@ function albumHandler(req) {
 		var thumbi = dce('img');
 		thumbi.src = images[i].thumb;
 		thumbi.setAttribute('style', 'height: 150px; width: 150px;');
-		//thumbi.setAttribute('width', '200');
-		//thumbi.setAttribute('height', '200');
-		thumbi.setAttribute('style', 'visibility: hidden; display: block');
 		thumbi.onload = function() {
-			this.setAttribute('style', 'visibility: visible');
+			this.setAttribute('style', 'visibility: visible; display: inline');
 		};
 		thumba.appendChild(thumbi);
 		thumbtd.appendChild(thumba);
@@ -257,12 +254,13 @@ function allAlbumsHandler(req) {
 			img.className = 'image_small';
 			img.src = album.images[i].thumb;
 			img.onload = function() {
+				this.setAttribute('style', 'visibility: visible; display: inline');
 				var w = parseInt(this.getAttribute('width'));
 				if (w > 100) {
 					this.setAttribute('width', w * 0.5);
 				}
 				this.onload = null;
-				this.setAttribute('style', 'display: inline');
+				//this.setAttribute('style', 'display: inline');
 			}
 			
 			imga.appendChild(img);
