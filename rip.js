@@ -12,6 +12,7 @@ document.body.removeChild(document.body.appendChild(dce('style')));
 
 // Executes when document has loaded
 function init() {
+	over18();
 	var url = String(window.location);
   if (url.lastIndexOf('#') >= 0) {
     var link = unescape(url.substring(url.lastIndexOf('#')+1));
@@ -514,6 +515,92 @@ function showMoreNews() {
 	gebi('more_news').appendChild(document.createTextNode(' '));
 	gebi('more_news').innerHTML += '';
 }
+
+///////////////////////////
+// COOKIES & TOS
+function setCookie(key, value) {
+	document.cookie = key + '=' + value + '; expires=Fri, 27 Dec 2999 00:00:00 UTC; path=/';
+}
+function getCookie(key) {
+	var cookies = document.cookie.split('; ');
+	for (var i in cookies) {
+		var pair = cookies[i].split('=');
+		if (pair[0] == key)
+			return pair[1];
+	}
+	return "";
+}
+var TOS_VERSION = '1';
+function over18() {
+	if (getCookie('rip_tos_v' + TOS_VERSION) === 'true') { return; }
+	gebi('top_bar').setAttribute(  'style', 'display: none');
+	gebi('maintable').setAttribute('style', 'display: none');
+	gebi('footer').setAttribute(   'style', 'display: none');
+	// User hasn't agreed to TOS or verified age.
+	var maindiv = dce('div');
+	maindiv.setAttribute('style', 'margin: 20px');
+	maindiv.setAttribute('id', 'maindiv');
+	var h1 = dce('h1');
+	h1.innerHTML = 'Warning: This site contains explicit content';
+	maindiv.appendChild(h1);
+
+	var div = dce('div');
+	div.innerHTML  = 'This website contains adult content and is intended for persons over the age of 18.';
+	div.innerHTML += '<p>';
+	div.innerHTML += 'By entering this site, you agree to the following terms of use:';
+	
+	var ul = dce('ul');
+	ul.setAttribute('style', 'margin-bottom: 30px');
+	
+	var li = dce('li');
+	li.innerHTML = 'I am over eighteen years old.';
+	ul.appendChild(li);
+	
+	li = dce('li');
+	li.innerHTML = 'I will not use this site to download illegal material, or to acquire illegal material in any way.';
+	ul.appendChild(li);
+	
+	li = dce('li');
+	li.innerHTML = 'I will report illegal content to the site administrator immediately via reddit or email';
+	ul.appendChild(li);
+	
+	li = dce('li');
+	li.innerHTML = 'I will not hog the resources of this site, and will not rip more than 20 albums per day.';
+	ul.appendChild(li);
+	
+	div.appendChild(ul);
+	maindiv.appendChild(div);
+	
+	var agree = dce('input');
+	agree.type = 'button';
+	agree.value = 'Agree & Enter';
+	agree.className = 'button';
+	agree.setAttribute('onclick', 'i_agree()');
+	agree.onclick = function() { i_agree(); };
+	var disagree = dce('input');
+	disagree.type = 'button';
+	disagree.value = 'Leave';
+	disagree.className = 'button';
+	disagree.setAttribute('style', 'margin-left: 20px');
+	disagree.setAttribute('onclick', 'i_disagree()');
+	disagree.onclick = function() { i_disagree(); };
+	maindiv.appendChild(agree);
+	maindiv.appendChild(disagree);
+	document.body.appendChild(maindiv);
+}
+
+function i_agree() {
+	setCookie('rip_tos_v' + TOS_VERSION, 'true');
+	gebi('top_bar').setAttribute(  'style', 'display: block');
+	gebi('maintable').setAttribute('style', 'display: table');
+	gebi('footer').setAttribute(   'style', 'display: table');
+	gebi('maindiv').setAttribute(  'style', 'display: none');
+}
+
+function i_disagree() {
+	window.location.href = 'about:blank';
+}
+
 
 // Call initialization function after entire JS file is parsed
 window.onload = init;
