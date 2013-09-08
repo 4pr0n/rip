@@ -101,8 +101,9 @@ function albumHandler(req) {
 		var thumbi = dce('img');
 		thumbi.src = images[i].thumb;
 		thumbi.setAttribute('style', 'height: 150px; width: 150px;');
+		thumbi.setAttribute('style', 'visibility: hidden');
 		thumbi.onload = function() {
-			this.setAttribute('style', 'visibility: visible; display: inline');
+			this.setAttribute('style', 'visibility: visible');
 		};
 		thumba.appendChild(thumbi);
 		thumbtd.appendChild(thumba);
@@ -253,8 +254,9 @@ function allAlbumsHandler(req) {
 			var img = dce('img');
 			img.className = 'image_small';
 			img.src = album.images[i].thumb;
+			img.setAttribute('style', 'visibility: hidden');
 			img.onload = function() {
-				this.setAttribute('style', 'visibility: visible; display: inline');
+				this.setAttribute('style', 'visibility: visible');
 				var w = parseInt(this.getAttribute('width'));
 				if (w > 100) {
 					this.setAttribute('width', w * 0.5);

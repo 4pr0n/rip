@@ -135,7 +135,8 @@ a.box:hover {
 }
 
 img {
-	visibility: hidden;
+	visibility: visible;
+	display: inline;
 	margin: 2px;
 	margin-bottom: 0px;
 	margin-top: 0px;
