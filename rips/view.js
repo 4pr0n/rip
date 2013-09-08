@@ -6,7 +6,7 @@ var ALBUMS_AT_ONCE             = 6; // Number of albums to return per request
 var ALBUM_PREVIEW_SIZE         = 4; // Number of thumbnails per album
 var ALBUM_PREVIEW_IMAGE_BREAKS = 4; // Thumbnails per row (all-albums view)
 var SINGLE_ALBUM_IMAGE_BREAKS  = 4; // Thumbnails per row (single-album view)
-var IMAGES_PER_PAGE            = 8; // Thumbnails per page
+var IMAGES_PER_PAGE           = 12; // Thumbnails per page
 
 // Check if current page has already been loaded
 // Some browsers don't call the popupstate event properly, this hopefully fixes it.
@@ -92,6 +92,7 @@ function albumHandler(req) {
 	for (var i = 0; i < images.length; i++) {
 		var thumbtd = dce('td');
 		thumbtd.className = 'image';
+		thumbtd.setAttribute('style', 'height: 150px; width: 150px;');
 		var thumba = dce('a');
 		thumba.href = images[i].image;
 		thumba.onclick = function() {
@@ -99,8 +100,12 @@ function albumHandler(req) {
 		};
 		var thumbi = dce('img');
 		thumbi.src = images[i].thumb;
+		thumbi.setAttribute('style', 'height: 150px; width: 150px;');
+		//thumbi.setAttribute('width', '200');
+		//thumbi.setAttribute('height', '200');
+		thumbi.setAttribute('style', 'visibility: hidden; display: block');
 		thumbi.onload = function() {
-			this.setAttribute('style', 'display: inline');
+			this.setAttribute('style', 'visibility: visible');
 		};
 		thumba.appendChild(thumbi);
 		thumbtd.appendChild(thumba);
@@ -123,6 +128,7 @@ function albumHandler(req) {
 		var remaining = album.total - (album.start + album.count);
 		next.innerHTML = remaining + ' images remaining';
 	}
+	scrollHandler();
 }
 
 function loadMoreImages() {
@@ -294,6 +300,7 @@ function allAlbumsHandler(req) {
 		var remaining = json.total - json.index;
 		next.innerHTML = remaining + ' albums remaining';
 	}
+	scrollHandler();
 }
 function loadNextAlbum() {
 	var albums = gebi('albums_table');
@@ -414,7 +421,7 @@ function loadImage(url) {
 		if (height > sheight) { width  = width  * (sheight / height); height = sheight; }
 		var ileft = (swidth  / 2) - (width  / 2);
 		var itop  = (sheight / 2) - (height / 2);
-		fg.setAttribute('style', 'display: block; left: ' + ileft + 'px; top: '  + itop  + 'px');
+		fg.setAttribute('style', 'display: block; visibility: visible; left: ' + ileft + 'px; top: '  + itop  + 'px');
 	}
 	fg.onclick = function() {
 		// hide it
