@@ -8,52 +8,161 @@
 	color: #fff;
 }
 
+/* Commonly used traits */
+.right {
+	text-align: right;
+}
+.left {
+	text-align: left;
+}
+.center {
+	text-align: center;
+}
+.top {
+	vertical-align: top;
+}
+.vcenter {
+	vertical-align: center;
+}
+.width100 {
+	width: 100%;
+}
+
+.hidden {
+	visibility: hidden;
+}
+.not_displayed {
+	display: none;
+}
+.nowrap {
+	white-space: nowrap;
+}
+
+.fontsmall {
+	font-size: 0.7em;
+}
+.fontbig {
+	font-size: 2.0em;
+}
+.bold {
+	font-weight: bold;
+}
+.underline {
+	text-decoration: underline;
+}
+
+.pointer {
+	cursor: pointer;
+}
+
+
+/* ID-specific traits */
+#maintable {
+	padding-top: 0px;
+}
+#recent_spinner {
+	visibility: hidden;
+}
+
+/* Root element traits */
+
 body {
 	padding: 20px;
 	padding-top: 30px;
+	padding-bottom: 40px;
 	background-color: #666;
 	color: #eee;
 	font-family: Verdana, monospace;
 }
 
 a {
-	text-decoration: none;
+	text-decoration: underline;
 	color: #eee;
 }
 a:hover {
 	color: #fff;
 	text-decoration: underline;
+	text-shadow:  4px  0px 10px rgba(130, 130, 130, 0.9),
+	              0px  4px 10px rgba(130, 130, 130, 0.9),
+	             -4px  0px 10px rgba(130, 130, 130, 0.9),
+	              0px -4px 10px rgba(130, 130, 130, 0.9);
 }
 
-div#top_bar {
+hr {
 	padding: 0px;
-	position: fixed;
-	display: none; /*block;*/
-	border-bottom: solid 2px #eee;
-	top:  0;
-	left: 0;
-	width: 100%;
-	z-index: 5;
-}
-div.top_bar_text {
-	font-size: 0.8em;
-	color: #eee;
-	background-color: #444;
-	padding: 2px;
-	padding-left: 10px;
-	z-index: 5;
-	white-space: nowrap;
-}
-a.top_bar {
-	text-decoration: underline;
-}
-a.top_bar:hover {
-	text-shadow:  4px  0px 10px rgba(150, 150, 150, 0.9),
-	              0px  4px 10px rgba(150, 150, 150, 0.9),
-	             -4px  0px 10px rgba(150, 150, 150, 0.9),
-	              0px -4px 10px rgba(150, 150, 150, 0.9);
+	color: #000;
 }
 
+h1 {
+	text-shadow:  4px  0px 5px rgba(0, 0, 0, 0.9),
+	              0px  4px 5px rgba(0, 0, 0, 0.9),
+	             -4px  0px 5px rgba(0, 0, 0, 0.9),
+	              0px -4px 5px rgba(0, 0, 0, 0.9);
+}
+
+/* Commonly-used element-based traits */
+td.hspacer {
+	padding-left: 20px; /* Horizontal spacer */
+}
+div.spacer {
+	padding-top: 30px; /* Vertical spacer */
+}
+div.small_spacer {
+	margin:     0px;
+	margin-top: 8px;
+	padding:    0px;
+}
+/* Download/link boxes */
+.download_box {
+	font-weight: bold;
+	text-decoration: none;
+	background-color: #111;
+	color: #fff;
+	border-radius: 5px;
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	white-space: nowrap;
+	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px  4px 10px rgba(150, 150, 150, 0.6),
+	           -4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px -4px 10px rgba(150, 150, 150, 0.6),
+	            5px  5px  5px rgba( 10,  10,  10, 0.3);
+}
+.download_box:hover {
+	cursor: pointer;
+	color: #fff;
+	text-decoration: none;
+	box-shadow: 6px  0px 10px rgba(150, 150, 150, 0.8),
+	            0px  6px 10px rgba(150, 150, 150, 0.8),
+	           -6px  0px 10px rgba(150, 150, 150, 0.8),
+	            0px -6px 10px rgba(150, 150, 150, 0.8),
+	            5px  5px  5px rgba( 10,  10,  10, 0.3);
+}
+
+a.box {
+	font-weight: bold;
+	text-decoration: none;
+	background-color: #111;
+	color: #fff;
+	border-radius: 5px;
+	padding: 5px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	box-shadow: 5px 5px 5px rgba(10, 10, 10, 0.3);
+}
+a.box:hover {
+	color: #fff;
+	background-color: #222;
+	text-decoration: none;
+	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px  4px 10px rgba(150, 150, 150, 0.6),
+	           -4px  0px 10px rgba(150, 150, 150, 0.6),
+	            0px -4px 10px rgba(150, 150, 150, 0.6),
+	            5px  5px  5px rgba( 10,  10,  10, 0.3);
+}
+
+/* "Floating rounded things" */
 table.page {
 	background-color: #444;
 	border-radius: 30px;
@@ -61,19 +170,31 @@ table.page {
 	width: 500px;
 	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.6);
 }
+td.title {
+	cursor:        default;
+	font-size:     1.5em;
+	font-weight:   bold;
+	padding-left:  15px;
+	text-align:    center;
+	border-radius: 10px;
+	text-shadow:  4px  0px 10px rgba(130, 130, 130, 0.6),
+	              0px  4px 10px rgba(130, 130, 130, 0.6),
+	             -4px  0px 10px rgba(130, 130, 130, 0.6),
+	              0px -4px 10px rgba(130, 130, 130, 0.6);
+}
 
+/* Ripper header */
+table.header {
+	padding-top: 0px;
+}
 a.header {
+	text-decoration: none;
 	text-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6),
 	              0px  4px 10px rgba(150, 150, 150, 0.6),
 	             -4px  0px 10px rgba(150, 150, 150, 0.6),
 	              0px -4px 10px rgba(150, 150, 150, 0.6);
 }
-a.header:hover {
-	text-decoration: none;
-}
 div.supheader {
-	padding-top: 0px;
-	text-align: center;
 	font-size: 1.0em;
 	position: relative;
 	top: 28px;
@@ -81,16 +202,15 @@ div.supheader {
 	letter-spacing: 0.1em;
 }
 div.header {
-	padding-top: 0px;
-	text-align: center;
 	font-size: 4.0em;
 	font-weight: bold;
 	letter-spacing: -0.07em;
 }
-
 div.subheader {
 	text-align: center;
 }
+
+/* Inputs */
 
 td.textbox {
 	text-align: center;
@@ -167,7 +287,8 @@ label.checkbox:hover {
 	              0px -4px 10px rgba(190, 190, 190, 0.6);
 }
 
-.statusbar {
+/* Status/progress bars */
+div.statusbar {
 	padding: 5px;
 	padding-top: 10px;
 	padding-bottom: 8px;
@@ -194,16 +315,12 @@ div#progress_bar_div {
 	padding: 5px;
 }
 
+/* List of supported sites */
 div.sites_header {
 	font-size: 1.2em;
 	font-weight: bold;
 	text-align: center;
-	/*background-color: #666;*/
-	border-radius: 10px;
 	padding: 5px;
-}
-table.site {
-	width: 100px;
 }
 td.site {
 	text-align: center;
@@ -218,6 +335,9 @@ div.site {
 	cursor: pointer;
 	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
 }
+a.site {
+	text-decoration: none;
+}
 div.site:hover {
 	background-color: #888;
 	box-shadow:   4px  0px 10px rgba(100, 100, 100, 0.6),
@@ -227,64 +347,10 @@ div.site:hover {
 	              5px  5px  5px rgba(  0,   0,   0, 0.6);
 }
 
-hr {
-	padding: 0px;
-	color: #000;
-}
-
 div.footer {
 	padding-left: 30px;
 	padding-top: 20px;
 	font-size: 0.7em;
-}
-
-.download_box {
-	font-weight: bold;
-	background-color: #111;
-	color: #fff;
-	border-radius: 5px;
-	padding: 5px;
-	padding-left: 10px;
-	padding-right: 10px;
-	white-space: nowrap;
-	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.6),
-	            0px  4px 10px rgba(150, 150, 150, 0.6),
-	           -4px  0px 10px rgba(150, 150, 150, 0.6),
-	            0px -4px 10px rgba(150, 150, 150, 0.6),
-	            5px  5px  5px rgba( 10,  10,  10, 0.3);
-}
-.download_box:hover {
-	cursor: pointer;
-	color: #fff;
-	text-decoration: none;
-	box-shadow: 6px  0px 10px rgba(150, 150, 150, 0.8),
-	            0px  6px 10px rgba(150, 150, 150, 0.8),
-	           -6px  0px 10px rgba(150, 150, 150, 0.8),
-	            0px -6px 10px rgba(150, 150, 150, 0.8),
-	            5px  5px  5px rgba( 10,  10,  10, 0.3);
-
-}
-
-a.box {
-	font-weight: bold;
-	background-color: #111;
-	color: #fff;
-	border-radius: 5px;
-	padding: 5px;
-	padding-top: 3px;
-	padding-bottom: 3px;
-	box-shadow: 5px 5px 5px rgba(10, 10, 10, 0.3);
-}
-a.box:hover {
-	color: #fff;
-	background-color: #222;
-	text-decoration: none;
-	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.6),
-	            0px  4px 10px rgba(150, 150, 150, 0.6),
-	           -4px  0px 10px rgba(150, 150, 150, 0.6),
-	            0px -4px 10px rgba(150, 150, 150, 0.6),
-	            5px  5px  5px rgba( 10,  10,  10, 0.3);
-
 }
 
 td.recent {
@@ -295,32 +361,24 @@ li.recent {
 	list-style: none;
 }
 
-td.updates_header {
-	font-size: 1.5em;
-	font-weight: bold;
-	padding-left: 15px;
-	text-align: center;
-	text-shadow:  4px  0px 10px rgba(130, 130, 130, 0.6),
-	              0px  4px 10px rgba(130, 130, 130, 0.6),
-	             -4px  0px 10px rgba(130, 130, 130, 0.6),
-	              0px -4px 10px rgba(130, 130, 130, 0.6);
-	border-radius: 10px;
-}
 td.updates {
 	font-size: 0.8em;
 	padding-bottom: 0px;
 }
 ul {
-	padding-left: 15px;
+	font-size: 1.0em;
+	padding-left: 30px;
 }
 li {
 	padding-top: 5px;
 }
-.update_date {
-	font-size: 1.2em;
-	font-weight: bold;
-	text-decoration: underline;
-	padding-bottom: 0px;
+div.date {
+	text-align: left;
+	font-size: 1.0em;
+	cursor: default;
+	font-style: italic;
+	margin-bottom: -15px;
+	padding-top: 0px;
 }
 
 .download_arrow {
@@ -345,15 +403,28 @@ li {
 }
 table.bottom {
 	max-height: 10px;
+	width: auto;
+}
+td.bottom {
+	white-space: nowrap;
+}
+td.donate {
+	text-align: right;
+	width: 99%;
+	padding-right: 20px;
+}
+td.bottom_active {
+	background-color: #454;
 }
 td.bottom:hover {
 	background-color: #555;
 }
 a.bottom {
+	text-decoration: none;
 	font-size: 0.8em;
 	font-weight: bold;
 	margin-top: 0px;
-	padding: 0px;
+	padding: 10px;
 	padding-left: 20px;
 	padding-right: 20px;
 }
@@ -377,12 +448,6 @@ div.donate_button input:hover {
 	background: transparent url(donate_color.png);
 }
 
-h1 {
-	text-shadow:  4px  0px 5px rgba(0, 0, 0, 0.9),
-	              0px  4px 5px rgba(0, 0, 0, 0.9),
-	             -4px  0px 5px rgba(0, 0, 0, 0.9),
-	              0px -4px 5px rgba(0, 0, 0, 0.9);
-}
 div.warning {
 	background-color: #444;
 	border-radius: 30px;
