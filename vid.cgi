@@ -69,6 +69,8 @@ def get_url(siteurl):
 		return get_site_ast(siteurl)
 	if 'spankbang.com' in siteurl:
 		return get_site_spankbang(siteurl)
+	if 'fapdu.com' in siteurl:
+		return get_site_fapdu(siteurl)
 
 	site_key = None
 	for key in sites.keys():
@@ -227,6 +229,14 @@ def get_site_spankbang(siteurl):
 	if url == '':
 		raise Exception('unable to find file: at %s' % siteurl)
 	return url
+
+def get_site_fapdu(siteurl):
+	r = web.get(siteurl)
+	if not '"file" : "' in r:
+		raise Exception('could not find file: at %s' % siteurl)
+	f = web.between(r, '"file" : "', '"')[0]
+	return f
+
 
 def is_supported(url):
 	for not_supported in ['pornhub.com/', 'youtube.com/']:
