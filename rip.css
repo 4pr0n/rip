@@ -456,3 +456,10 @@ div.warning {
 	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.6);
 	margin-bottom: 30px;
 }
+
+#adbrock {
+	border-radius: 20px;
+	background-color: #555;
+	padding: 20px;
+	padding-bottom: 10px;
+}

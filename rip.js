@@ -15,6 +15,7 @@ function init() {
 	handleResize();
 	over18();
 	if (gebi('rip_text') === null) { return; }
+	adBlock();
 	var url = String(window.location);
   if (url.lastIndexOf('#') >= 0) {
     var link = unescape(url.substring(url.lastIndexOf('#')+1));
@@ -611,6 +612,14 @@ function handleResize() {
 	bb.setAttribute('style', 'top: ' + t + 'px');
 }
 window.onresize = handleResize;
+
+function adBlock() {
+	var ad = gebi('ad');
+	if (ad.clientHeight == 0) {
+		gebi('adbrock').className = "fontmed center page";
+		gebi('adbrock').setAttribute('style', 'display: block');
+	}
+}
 
 // Call initialization function after entire JS file is parsed
 window.onload = init;
