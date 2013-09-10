@@ -1,10 +1,14 @@
 /* Change text selection color */
-::-moz-selection {
-	background-color: #000;
+input::-moz-selection {
+	background-color: rgba(0, 0, 0, 0.99);
 	color: #fff;
 }
-::selection {
-	background-color: #000;
+input::-webkit-selection {
+	background-color: rgba(0, 0, 0, 0.99);
+	color: #fff;
+}
+input::selection {
+	background-color: rgba(0, 0, 0, 0.99);
 	color: #fff;
 }
 
@@ -22,7 +26,7 @@
 	vertical-align: top;
 }
 .vcenter {
-	vertical-align: center;
+	vertical-align: middle;
 }
 .width100 {
 	width: 100%;
@@ -225,7 +229,7 @@ input.textbox {
 	border-radius: 5px;
 	padding: 5px;
 	letter-spacing: -0.03em;
-	display: block;
+	display: inline;
 	width: 98%;
 }
 input.textbox:hover {

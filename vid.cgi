@@ -24,8 +24,16 @@ def get_video_url(siteurl):
 	if not 'Content-Type' in meta or ('video' not in meta['Content-Type'].lower() and 'application/octet-stream' not in meta['Content-Type'].lower()):
 		print_error('no video content at %s' % url)
 		return
+	typ = meta['Content-Type']
+	if '/' in typ: typ = typ[typ.find('/')+1:]
+	siz = ''
+	if 'Content-Length' in meta:
+		length = int(meta['Content-Length'])
+		siz = get_size(length)
 	print dumps( {
-		'url' : url
+		'url'  : url,
+		'type' : typ,
+		'size' : siz,
 	})
 
 def get_url(siteurl):
@@ -258,6 +266,15 @@ def between(text, i, before, after):
 		raise Exception('could not find begin=%s end=%s around %s' % (before, after, text))
 	return text[start+len(before):end]
 	
+""" Returns human-readable filesize for file """
+def get_size(byt):
+	b = 1024 * 1024 * 1024
+	a = ['g','m','k','']
+	for i in a:
+		if byt >= b:
+			return '%.2f%sb' % (float(byt) / float(b), i)
+		b /= 1024
+	return '0b'
 
 def get_extension_indexes(source):
 	extensions = ['.mp4', '.flv']

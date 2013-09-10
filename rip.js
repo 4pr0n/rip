@@ -208,7 +208,7 @@ function requestHandler(req) {
 			var adl = dce('a');
 			adl.className = 'download_box';
 			adl.href = zipurl;
-			adl.innerHTML = title;
+			adl.innerHTML = 'download zip'; //title;
 			
 			var span = dce('span');
 			span.setAttribute('style', 'font-size: 0.8em');
@@ -220,6 +220,20 @@ function requestHandler(req) {
 			adl.appendChild(span);
 			center.appendChild(adl);
 			
+			if (json.album != null) {
+				var spandl = dce('span');
+				spandl.setAttribute('style', 'margin-left: 5px; line-height: 3em; white-space: pre');
+				var aview = dce('a');
+				aview.className = 'download_box';
+				aview.href = json.url;
+				aview.innerHTML = 'view album';
+				aview.target = '_BLANK';
+				spandl.appendChild(aview);
+				center.innerHTML += " ";
+				center.appendChild(spandl);
+			}
+
+			
 			if (json.limit != null) {
 				var diverr = dce('div');
 				diverr.className = 'error';
@@ -228,16 +242,21 @@ function requestHandler(req) {
 				center.appendChild(diverr);
 			}
 			
-			if (json.album != null) {
-				var divdl = dce('div');
-				divdl.innerHTML = '<br>';
-				var aview = dce('a');
-				aview.className = 'download_box';
-				aview.href = json.url;
-				aview.innerHTML = 'view album';
-				divdl.appendChild(aview);
-				center.appendChild(divdl);
-			}
+			center.appendChild(dce('div'));
+			var share = dce('div');
+			share.className = 'fontmed';
+			share.setAttribute('style', 'margin-top: 10px; white-space: pre');
+			share.appendChild(document.createTextNode('share: '));
+			var inp = dce('input');
+			inp.type = 'text';
+			inp.className = 'textbox fontsmall';
+			inp.setAttribute('style', 'width: 75%');
+			inp.setAttribute('value', window.location.href);
+			inp.setAttribute('onfocus',   'this.select()');
+			inp.setAttribute('onmouseup', 'return false');
+			inp.setAttribute('readonly', 'true');
+			share.appendChild(inp);
+			center.appendChild(share);
 			
 			statbar.innerHTML = '';
 			statbar.appendChild(center);
@@ -464,6 +483,18 @@ function vidRequestHandler(req) {
 		vidstatusbar('<div class="error">error: ' + json.error + '</div>');
 	} else if (json.url != null) {
 		// do stuff
+		var infodiv = dce('div');
+		if (json.type != null && json.size != null) {
+			infodiv.className = 'fontmed bold';
+			infodiv.setAttribute('style', 'margin-bottom: 15px');
+			infodiv.innerHTML = json.type;
+			if (json.size !== '') {
+				infodiv.innerHTML += ' (' + json.size + ')';
+			}
+		} else {
+			infodiv.className = 'not_displayed';
+		}
+		
 		var vida = dce('a');
 		vida.className = 'download_box';
 		vida.setAttribute('style','padding: 5px');
@@ -500,6 +531,7 @@ function vidRequestHandler(req) {
 		vidi.setAttribute('readonly', 'true');
 		
 		var center = dce('center');
+		center.appendChild(infodiv);
 		center.appendChild(vida);
 		center.appendChild(vidb);
 		center.appendChild(vidd);
