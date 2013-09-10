@@ -244,7 +244,7 @@ function requestHandler(req) {
 			
 			center.appendChild(dce('div'));
 			var share = dce('div');
-			share.className = 'fontmed';
+			share.className = 'fontsmall';
 			share.setAttribute('style', 'margin-top: 10px; white-space: pre');
 			share.appendChild(document.createTextNode('share: '));
 			var inp = dce('input');
