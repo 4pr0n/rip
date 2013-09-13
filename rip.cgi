@@ -51,10 +51,6 @@ from sites.site_shareimage  import  shareimage
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
 
-blacklisted_urls = ['butttoucher.com/users/Crimson_in_Red', \
-                    'reddit.com/user/crimson_in_red', \
-                    'http://imgbox.com/g/xXIWnIuGWg']
-
 """ Print error in JSON format """
 def print_error(text):
 	print dumps( { 'error' : text } )
@@ -98,14 +94,18 @@ def main():
 """ Gets ripper, checks for existing rip, rips and zips as needed. """
 def rip(url, cached, urls_only):
 	url = unquote(url).replace(' ', '%20')
+	
 	# Check blacklist
-	for blacklisted_url in blacklisted_urls:
-		if blacklisted_url.lower() in url.lower():
-			print_error("specific URL not supported")
-			return
-	if 'twitter.com' in url:
-		print_error('twitter rips temporarily disabled due to overuse')
-		return
+	if path.exists('url_blacklist.txt'):
+		f = open('url_blacklist.txt')
+		lines = f.read().split('\n')
+		f.close()
+		for blacklisted_url in lines:
+			if blacklisted_url.strip() == '': continue
+			if blacklisted_url.strip().lower() in url.lower():
+				print_error("unspecified error occurred")
+				return
+	
 	try:
 		# Get domain-specific ripper for URL
 		ripper = get_ripper(url, urls_only)
