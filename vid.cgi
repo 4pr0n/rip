@@ -79,6 +79,8 @@ def get_url(siteurl):
 		return get_site_spankbang(siteurl)
 	if 'fapdu.com' in siteurl:
 		return get_site_fapdu(siteurl)
+	if 'pornably.com' in siteurl:
+		return get_site_pornably(siteurl)
 
 	site_key = None
 	for key in sites.keys():
@@ -243,6 +245,13 @@ def get_site_fapdu(siteurl):
 	if not '"file" : "' in r:
 		raise Exception('could not find file: at %s' % siteurl)
 	f = web.between(r, '"file" : "', '"')[0]
+	return f
+
+def get_site_pornably(siteurl):
+	r = web.get(siteurl)
+	if not 'preload="metadata" src="' in r:
+		raise Exception('could not find metadata src at %s' % siteurl)
+	f = web.between(r, 'preload="metadata" src="', '"')[0]
 	return f
 
 
