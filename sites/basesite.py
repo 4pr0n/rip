@@ -7,7 +7,13 @@ from threading import Thread
 from zipfile   import ZipFile, ZIP_DEFLATED
 from Web       import Web
 from shutil    import rmtree
-from PIL       import Image
+
+# Try to import Python Image Library
+try:
+	from PIL     import Image
+except ImportError:
+	# Python Image Library not installed, no thumbnail support
+	Image = None
 
 LOG_NAME      = 'log.txt' 
 RIP_DIRECTORY = 'rips' # Directory to store rips in
@@ -265,6 +271,11 @@ class basesite(object):
 		Creates /thumbs/ sub dir & stores thumbnail
 	"""
 	def create_thumb(self, inp):
+		if Image == None:
+			sys.stderr.write('Python Image Library (PIL) not installed; unable to create thumbnail for %s\n' % inp)
+			sys.stderr.write('Go to http://www.pythonware.com/products/pil/ to install PIL\n')
+			sys.stderr.flush()
+			return
 		fields = inp.split(os.sep)
 		fields.insert(-1, 'thumbs')
 		saveas = os.sep.join(fields)
