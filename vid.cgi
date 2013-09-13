@@ -42,13 +42,14 @@ def get_url(siteurl):
 			'videobam.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
 			'xhamster.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
 			'videarn.com/'  :  { 'begend' : ["src='",  "'"],        'unquote' : 1 },
-			'beeg.com/'     :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
 			'drtuber.com/'  :  { 'begend' : ['url%3D', '"'],        'unquote' : 1 },
 			'youporn.com/'  :  { 'begend' : ['href="', '&amp;'],    'unquote' : 1 },
 			'redtube.com/'  :  { 'begend' : ['&flv_url=', '&'],     'unquote' : 1 },
 			'motherless.com/': { 'begend' : ["__fileurl = '", '"'], 'unquote' : 1 },
 			'vine.co/'      :  { 'begend' : ['source src="', '"'],  'unquote' : 1 },
 		}
+	if 'beeg.com' in siteurl:
+		return get_site_beeg(siteurl)
 	if 'xvideos.com/' in siteurl:
 		return get_site_xvideos(siteurl)
 	if 'fapmenow.com/' in siteurl:
@@ -98,6 +99,13 @@ def get_url(siteurl):
 		sites[site_key]['unquote'] -= 1
 		url = unquote(url)
 	return url
+
+def get_site_beeg(siteurl):
+	r = web.get(siteurl)
+	if not "'file': '" in r:
+		raise Exception('could not find file: at %s' % siteurl)
+	u = web.between(r, "'file': '", "'")[0]
+	return u
 
 def get_site_xvideos(siteurl):
 	r = web.get(siteurl)

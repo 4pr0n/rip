@@ -498,10 +498,10 @@ function vidRequestHandler(req) {
 		var vida = dce('a');
 		vida.className = 'download_box';
 		vida.setAttribute('style','padding: 5px');
-		vida.href = 'data:text/html;charset=utf-8, ' +
+		vida.href = 'data:text/html;charset=utf-8,\n\n' +
 			          '<html><head><meta http-equiv=\'REFRESH\' content=\'0;url=' +
 								json.url + 
-								'\'></head><body<h1>redirection...</h1></body></html>" ';
+								'\'></head><body><h1>redirecting...</h1></body></html>\n\n';
 		vida.rel = 'noreferrer';
 		vida.innerHTML = 'redirect to video';
 		
@@ -509,6 +509,7 @@ function vidRequestHandler(req) {
 		vidb.className = 'download_box';
 		vidb.setAttribute('style','padding: 5px; margin-left: 15px;');
 		vidb.href = json.url;
+		vidb.setAttribute('rel', 'noreferrer');
 		vidb.onclick = function() { return false; }
 		vidb.setAttribute('onclick', 'return false;');
 		vidb.innerHTML = 'right click, save as';
