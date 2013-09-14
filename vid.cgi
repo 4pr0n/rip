@@ -82,6 +82,8 @@ def get_url(siteurl):
 		return get_site_fapdu(siteurl)
 	if 'pornably.com' in siteurl:
 		return get_site_pornably(siteurl)
+	if 'vporn.com' in siteurl:
+		return get_site_vporn(siteurl)
 
 	site_key = None
 	for key in sites.keys():
@@ -260,6 +262,16 @@ def get_site_pornably(siteurl):
 	if not 'preload="metadata" src="' in r:
 		raise Exception('could not find metadata src at %s' % siteurl)
 	f = web.between(r, 'preload="metadata" src="', '"')[0]
+	return f
+
+def get_site_vporn(siteurl):
+	r = web.get(siteurl)
+	if 'flashvars.videoUrlHD  = "' in r:
+		f = web.between(r, 'flashvars.videoUrlHD  = "', '"')[0]
+	elif 'videoUrlLow  = "' in r:
+		f = web.between(r, 'videoUrlLow  = "', '"')[0]
+	else:
+		raise Exception('could not find videourlhd at %s' % siteurl)
 	return f
 
 
