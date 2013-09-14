@@ -1,4 +1,5 @@
 IndexIgnore *
+
 # Prevent hotlinking
 RewriteEngine on
 # Allow blank referrers
@@ -7,3 +8,6 @@ RewriteCond %{HTTP_REFERER} !^$
 RewriteCond %{HTTP_REFERER} !^http(s)?://rip.rarchives.com [NC]
 # Redirect everyone else
 RewriteRule \.(zip)$ - [NC,F,L]
+
+# Block public access to ip addresses
+RedirectMatch 404 ^.*ip\.txt$

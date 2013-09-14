@@ -4,7 +4,7 @@ import cgitb #; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from sys    import argv, stdout
-from os     import remove, path, stat, utime, SEEK_END, sep, walk
+from os     import remove, path, stat, utime, SEEK_END, sep, walk, environ
 from shutil import rmtree
 from stat   import ST_ATIME, ST_MTIME
 from time   import strftime
@@ -159,6 +159,11 @@ def rip(url, cached, urls_only):
 	if not path.exists(ripper.working_dir):
 		print_error('unable to download album (empty? 404?)')
 		return
+	
+	# Save IP of ripper
+	f = open('%s%sip.txt' % (ripper.working_dir, sep), 'w')
+	f.write(environ["REMOTE_ADDR"])
+	f.close()
 	
 	response = {}
 	response['image_count'] = ripper.image_count
