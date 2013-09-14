@@ -33,7 +33,7 @@ function init() {
 		gebi('label_cached').setAttribute('style', 'display: none');
 		refreshRecent();
 	}
-	loadUserRips();
+	loadUserRips('me');
 }
 
 function refreshRecent() {
@@ -648,8 +648,8 @@ window.onresize = handleResize;
 
 //////////////////////
 // USER'S RECENT RIPS
-function loadUserRips() {
-	var url = 'rip.cgi?byuser=me';
+function loadUserRips(ip) {
+	var url = 'rip.cgi?byuser=' + ip;
 	sendRequest(url, userRipHandler);
 }
 function userRipHandler(req) {
@@ -666,8 +666,8 @@ function userRipHandler(req) {
 		for (var i = 0; i < json.albums.length; i++) {
 			var li = dce('li');
 			var ali = dce('a');
-			ali.href = './rips/#' + json.albums[i];
-			ali.innerHTML = json.albums[i];
+			ali.href = './rips/#' + json.albums[i].album;
+			ali.innerHTML = json.albums[i].album;
 			li.appendChild(ali);
 			ul.appendChild(li);
 		}

@@ -214,9 +214,6 @@ def rip(url, cached, urls_only):
 """
 def check(url, urls_only):
 	url = unquote(url).replace(' ', '%20')
-	if 'twitter.com' in url:
-		print_error('twitter rips temporarily disabled due to overuse')
-		return
 	try:
 		ripper = get_ripper(url, urls_only)
 	except Exception, e:
@@ -225,11 +222,23 @@ def check(url, urls_only):
 
 	# Check if there's already a zip for the album
 	if ripper.existing_zip_path() != None:
+		response = {}
+		response['zip']  = ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520')
+		response['size'] = ripper.get_size(ripper.existing_zip_path())
 		# Return link to zip
-		print dumps( {
-			'zip'  : ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520'),
-			'size' : ripper.get_size(ripper.existing_zip_path())
-			} )
+		if path.exists(ripper.working_dir):
+			update_file_modified(ripper.working_dir)
+			image_count = 0
+			for root, subdirs, files in walk(ripper.working_dir):
+				if 'thumbs' in root: continue
+				for f in files:
+					if f.endswith('.txt'): continue
+					image_count += 1
+						
+			response['album'] = ripper.working_dir.replace('rips/', '').replace('%20', '%2520')
+			response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
+			response['image_count'] = image_count
+		print dumps( response )
 	else:
 		# Print last log line ("status")
 		lines = ripper.get_log(tail_lines=1)
@@ -376,7 +385,20 @@ def albums_by_ip(ip):
 		albumip = f.read().strip()
 		f.close()
 		if ip == albumip:
-			albums.append(thedir)
+			jsonalbum = {}
+			jsonalbum['album'] = thedir
+			url = ''
+			thelog = path.join(d, 'log.txt')
+			if path.exists(thelog):
+				f = open(thelog, 'r')
+				lines = f.read().split('\n')
+				f.close()
+				if len(lines) > 0:
+					url = lines[0]
+					url = url[url.rfind(' ')+1:]
+				jsonalbum['url']   = url
+					
+			albums.append(jsonalbum)
 	print dumps( {
 		'albums' : albums
 		} )
