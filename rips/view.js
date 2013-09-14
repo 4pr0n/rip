@@ -231,11 +231,13 @@ function allAlbumsHandler(req) {
 		table.setAttribute('album', album.album);
 		table.setAttribute('show_album', 'true');
 		table.setAttribute('width', '100%');
-		table.setAttribute('onclick', 'if (this.getAttribute("show_album")) window.open(window.location.href + "#' + album.album + '")');
+		table.setAttribute('onclick', 'if (this.getAttribute("show_album")) { var u = window.location.href; if (u.indexOf("#") >= 0) { u = u.substring(0, u.indexOf("#")); } window.open(u + "#" + album.album)');
 		table.onclick = function() {
 			if (this.getAttribute('show_album')) {
 				// Open albums in new tab
-				window.open(window.location.href + '#' + this.getAttribute('album'));
+				var u = window.location.href;
+				if (u.indexOf('#') >= 0) { u = u.substring(0, u.indexOf('#')); }
+				window.open(u + '#' + this.getAttribute('album'));
 			}
 		}
 		var titletr = dce('tr');
