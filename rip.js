@@ -672,6 +672,14 @@ function userRipHandler(req) {
 			ul.appendChild(li);
 		}
 		userrips.appendChild(ul);
+		var usera = dce('a');
+		usera.setAttribute('style', 'padding-top: 10px');
+		usera.href = './rips/#user=me';
+		usera.innerHTML = 'view albums';
+		var userdiv = dce('div');
+		userdiv.className = 'center';
+		userdiv.appendChild(usera);
+		userrips.appendChild(userdiv);
 		var userriptab = gebi('user_rips_tab');
 		userriptab.setAttribute('style', 'display: table');
 	}

@@ -3,7 +3,7 @@
 import cgitb #; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
-from os       import listdir, path, sep, walk, utime, stat
+from os       import listdir, path, sep, walk, utime, stat, environ
 from json     import dumps
 from random   import randrange
 from datetime import datetime
@@ -44,6 +44,9 @@ def main():
 	
 	elif 'urls' in keys:
 		get_urls_for_album(keys['urls'])
+	
+	elif 'user' in keys:
+		get_albums_for_user(keys['user'], count, preview, after)
 		
 	else:
 		print_error('unsupported method')
@@ -76,19 +79,55 @@ def get_thumb(img):
 # ALBUMS
 
 def get_all_albums(count, preview_size, after):
-	dcount = 0 # Number of albums retrieved & returned to user
-	dtotal = 0 # Total number of albums
-	dindex = 0 # Current index of last_after
-	
 	found_after = False # User-specified 'after' was found in list of directories
-	# Get directories, sorted by most-recent
+	# Get directories and timestamps
 	thedirs = []
 	for f in listdir('.'):
 		if not path.isdir(f): continue
 		if not path.exists('%s.zip' % f): continue
 		if not found_after and after != '' and f == after: found_after = True
 		thedirs.append( (f, path.getmtime(f) ) )
+	# Sort by most recent
 	thedirs = sorted(thedirs, key=lambda k: k[1], reverse=True)
+	
+	# Strip out timestamp
+	for i in xrange(0, len(thedirs)):
+		thedirs[i] = thedirs[i][0]
+	
+	# Filter results
+	filter_albums(thedirs, count, preview_size, after, found_after)
+
+def get_albums_for_user(user, count, preview_size, after):
+	found_after = False # User-specified 'after' was found in list of directories
+	# Get directories and timestamps
+	thedirs = []
+	for f in listdir('.'):
+		if not path.isdir(f): continue
+		if not path.exists('%s.zip' % f): continue
+		if not found_after and after != '' and f == after: found_after = True
+		iptxt = path.join(f, 'ip.txt')
+		if not path.exists(iptxt): continue
+		fil = open(iptxt, 'r')
+		ip = fil.read().strip()
+		fil.close()
+		if user == 'me' and ip != environ['REMOTE_ADDR']: continue
+		if user != 'me' and ip != user: continue
+		thedirs.append( (f, path.getmtime(f) ) )
+	
+	# Sort by most recent
+	thedirs = sorted(thedirs, key=lambda k: k[1], reverse=True)
+	
+	# Strip out timestamp
+	for i in xrange(0, len(thedirs)):
+		thedirs[i] = thedirs[i][0]
+	
+	# Filter results
+	filter_albums(thedirs, count, preview_size, after, found_after)
+	
+def filter_albums(thedirs, count, preview_size, after, found_after):
+	dcount = 0 # Number of albums retrieved & returned to user
+	dtotal = 0 # Total number of albums
+	dindex = 0 # Current index of last_after
 	
 	if not found_after: after = '' # Requested 'after' not found, don't look for it
 	
@@ -100,7 +139,7 @@ def get_all_albums(count, preview_size, after):
 	last_after = '' # Last album retrieved
 	albums = []
 	# Iterate over directories
-	for (f, mtime) in thedirs:
+	for f in thedirs:
 		dtotal += 1
 		
 		# Check if we hit the 'after' specified by request

@@ -15,7 +15,7 @@ function init() {
 		return;
 	}
 	var url = String(window.location);
-	if (window.location.hash !== '') {
+	if (window.location.hash !== '' && window.location.hash.indexOf('user=') == -1) {
 		// Viewing specific album
 		loadAlbum(window.location.hash.substring(1))
 	} else {
@@ -93,7 +93,6 @@ function albumHandler(req) {
 	gebi('album_url').innerHTML = '';
 	gebi('album_url').appendChild(urla);
 	
-	console.log(album.album);
 	// Get URLs link
 	var urlsa = dce('a');
 	urlsa.className = 'download_box fontmed';
@@ -174,8 +173,14 @@ function loadMoreImages() {
 // ALL ALBUMS
 
 function getAllAlbumUrl(after) {
+	var hash = window.location.hash;
 	var req = 'view.cgi';
-	req += '?view_all=true';
+	if (hash === '') {
+		req += '?view_all=true';
+	} else {
+		hash = hash.substring(hash.indexOf('user=')+5);
+		req += '?user=' + hash;
+	}
 	if (after != undefined) {
 		req += '&after=' + after;
 	}
@@ -403,7 +408,7 @@ function scrollHandler() {
 	var scroll = document.documentElement.scrollTop || window.pageYOffset;
 	var remain = (page - client) - scroll;
 	if (remain < 200) {
-		if (window.location.hash === '') {
+		if (window.location.hash === '' || window.location.hash.indexOf('user=') >= 0) {
 			// Viewing all albums
 			loadNextAlbum();
 		} else {
@@ -562,7 +567,7 @@ function loadUrlsHandler(req) {
 		for (var i = 0; i < json.urls.length; i++) {
 			out += json.urls[i] + '<br>';
 		}
-		gebi('get_urls').setAttribute('style', 'font-size: 0.8em');
+		gebi('get_urls').setAttribute('style', 'font-size: 0.8em; padding-left: 20px;');
 		gebi('get_urls').innerHTML = out;
 	}
 }
