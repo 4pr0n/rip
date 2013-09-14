@@ -1,4 +1,7 @@
+# Hide certain files/types
 RedirectMatch 404 ^.*\.py$
+RedirectMatch 404 ^.*url_blacklist\.txt$
+RedirectMatch 404 ^.*admin_ip\.txt$
 
 ## USER IP BANNING
 <Limit GET POST>
