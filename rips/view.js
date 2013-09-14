@@ -64,19 +64,47 @@ function albumHandler(req) {
 	if (album.images.length == 0) {
 		gebi('album_title').innerHTML = 'album not found';
 		gebi('album_download_title').setAttribute('style', 'display: none');
-		gebi('album_download').setAttribute('style', 'display: none');
-		gebi('thumbs_area').setAttribute('style', 'display: none');
+		gebi('album_download').setAttribute(      'style', 'display: none');
+		gebi('album_url_title').setAttribute(     'style', 'display: none');
+		gebi('album_url').setAttribute(           'style', 'display: none');
+		gebi('thumbs_area').setAttribute(         'style', 'display: none');
 		return;
 	}
 	gebi('album_title').innerHTML = album.album + ' (' + album.total + ' images)';
 	gebi('album_download').setAttribute('style', 'display: inline');
-	gebi('thumbs_area').setAttribute('style', 'display: table');
+	gebi('album_url').setAttribute(     'style', 'display: inline');
+	gebi('thumbs_area').setAttribute(   'style', 'display: table');
+	
+	// .ZIP link
 	var albuma = dce('a');
 	albuma.className = 'download_box';
 	albuma.href = album.archive;
 	albuma.innerHTML = album.archive.replace('./', '');
 	gebi('album_download').innerHTML = '';
 	gebi('album_download').appendChild(albuma);
+	
+	// URL link
+	var urla = dce('a');
+	urla.className = 'bold';
+	urla.href = album.url;
+	urla.target = '_BLANK';
+	urla.rel = 'noreferrer';
+	urla.innerHTML = album.url;
+	gebi('album_url').innerHTML = '';
+	gebi('album_url').appendChild(urla);
+	
+	console.log(album.album);
+	// Get URLs link
+	var urlsa = dce('a');
+	urlsa.className = 'download_box fontmed';
+	urlsa.href = "javascript:void(0)";
+	urlsa.innerHTML = 'get urls';
+	urlsa.setAttribute('album', album.album);
+	urlsa.album = album.album;
+	urlsa.setAttribute('onclick', 'loadUrls(' + album.album + ')');
+	urlsa.onclick = function() { loadUrls(this.album) }
+	gebi('get_urls').innerHTML = '';
+	gebi('get_urls').appendChild(urlsa);
 	
 	// Table to append thumbnails to
 	var thumbtable = gebi('thumbs_table');
@@ -508,6 +536,35 @@ function i_agree() {
 }
 function i_disagree() {
 	window.location.href = 'about:blank';
+}
+
+function loadUrls(album) {
+	gebi('get_urls').innerHTML = 'loading <img src="../spinner_dark.gif" style="border: none">';
+	var url = 'view.cgi?urls=' + album;
+	sendRequest(url, loadUrlsHandler);
+	return false;
+}
+function loadUrlsHandler(req) {
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		throw new Error('unable to parse response:\n' + req.responseText);
+	}
+	if (json.error != null) throw new Error("error: " + json.error);
+	if (json.urls != null) {
+		if (json.urls.length == 0) {
+			// No urls found
+			gebi('get_urls').innerHTML = 'no urls found';
+			return;
+		}
+		var out = '';
+		for (var i = 0; i < json.urls.length; i++) {
+			out += json.urls[i] + '<br>';
+		}
+		gebi('get_urls').setAttribute('style', 'font-size: 0.8em');
+		gebi('get_urls').innerHTML = out;
+	}
 }
 
 ////////////////

@@ -41,6 +41,9 @@ def main():
 	elif 'update' in keys:
 		update_album(keys['update'])
 		print dumps( { 'date' : utime_to_hrdate(int(strftime('%s'))) } )
+	
+	elif 'urls' in keys:
+		get_urls_for_album(keys['urls'])
 		
 	else:
 		print_error('unsupported method')
@@ -200,7 +203,42 @@ def get_images_for_album(album, start, count, thumbs=False):
 def get_album(album, start, count):
 	result = get_images_for_album(album, start, count)
 	update_album(album) # Mark album as recently-viewed
+	result['url'] = get_url_for_album(album)
 	print dumps( { 'album' : result } )
+
+# Return external URL for album that was ripped
+def get_url_for_album(album):
+	logtxt = path.join(album, 'log.txt')
+	if not path.exists(logtxt): return ''
+	f = open(logtxt, 'r')
+	lines = f.read().split('\n')
+	f.close()
+	if len(lines) == 0: return ''
+	url = lines[0]
+	if not ' ' in url: return ''
+	return url[url.rfind(' ')+1:]
+
+# Return all URLs for an album
+def get_urls_for_album(album):
+	logtxt = path.join(album, 'log.txt')
+	if not path.exists(logtxt):
+		print dumps( { 'urls' : [] } )
+		return
+	f = open(logtxt, 'r')
+	lines = f.read().split('\n')
+	f.close()
+	result = []
+	for line in lines:
+		if not line.startswith('downloaded'): continue
+		if not '(' in line or not ')' in line: continue
+		url = line[line.rfind(' - ')+3:]
+		index = line[line.find('(')+1:line.find(')')]
+		if '/' in index: index = index.split('/')[0]
+		result.append( (index, url) )
+	result = sorted(result, key=lambda k: k[0])
+	for i in xrange(0, len(result)):
+		result[i] = result[i][1]
+	print dumps( { 'urls' : result } )
 
 ##############
 # TIME
