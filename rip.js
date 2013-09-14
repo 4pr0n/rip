@@ -140,9 +140,6 @@ function getQueryString(start) {
 	} else {
 		query += '&check=true';
 	}
-	if (gebi('rip_urls').checked) {
-		query += '&urls_only=true';
-	}
 	return query;
 }
 
@@ -244,13 +241,13 @@ function requestHandler(req) {
 			
 			center.appendChild(dce('div'));
 			var share = dce('div');
-			share.className = 'fontsmall';
+			share.className = 'fontmed';
 			share.setAttribute('style', 'margin-top: 10px; white-space: pre');
 			share.appendChild(document.createTextNode('share: '));
 			var inp = dce('input');
 			inp.type = 'text';
 			inp.className = 'textbox fontsmall';
-			inp.setAttribute('style', 'width: 75%');
+			inp.setAttribute('style', 'width: 75%; font-size: 0.8em;');
 			inp.setAttribute('value', window.location.href);
 			inp.setAttribute('onfocus',   'this.select()');
 			inp.setAttribute('onmouseup', 'return false');
