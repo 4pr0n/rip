@@ -5,6 +5,9 @@ function statusbar(text) {
 	gebi('status_bar').innerHTML = text;
 }
 
+// Maximum number of rips allowed per user
+var MAX_USER_ALBUMS = 20;
+
 // Safari is BAD. 
 // I have to append a blank style element to get the darn thing to refresh
 // More info: http://stackoverflow.com/questions/3485365
@@ -13,17 +16,11 @@ document.body.removeChild(document.body.appendChild(dce('style')));
 // Executes when document has loaded
 function init() {
 	handleResize();
+	
 	over18();
 	if (gebi('rip_text') === null) { return; }
-	var url = String(window.location);
-  if (url.lastIndexOf('#') >= 0) {
-    var link = unescape(url.substring(url.lastIndexOf('#')+1));
-		if (link.indexOf('http://') != 0 && link.indexOf('https://') != 0) {
-			link = 'http://' + link;
-		}
-		gebi('rip_text').value = link;
-		startRip();
-	}
+	
+	// Display cache if needed
 	if (getCookie('cache_enabled') == 'true') {
 		gebi('rip_cached').setAttribute('style', 'display: inline-block');
 		gebi('label_cached').setAttribute('style', 'display: inline-block');
@@ -33,7 +30,10 @@ function init() {
 		gebi('label_cached').setAttribute('style', 'display: none');
 		refreshRecent();
 	}
+
+	// Load user rips, check if limit is exceeded
 	loadUserRips('me');
+	
 }
 
 function refreshRecent() {
@@ -164,6 +164,10 @@ function enableControls() {
 
 // Start ripping album
 function startRip() {
+	if (gebi('status_bar').exceeded !== undefined) {
+		// User has exceeded max number of rips, short-circuit
+		return;
+	}
 	gebi('status_bar').has_download_link = false;
 	disableControls();
 	setHash(gebi('rip_text').value);
@@ -659,7 +663,7 @@ function userRipHandler(req) {
 	if (json.albums != null && json.albums.length > 0) {
 		var userrips = gebi('user_rips_td');
 		userrips.innerHTML = '';
-		var ul = dce('ul');
+		var ul = dce('ol');
 		for (var i = 0; i < json.albums.length; i++) {
 			var li = dce('li');
 			var ali = dce('a');
@@ -678,7 +682,35 @@ function userRipHandler(req) {
 		userdiv.appendChild(usera);
 		userrips.appendChild(userdiv);
 		var userriptab = gebi('user_rips_tab');
-		userriptab.setAttribute('style', 'display: table');
+		userriptab.setAttribute('style', 'display: table; margin-top: 30px;');
+		slowlyShow(userrips, 0.0);
+
+		if (json.albums.length > MAX_USER_ALBUMS) {
+			gebi('rip_text').setAttribute('style', 'display: none');
+			gebi('rip_button').setAttribute('style', 'display: none');
+			gebi('rip_cached').setAttribute('style', 'display: none');
+			gebi('label_cached').setAttribute('style', 'display: none');
+			var div = dce('div');
+			div.className = 'error center';
+			div.innerHTML = 'you have ripped too much.<br>';
+			div.innerHTML += 'the maximum number of active rips per user is: ' + MAX_USER_ALBUMS + '<br>';
+			div.innerHTML += '<br>try again later';
+			var statbar = gebi('status_bar');
+			statbar.innerHTML = '';
+			statbar.appendChild(div);
+			statbar.innerHTML += '';
+			statbar.setAttribute('exceeded', 'true');
+			return;
+		}
+	}
+	var url = String(window.location);
+	if (url.lastIndexOf('#') >= 0) {
+		var link = unescape(url.substring(url.lastIndexOf('#')+1));
+		if (link.indexOf('http://') != 0 && link.indexOf('https://') != 0) {
+			link = 'http://' + link;
+		}
+		gebi('rip_text').value = link;
+		startRip();
 	}
 }
 
