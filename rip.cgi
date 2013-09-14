@@ -4,7 +4,7 @@ import cgitb #; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from sys    import argv, stdout
-from os     import remove, path, stat, utime, SEEK_END, sep, walk, environ
+from os     import remove, path, stat, utime, SEEK_END, sep, walk, environ, listdir
 from shutil import rmtree
 from stat   import ST_ATIME, ST_MTIME
 from time   import strftime
@@ -87,6 +87,10 @@ def main():
 		if 'lines' in keys:
 			lines = int(keys['lines'])
 		recent(lines)
+	elif 'byuser' in keys:
+		ip = keys['byuser']
+		if ip == 'me': ip = environ['REMOTE_ADDR']
+		albums_by_ip(ip)
 	
 	else:
 		print_error('invalid request')
@@ -196,7 +200,6 @@ def rip(url, cached, urls_only):
 	
 	response['zip']  = ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520')
 	response['size'] = ripper.get_size(ripper.existing_zip_path())
-	
 	
 	# Add to recently-downloaded list
 	add_recent(url)
@@ -361,6 +364,22 @@ def add_recent(url):
 	f = open('recent_rips.lst', 'a')
 	f.write('%s\n' % url)
 	f.close()
+
+def albums_by_ip(ip):
+	albums = []
+	for thedir in listdir('rips'):
+		d = path.join('rips', thedir)
+		if not path.isdir(d): continue
+		iptxt = path.join(d, 'ip.txt')
+		if not path.exists(iptxt): continue
+		f = open(iptxt, 'r')
+		albumip = f.read().strip()
+		f.close()
+		if ip == albumip:
+			albums.append(thedir)
+	print dumps( {
+		'albums' : albums
+		} )
 
 """ Entry point. Print leading/trailing characters, executes main() """
 if __name__ == '__main__':

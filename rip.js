@@ -15,7 +15,6 @@ function init() {
 	handleResize();
 	over18();
 	if (gebi('rip_text') === null) { return; }
-	adBlock();
 	var url = String(window.location);
   if (url.lastIndexOf('#') >= 0) {
     var link = unescape(url.substring(url.lastIndexOf('#')+1));
@@ -34,6 +33,7 @@ function init() {
 		gebi('label_cached').setAttribute('style', 'display: none');
 		refreshRecent();
 	}
+	loadUserRips();
 }
 
 function refreshRecent() {
@@ -646,11 +646,34 @@ function handleResize() {
 }
 window.onresize = handleResize;
 
-function adBlock() {
-	var ad = gebi('ad');
-	if (ad.clientHeight == 0) {
-		gebi('adbrock').className = "fontmed center page";
-		gebi('adbrock').setAttribute('style', 'display: block');
+//////////////////////
+// USER'S RECENT RIPS
+function loadUserRips() {
+	var url = 'rip.cgi?byuser=me';
+	sendRequest(url, userRipHandler);
+}
+function userRipHandler(req) {
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		throw new Error('unable to parse response:\n' + req.responseText);
+	}
+	if (json.albums != null && json.albums.length > 0) {
+		var userrips = gebi('user_rips_td');
+		userrips.innerHTML = '';
+		var ul = dce('ul');
+		for (var i = 0; i < json.albums.length; i++) {
+			var li = dce('li');
+			var ali = dce('a');
+			ali.href = './rips/#' + json.albums[i];
+			ali.innerHTML = json.albums[i];
+			li.appendChild(ali);
+			ul.appendChild(li);
+		}
+		userrips.appendChild(ul);
+		var userriptab = gebi('user_rips_tab');
+		userriptab.setAttribute('style', 'display: table');
 	}
 }
 
