@@ -10,6 +10,8 @@ class buttoucher(basesite):
 			raise Exception('')
 		if not '/users/' in url:
 			raise Exception('required /users/ not found in URL')
+		if '#' in url: url = url[:url.find('#')]
+		if '?' in url: url = url[:url.find('?')]
 		return url
 
 	""" Discover directory path based on URL """
