@@ -420,6 +420,9 @@ td.donate {
 	width: 99%;
 	padding-right: 20px;
 }
+td.donate:hover {
+	background-color: #444;
+}
 td.bottom_active {
 	background-color: #454;
 }
