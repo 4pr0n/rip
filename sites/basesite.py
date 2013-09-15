@@ -259,6 +259,8 @@ class basesite(object):
 				#if 'log.txt' in fn: continue
 				if fn.endswith('zipping.txt'): continue
 				if fn.endswith('complete.txt'): continue
+				if fn.endswith('ip.txt'): continue
+				if fn.endswith('reports.txt'): continue
 				absfn = os.path.join(root, fn)
 				zfn = absfn[len(self.working_dir)+len(os.sep):] #XXX: relative path
 				z.write(absfn, zfn)
