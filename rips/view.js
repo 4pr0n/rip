@@ -231,12 +231,22 @@ function allAlbumsHandler(req) {
 		table.setAttribute('album', album.album);
 		table.setAttribute('show_album', 'true');
 		table.setAttribute('width', '100%');
-		table.setAttribute('onclick', 'if (this.getAttribute("show_album")) { var u = window.location.href; if (u.indexOf("#") >= 0) { u = u.substring(0, u.indexOf("#")); } window.open(u + "#" + album.album)');
+		table.setAttribute('onclick', 
+			'if (this.getAttribute("show_album") === "true") { ' +
+				'var u = window.location.href; ' + 
+				'if (u.indexOf("#") >= 0) { ' + 
+					'u = u.substring(0, u.indexOf("#")); ' + 
+				'} ' + 
+				'window.open(u + "#" + album.album)' +
+			'}'
+		);
 		table.onclick = function() {
-			if (this.getAttribute('show_album')) {
+			if (this.getAttribute('show_album') === 'true' || this.album === 'true') {
 				// Open albums in new tab
 				var u = window.location.href;
-				if (u.indexOf('#') >= 0) { u = u.substring(0, u.indexOf('#')); }
+				if (u.indexOf('#') >= 0) { 
+					u = u.substring(0, u.indexOf('#'));
+				}
 				window.open(u + '#' + this.getAttribute('album'));
 			}
 		}
@@ -268,12 +278,15 @@ function allAlbumsHandler(req) {
 			var imga = dce('a');
 			imga.setAttribute('album', album.album);
 			imga.href = album.images[i].image;
+			imga.setAttribute('onclick', 'return loadImage(' + album.images[i].image + ')');
 			imga.onclick = function() {
 				return loadImage(this.href);
 			}
+			imga.setAttribute('onmouseover', 'gebi("' + album.album + '").removeAttribute("show_album")');
 			imga.onmouseover = function() {
 				gebi(this.getAttribute('album')).removeAttribute('show_album');
 			}
+			imga.setAttribute('onmouseout', 'gebi("' + album.album + '").setAttribute("show_album", "true")');
 			imga.onmouseout = function() {
 				gebi(this.getAttribute('album')).setAttribute('show_album', 'true');
 			}
