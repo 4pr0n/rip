@@ -87,6 +87,7 @@ class photobucket(basesite):
 			murl = murl[:murl.find('/albums/')+len('/albums/')] + album
 			name = album.split('/')[1].replace('%20', '-')
 			self.download_album(path, murl, name=name)
+			if self.hit_image_limit(): break
 			
 		self.wait_for_threads()
 	

@@ -362,12 +362,12 @@ function sendRequest(url, handler) {
 function setExample(site) {
 	var dic = {
 		'imgur'       : 'http://imgur.com/a/DU74E', //'http://imgur.com/a/RdXNa',
-		'tumblr'      : 'http://mourning-sex.tumblr.com/tagged/me',
+		'tumblr'      : 'http://owlberta.tumblr.com/tagged/me',
 		'twitter'     : 'https://twitter.com/MrNMissesSmith',
 		'deviantart'  : 'http://geekysica.deviantart.com/gallery/40343783',
 		'flickr'      : 'https://secure.flickr.com/photos/peopleofplatt/sets/72157624572361792/with/6166517381/',
 		'photobucket' : 'http://s1216.beta.photobucket.com/user/Liebe_Dich/profile/',
-		'webstagram'  : 'http://web.stagram.com/n/glitterypubez/',
+		'webstagram'  : 'http://instagram.com/joselyncano#',
 		'imagefap'    : 'http://www.imagefap.com/pictures/2885204/Kentucky-Craigslist',
 		'imagearn'    : 'http://imagearn.com/gallery.php?id=1616', // 'http://imagearn.com/gallery.php?id=82587',
 		'imagebam'    : 'http://www.imagebam.com/gallery/3b73c0f6ba797e77a33b46779fbfe678/',
@@ -676,7 +676,7 @@ function userRipHandler(req) {
 		var usera = dce('a');
 		usera.setAttribute('style', 'padding-top: 10px');
 		usera.href = './rips/#user=me';
-		usera.innerHTML = 'view albums';
+		usera.innerHTML = 'view your albums';
 		var userdiv = dce('div');
 		userdiv.className = 'center';
 		userdiv.appendChild(usera);
