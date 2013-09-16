@@ -1,13 +1,14 @@
 #!/usr/bin/python
 
-import cgitb #; cgitb.enable() # for debugging
+import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
-from os       import listdir, path, sep, walk, utime, stat, environ
+from os       import listdir, path, sep, walk, utime, stat, environ, remove
 from json     import dumps
 from random   import randrange
 from datetime import datetime
 from time     import strftime
+from urllib   import quote, unquote
 
 ##################
 # MAIN
@@ -48,6 +49,19 @@ def main():
 	elif 'user' in keys:
 		get_albums_for_user(keys['user'], count, preview, after)
 		
+	elif 'report' in keys:
+		if 'reason' in keys:
+			reason = keys['reason']
+		else:
+			reason = ''
+		report_album(keys['report'], reason=reason)
+		
+	elif 'get_report' in keys:
+		get_reported_albums(count, preview, after)
+	
+	elif 'clear_reports' in keys:
+		clear_reports(keys['clear_reports'])
+	
 	else:
 		print_error('unsupported method')
 
@@ -124,11 +138,41 @@ def get_albums_for_user(user, count, preview_size, after):
 	# Filter results
 	filter_albums(thedirs, count, preview_size, after, found_after)
 	
+def get_reported_albums(count, preview_size, after):
+	if not is_admin():
+		print_error('')
+		return
+	
+	found_after = False # User-specified 'after' was found in list of directories
+	# Get reported directories & number of reports
+	thedirs = []
+	for f in listdir('.'):
+		if not path.isdir(f): continue
+		reportstxt = path.join(f, 'reports.txt')
+		if not path.exists(reportstxt): continue
+		if not found_after and after != '' and f == after: found_after = True
+		fil = open(reportstxt, 'r')
+		reports = fil.read().split('\n')
+		fil.close()
+		thedirs.append( (f, len(reports) ) )
+	
+	# Sort by most recent
+	thedirs = sorted(thedirs, key=lambda k: int(k[1]), reverse=True)
+	
+	# Strip out timestamp
+	for i in xrange(0, len(thedirs)):
+		thedirs[i] = thedirs[i][0]
+	
+	# Filter results
+	filter_albums(thedirs, count, preview_size, after, found_after)
+	
+
 def filter_albums(thedirs, count, preview_size, after, found_after):
 	dcount = 0 # Number of albums retrieved & returned to user
 	dtotal = 0 # Total number of albums
 	dindex = 0 # Current index of last_after
 	
+	admin = is_admin()
 	if not found_after: after = '' # Requested 'after' not found, don't look for it
 	
 	if after == '': 
@@ -177,13 +221,22 @@ def filter_albums(thedirs, count, preview_size, after, found_after):
 		for i in rand:
 			preview.append( images[i] )
 		
-		# Add album to response
-		albums.append( {
+		album_result = {
 			'album'  : f,
 			'images' : preview,
 			'total'  : result['total'],
 			'time'   : path.getmtime(f)
-		})
+		}
+
+		# Retrieve number of reports if user is admin
+		if admin:
+			rtxt = path.join(f, 'reports.txt')
+			if path.exists(rtxt):
+				fil = open(rtxt, 'r')
+				album_result['reports'] = len(fil.read().strip().split('\n'))
+				fil.close()
+		# Add album to response
+		albums.append( album_result )
 	
 	if dindex == len(thedirs):
 		last_after = ''
@@ -199,7 +252,6 @@ def filter_albums(thedirs, count, preview_size, after, found_after):
 
 ##################
 # SINGLE ALBUM
-	
 def get_images_for_album(album, start, count, thumbs=False):
 	if not path.exists(album):
 		return {
@@ -243,6 +295,8 @@ def get_album(album, start, count):
 	result = get_images_for_album(album, start, count)
 	update_album(album) # Mark album as recently-viewed
 	result['url'] = get_url_for_album(album)
+	if start == 0 and is_admin():
+		result['report_reasons'] = get_report_reasons(album)
 	print dumps( { 'album' : result } )
 
 # Return external URL for album that was ripped
@@ -259,25 +313,104 @@ def get_url_for_album(album):
 
 # Return all URLs for an album
 def get_urls_for_album(album):
-	logtxt = path.join(album, 'log.txt')
-	if not path.exists(logtxt):
+	album = quote(album)
+	if not path.exists(album):
 		print dumps( { 'urls' : [] } )
 		return
-	f = open(logtxt, 'r')
+	result = []
+	for f in listdir(album):
+		f = path.join(album, f)
+		if f.endswith('.txt'): continue
+		if path.isdir(f): continue
+		result.append( f )
+	result = sorted(result)
+	print dumps( { 'urls' : result } )
+
+#############
+# REPORT
+def report_album(album, reason=""):
+	album = quote(album)
+	if '..' in album or '/' in album or not path.isdir(album):
+		print dumps( {
+			'album'    : album,
+			'reported' : False,
+			'error'    : 'invalid album specified: %s' % album
+		} )
+		return
+	reports = path.join(album, 'reports.txt')
+	if not path.exists(album):
+		print dumps( {
+			'album'    : album,
+			'reported' : False,
+			'error'    : 'album does not exist: %s' % album
+		} )
+		return
+	if path.exists(reports):
+		f = open(reports, 'r')
+		lines = f.read().split('\n')
+		f.close()
+		for line in lines:
+			if line.startswith(environ['REMOTE_ADDR']):
+				print dumps( {
+					'album'    : album,
+					'reported' : False,
+					'warning'  : 'you have already reported this album'
+				} )
+				return
+	f = open(reports, 'a')
+	f.write('%s:%s\n' % (environ['REMOTE_ADDR'], reason))
+	f.close()
+	print dumps( { 
+		'album' : album,
+		'reported' : True
+	} )
+
+def get_report_reasons(album):
+	# Sanitization, check if album
+	if '..' in album or '/' in album or not path.isdir(album):
+		return []
+	# No album
+	if not path.exists(album):
+		return []
+	# No reports
+	reports = path.join(album, 'reports.txt')
+	if not path.exists(reports):
+		return []
+	f = open(reports, 'r')
 	lines = f.read().split('\n')
 	f.close()
-	result = []
+	reasons = []
 	for line in lines:
-		if not line.startswith('downloaded'): continue
-		if not '(' in line or not ')' in line: continue
-		url = line[line.rfind(' - ')+3:]
-		index = line[line.find('(')+1:line.find(')')]
-		if '/' in index: index = index.split('/')[0]
-		result.append( (index, url) )
-	result = sorted(result, key=lambda k: k[0])
-	for i in xrange(0, len(result)):
-		result[i] = result[i][1]
-	print dumps( { 'urls' : result } )
+		if line.strip() == '': continue
+		ip = line[:line.find(':')]
+		reason = line[line.find(':')+1:]
+		reasons.append( {
+			'user'   : ip,
+			'reason' : reason
+		} )
+	return reasons
+
+def clear_reports(album):
+	if not is_admin():
+		print_error('you are not an admin: %s' % environ['REMOTE_ADDR'])
+		return
+	album = quote(album)
+	# Sanitization, check if album
+	if '..' in album or '/' in album or not path.isdir(album):
+		print_error('album is not valid: %s' % album)
+		return
+	# No album
+	if not path.exists(album):
+		print_error('album not found: %s' % album)
+		return
+	# No reports
+	reports = path.join(album, 'reports.txt')
+	if not path.exists(reports):
+		print_error('no reports found: %s' % reports)
+		return
+	remove(reports)
+	print dumps( { 'ok' : 'reports cleared' } )
+	
 
 ##############
 # TIME
@@ -361,6 +494,13 @@ def tail(f, lines=1, _buffer=4098):
 	result = [word.strip() for word in lines_found[-lines:]]
 	result.reverse()
 	return result
+
+def is_admin():
+	ip = environ['REMOTE_ADDR']
+	f = open('../admin_ip.txt', 'r')
+	adminip = f.read().replace('\n', '').strip()
+	f.close()
+	return ip == adminip
 
 # Entry point. Print leading/trailing characters, executes main()
 if __name__ == '__main__':

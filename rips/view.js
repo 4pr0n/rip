@@ -15,7 +15,7 @@ function init() {
 		return;
 	}
 	var url = String(window.location);
-	if (window.location.hash !== '' && window.location.hash.indexOf('user=') == -1) {
+	if (window.location.hash !== '' && window.location.hash.indexOf('_') >= 0) {
 		// Viewing specific album
 		loadAlbum(window.location.hash.substring(1))
 	} else {
@@ -29,6 +29,7 @@ function init() {
 // SINGLE ALBUM
 
 function loadAlbum(album, start, count, startOver) {
+	if (album == null) { return; }
 	gebi('albums_area').setAttribute('style', 'display: none');
 	gebi('status_area').setAttribute('style', 'display: block');
 	gebi('thumbs_area').setAttribute('style', 'display: block');
@@ -67,13 +68,67 @@ function albumHandler(req) {
 		gebi('album_download').setAttribute(      'style', 'display: none');
 		gebi('album_url_title').setAttribute(     'style', 'display: none');
 		gebi('album_url').setAttribute(           'style', 'display: none');
+		gebi('report').setAttribute(              'style', 'display: none');
 		gebi('thumbs_area').setAttribute(         'style', 'display: none');
 		return;
 	}
 	gebi('album_title').innerHTML = album.album + ' (' + album.total + ' images)';
-	gebi('album_download').setAttribute('style', 'display: inline');
-	gebi('album_url').setAttribute(     'style', 'display: inline');
+	gebi('album_download').setAttribute('style', 'display: table-cell');
+	gebi('album_url').setAttribute(     'style', 'display: table-cell');
+	gebi('report').setAttribute(        'style', 'display: table-cell');
 	gebi('thumbs_area').setAttribute(   'style', 'display: table');
+	
+	if (album.report_reasons != undefined) {
+		// Display list of reasons
+		var report = gebi('report');
+		report.innerHTML = '';
+		report.className = 'fontsmall red';
+		if (album.report_reasons.length == 0) {
+			var rspan = dce('span');
+			rspan.innerHTML = 'no reports found';
+			report.appendChild(rspan);
+		} else {
+			var rdiv = dce('div');
+			rdiv.innerHTML = 'reports:';
+			report.appendChild(rdiv);
+			var rol = dce('ol');
+			for (var i = 0; i < album.report_reasons.length; i++) {
+				var user = album.report_reasons[i].user;
+				var reason = album.report_reasons[i].reason;
+				if (reason === '') {
+					reason = '[no reason given]';
+				}
+				var uli = dce('li');
+				var ulidiv = dce('div');
+				ulidiv.innerHTML = 'ip: <a href="#user=' + user + '" target="_BLANK">' + user + '</a><br>';
+				ulidiv.innerHTML += 'reason: ' + reason;
+				uli.appendChild(ulidiv);
+				rol.appendChild(uli);
+			}
+			report.appendChild(rol);
+
+			var rclear = dce('a');
+			rclear.href = 'javascript:void(0)';
+			rclear.setAttribute('album', album.album);
+			rclear.setAttribute('onclick', 'clearReports("' + album.album + '"); return false;');
+			rclear.innerHTML = 'clear reports';
+			rclear.className = 'orange bold underline';
+			report.appendChild(rclear);
+			var rclears = dce('span');
+			rclears.setAttribute('style', 'padding-left: 10px;');
+			rclears.className = 'green';
+			rclears.setAttribute('id', 'report_clear_status');
+			report.appendChild(rclears);
+		}
+	} else {
+		// Show report link
+		var areport = gebi('report_link');
+		if (areport != null) {
+			areport.href = "javascript:void(0)";
+			areport.setAttribute('album', album.album);
+			areport.setAttribute('onclick', 'report("' + album.album + '")');
+		}
+	}
 	
 	// .ZIP link
 	var albuma = dce('a');
@@ -177,9 +232,11 @@ function getAllAlbumUrl(after) {
 	var req = 'view.cgi';
 	if (hash === '') {
 		req += '?view_all=true';
-	} else {
+	} else if (hash.indexOf('user=') != -1) {
 		hash = hash.substring(hash.indexOf('user=')+5);
 		req += '?user=' + hash;
+	} else if (hash.indexOf('report') != -1) {
+		req += '?get_report=y';
 	}
 	if (after != undefined) {
 		req += '&after=' + after;
@@ -259,11 +316,23 @@ function allAlbumsHandler(req) {
 		titletr.appendChild(titletd);
 		table.appendChild(titletr);
 
+		if (album.reports != undefined) {
+			var rtr = dce('tr');
+			rtr.setAttribute('valign', 'top');
+			rtr.className = 'fontsmall orange bold';
+			var rtd = dce('td');
+			rtd.setAttribute('colspan', ALBUM_PREVIEW_IMAGE_BREAKS);
+			rtd.setAttribute('style', 'margin: 0px; padding: 0px;');
+			rtd.innerHTML = 'reports: ' + album.reports;
+			rtr.appendChild(rtd);
+			table.appendChild(rtr);
+		}
+
 		// Spacing so table doesn't resize when images load
 		var spacetr = dce('tr');
 		for (var i = 0; i < ALBUM_PREVIEW_IMAGE_BREAKS; i++) {
 			var spacetd = dce('td');
-			spacetd.setAttribute('style', 'width: 105px');
+			spacetd.setAttribute('style', 'width: 115px');
 			spacetd.setAttribute('style', 'height: 0px');
 			spacetr.appendChild(spacetd);
 		}
@@ -423,7 +492,7 @@ function scrollHandler() {
 	var scroll = document.documentElement.scrollTop || window.pageYOffset;
 	var remain = (page - client) - scroll;
 	if (remain < 200) {
-		if (window.location.hash === '' || window.location.hash.indexOf('user=') >= 0) {
+		if (window.location.hash === '' || window.location.hash.indexOf('_') == -1) {
 			// Viewing all albums
 			loadNextAlbum();
 		} else {
@@ -578,12 +647,88 @@ function loadUrlsHandler(req) {
 			gebi('get_urls').innerHTML = 'no urls found';
 			return;
 		}
+		var root = window.location.href;
+		if (root.indexOf('#') != -1) {
+			root = root.substring(0, root.indexOf('#'));
+		}
 		var out = '';
 		for (var i = 0; i < json.urls.length; i++) {
-			out += json.urls[i] + '<br>';
+			out += root + json.urls[i] + '<br>';
 		}
 		gebi('get_urls').setAttribute('style', 'font-size: 0.8em; padding-left: 20px;');
 		gebi('get_urls').innerHTML = out;
+	}
+}
+
+////////////////////////
+// REPORTING
+
+function report(album) {
+	var reason = prompt("please enter the reason why this album should be reported", "enter reason here");
+	if (reason == null || reason == '') {
+		return;
+	}
+	if (reason == "enter reason here") {
+		var rstat = gebi('report_status');
+		rstat.className = 'red bold';
+		rstat.innerHTML = 'you must enter a valid reason';
+		return;
+	}
+	var url = 'view.cgi';
+	url += '?report=' + album;
+	url += '&reason=' + reason;
+	gebi('report_status').innerHTML = '<img src="../spinner_dark.gif" style="border: none">&nbsp;reporting...';
+	sendRequest(url, reportHandler);
+	return false;
+}
+function reportHandler(req) {
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		throw new Error('unable to parse response:\n' + req.responseText);
+	}
+	var rstat = gebi('report_status');
+	if (json.error != null) {
+		rstat.className = 'red';
+		rstat.innerHTML = json.error;
+	}
+	else if (json.warning != null) {
+		rstat.className = 'orange';
+		rstat.innerHTML = json.warning;
+	}
+	else if (json.reported) {
+		rstat.className = 'green';
+		gebi('report_link').innerHTML = '';
+		rstat.innerHTML = 'album has been reported';
+	}
+	else {
+		rstat.innerHTML = 'unknown response';
+	}
+}
+function clearReports(album) {
+	var url = 'view.cgi?clear_reports=' + album;
+	sendRequest(url, clearReportsHandler);
+}
+function clearReportsHandler(req) {
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		throw new Error('unable to parse response:\n' + req.responseText);
+	}
+	var rstat = gebi('report_clear_status');
+	if (json.error != null) {
+		rstat.className = 'red';
+		rstat.innerHTML = json.error;
+	}
+	else if (json.warning != null) {
+		rstat.className = 'warning';
+		rstat.innerHTML = json.warning;
+	}
+	else if (json.ok != null) {
+		rstat.className = 'green';
+		rstat.innerHTML = json.ok;
 	}
 }
 

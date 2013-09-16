@@ -26,6 +26,27 @@ a:hover {
 .center {
 	text-align: center;
 }
+.underline {
+	text-decoration: underline;
+}
+.red {
+	color: #f00;
+}
+.orange {
+	color: #f50;
+}
+.green {
+	color: #0f0;
+}
+.fontsmall {
+	font-size: 0.8em;
+}
+.fontmed {
+	font-size: 1.0em;
+}
+.fontbig {
+	font-size: 1.2em;
+}
 
 .page {
 	background-color: #444;
