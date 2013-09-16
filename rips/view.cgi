@@ -485,12 +485,12 @@ def ban_user(user, reason=""):
 	if not 'allow from all' in lines:
 		print_error('unable to ban user; cannot find "allow from all" in htaccess')
 		return
-	if '  deny from %s' % user in lines:
+	if ' deny from %s' % user in lines:
 		print_error('user is already banned')
 		return
 	reason = reason.replace('\n', '').replace('\r', '')
 	lines.insert(lines.index('allow from all'), '# added by admin %s (reason: %s)' % (environ['REMOTE_ADDR'], reason))
-	lines.insert(lines.index('allow from all'), '  deny from %s' % user)
+	lines.insert(lines.index('allow from all'), ' deny from %s' % user)
 	lines.insert(lines.index('allow from all'), '')
 	f = open('../.htaccess', 'w')
 	f.write('\n'.join(lines))
