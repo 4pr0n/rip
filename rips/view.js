@@ -790,6 +790,7 @@ function clearReportsHandler(req) {
 	}
 }
 function deleteAlbum(album) {
+	gebi('delete_status').innerHTML = '<img src="../spinner_dark.gif" style="border: none">&nbsp;deleting...';
 	var url = 'view.cgi?delete=' + album;
 	sendRequest(url, deleteAlbumHandler);
 }
@@ -815,6 +816,7 @@ function deleteAlbumHandler(req) {
 	}
 }
 function deleteAllAlbums(user) {
+	gebi('delete_status').innerHTML = '<img src="../spinner_dark.gif" style="border: none">&nbsp;deleting...';
 	var url = 'view.cgi?delete_user=' + user;
 	sendRequest(url, deleteUserHandler);
 }
@@ -852,6 +854,7 @@ function banUser(user) {
 		rstat.innerHTML = 'you must enter a reason';
 		return;
 	}
+	gebi('ban_status').innerHTML = '<img src="../spinner_dark.gif" style="border: none">&nbsp;banning...';
 	var url = 'view.cgi?ban_user=' + user + '&reason=' + reason;
 	sendRequest(url, banUserHandler);
 }
