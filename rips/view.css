@@ -29,8 +29,14 @@ a:hover {
 .underline {
 	text-decoration: underline;
 }
+.white {
+	color: #fff;
+}
 .red {
 	color: #f00;
+}
+a.red:hover {
+	color: #f55;
 }
 .orange {
 	color: #f50;
@@ -46,6 +52,10 @@ a:hover {
 }
 .fontbig {
 	font-size: 1.2em;
+}
+.space {
+	padding-top: 5px;
+	padding-left: 5px;
 }
 
 .page {

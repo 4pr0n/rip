@@ -70,6 +70,7 @@ function albumHandler(req) {
 		gebi('album_url').setAttribute(           'style', 'display: none');
 		gebi('report').setAttribute(              'style', 'display: none');
 		gebi('thumbs_area').setAttribute(         'style', 'display: none');
+		gebi('next').innerHTML += '';
 		return;
 	}
 	gebi('album_title').innerHTML = album.album + ' (' + album.total + ' images)';
@@ -79,7 +80,7 @@ function albumHandler(req) {
 	gebi('thumbs_area').setAttribute(   'style', 'display: table');
 	
 	if (album.report_reasons != undefined) {
-		// Display list of reasons
+		// Display list of reasons for reporting
 		var report = gebi('report');
 		report.innerHTML = '';
 		report.className = 'fontsmall red';
@@ -100,7 +101,7 @@ function albumHandler(req) {
 				}
 				var uli = dce('li');
 				var ulidiv = dce('div');
-				ulidiv.innerHTML = 'ip: <a href="#user=' + user + '" target="_BLANK">' + user + '</a><br>';
+				ulidiv.innerHTML = 'ip: <a class="red underline" href="#user=' + user + '" target="_BLANK">' + user + '</a><br>';
 				ulidiv.innerHTML += 'reason: ' + reason;
 				uli.appendChild(ulidiv);
 				rol.appendChild(uli);
@@ -108,17 +109,74 @@ function albumHandler(req) {
 			report.appendChild(rol);
 
 			var rclear = dce('a');
+			rclear.className = 'orange bold underline space';
 			rclear.href = 'javascript:void(0)';
 			rclear.setAttribute('album', album.album);
 			rclear.setAttribute('onclick', 'clearReports("' + album.album + '"); return false;');
 			rclear.innerHTML = 'clear reports';
-			rclear.className = 'orange bold underline';
 			report.appendChild(rclear);
 			var rclears = dce('span');
+			rclears.className = 'green space';
 			rclears.setAttribute('style', 'padding-left: 10px;');
-			rclears.className = 'green';
 			rclears.setAttribute('id', 'report_clear_status');
 			report.appendChild(rclears);
+		}
+		// Show user that uploaded the album
+		if (album.user != null) {
+			var udiv = dce('div');
+			udiv.className = 'space';
+			var ua = dce('a');
+			ua.className = 'white bold';
+			ua.href = '#user=' + album.user;
+			ua.setAttribute('target', '_BLANK');
+			ua.innerHTML = 'all albums uploaded by ' + album.user;
+			udiv.appendChild(ua);
+			report.appendChild(udiv);
+		}
+		// Show 'delete album' link
+		var ddiv = dce('div');
+		ddiv.className = 'space';
+		var adel = dce('a');
+		adel.className = 'red bold underline';
+		adel.href = "javascript:void(0)";
+		adel.setAttribute('onclick', 'deleteAlbum("' + album.album + '")');
+		adel.innerHTML = 'delete album';
+		ddiv.appendChild(adel);
+		var sdel = dce('span');
+		sdel.setAttribute('style', 'padding-left: 5px');
+		sdel.setAttribute('id', 'delete_status');
+		ddiv.appendChild(sdel);
+		report.appendChild(ddiv);
+		// Show 'delete all albums by user' link
+		if (album.user != null) {
+			var alldiv = dce('div');
+			alldiv.className = 'space';
+			var aall = dce('a');
+			aall.className = 'red bold underline';
+			aall.href = "javascript:void(0)";
+			aall.setAttribute('onclick', 'deleteAllAlbums("' + album.user + '")');
+			aall.innerHTML = 'delete all albums by ' + album.user;
+			alldiv.appendChild(aall);
+			report.appendChild(alldiv);
+
+			var bandiv = dce('div');
+			bandiv.className = 'space';
+			var aban = dce('a');
+			aban.className = 'red bold underline';
+			aban.href = 'javascript:void(0)';
+			aban.setAttribute('onclick', 'banUser("' + album.user + '")');
+			aban.innerHTML = 'permanently ban ' + album.user;
+			bandiv.appendChild(aban);
+			var banspan = dce('span');
+			banspan.setAttribute('id', 'ban_status');
+			banspan.setAttribute('style', 'padding-left: 5px')
+			bandiv.appendChild(banspan);
+			report.appendChild(bandiv);
+		} else {
+			var errdiv = dce('div');
+			errdiv.className = 'orange space';
+			errdiv.innerHTML += 'unable to determine which user created this rip';
+			report.appendChild(errdiv);
 		}
 	} else {
 		// Show report link
@@ -215,7 +273,7 @@ function loadMoreImages() {
 	var ii = next.getAttribute('image_index');
 
 	// Load more images
-	gebi('albums_table').setAttribute('loading', 'true');
+	albums.setAttribute('loading', 'true');
 	setTimeout(function() {
 		gebi('next').innerHTML += '<br>loading...'; // Give them hope
 	}, 150);
@@ -729,6 +787,89 @@ function clearReportsHandler(req) {
 	else if (json.ok != null) {
 		rstat.className = 'green';
 		rstat.innerHTML = json.ok;
+	}
+}
+function deleteAlbum(album) {
+	var url = 'view.cgi?delete=' + album;
+	sendRequest(url, deleteAlbumHandler);
+}
+function deleteAlbumHandler(req) {
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		throw new Error('unable to parse response:\n' + req.responseText);
+	}
+	var dstat = gebi('delete_status');
+	if (json.error != null) {
+		dstat.className = 'red';
+		dstat.innerHTML = json.error;
+	}
+	else if (json.warning != null) {
+		dstat.className = 'warning';
+		dstat.innerHTML = json.warning;
+	}
+	else if (json.ok != null) {
+		dstat.className = 'green';
+		dstat.innerHTML = json.ok;
+	}
+}
+function deleteAllAlbums(user) {
+	var url = 'view.cgi?delete_user=' + user;
+	sendRequest(url, deleteUserHandler);
+}
+function deleteUserHandler(req) {
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		throw new Error('unable to parse response:\n' + req.responseText);
+	}
+	var dstat = gebi('delete_status');
+	if (json.error != null) {
+		dstat.className = 'red';
+		dstat.innerHTML = json.error;
+	}
+	else if (json.deleted != null) {
+		dstat.className = 'green';
+		var out = 'deleted ' + json.deleted.length + ' files/directories from ' + json.user + ':';
+		out += '<ol>';
+		for (var i = 0; i < json.deleted.length; i++) {
+			out += '<li>' + json.deleted[i];
+		}
+		out += '</ol>';
+		dstat.innerHTML = out;
+	}
+}
+function banUser(user) {
+	var reason = prompt("enter reason why user is being banned", "enter reason here");
+	if (reason == null || reason == '') {
+		return;
+	}
+	if (reason == "enter reason here") {
+		var rstat = gebi('ban_status');
+		rstat.className = 'red bold';
+		rstat.innerHTML = 'you must enter a reason';
+		return;
+	}
+	var url = 'view.cgi?ban_user=' + user + '&reason=' + reason;
+	sendRequest(url, banUserHandler);
+}
+function banUserHandler(req) {
+	var json;
+	try {
+		json = JSON.parse(req.responseText);
+	} catch (error) {
+		throw new Error('unable to parse response:\n' + req.responseText);
+	}
+	var dstat = gebi('ban_status');
+	if (json.error != null) {
+		dstat.className = 'red';
+		dstat.innerHTML = json.error;
+	}
+	else if (json.banned != null) {
+		dstat.className = 'green';
+		dstat.innerHTML = 'banned ' + json.banned + ' forever!';
 	}
 }
 

@@ -9,6 +9,7 @@ from random   import randrange
 from datetime import datetime
 from time     import strftime
 from urllib   import quote, unquote
+from shutil   import rmtree
 
 ##################
 # MAIN
@@ -62,6 +63,18 @@ def main():
 	elif 'clear_reports' in keys:
 		clear_reports(keys['clear_reports'])
 	
+	elif 'delete' in keys:
+		delete_album(keys['delete'])
+	
+	elif 'delete_user' in keys:
+		delete_albums_by_user(keys['delete_user'])
+	
+	elif 'ban_user' in keys:
+		reason = ''
+		if 'reason' in keys:
+			reason = keys['reason']
+		ban_user(keys['ban_user'], reason=reason)
+		
 	else:
 		print_error('unsupported method')
 
@@ -297,6 +310,12 @@ def get_album(album, start, count):
 	result['url'] = get_url_for_album(album)
 	if start == 0 and is_admin():
 		result['report_reasons'] = get_report_reasons(album)
+		iptxt = path.join(album, 'ip.txt')
+		if path.exists(iptxt):
+			f = open(iptxt, 'r')
+			ip = f.read()
+			f.close()
+			result['user'] = ip
 	print dumps( { 'album' : result } )
 
 # Return external URL for album that was ripped
@@ -411,6 +430,74 @@ def clear_reports(album):
 	remove(reports)
 	print dumps( { 'ok' : 'reports cleared' } )
 	
+def delete_album(album):
+	if not is_admin():
+		print_error('you are not an admin: %s' % environ['REMOTE_ADDR'])
+		return
+	album = quote(album)
+	# Sanitization, check if album
+	if '..' in album or '/' in album or not path.isdir(album):
+		print_error('album is not valid: %s' % album)
+		return
+	# No album
+	if not path.exists(album):
+		print_error('album not found: %s' % album)
+		return
+	zipfile = '%s.zip' % album
+	if path.exists(zipfile):
+		remove(zipfile)
+	rmtree(album)
+	print dumps( { 'ok' : 'album and/or zip deleted' } )
+
+def delete_albums_by_user(user):
+	if not is_admin():
+		print_error('you are not an admin: %s' % environ['REMOTE_ADDR'])
+		return
+	deleted = []
+	for d in listdir('.'):
+		if not path.isdir(d): continue
+		iptxt = path.join(d, 'ip.txt')
+		if not path.exists(iptxt): continue
+		f = open(iptxt, 'r')
+		ip = f.read().replace('\n', '').strip()
+		f.close()
+		if ip != user: continue
+		# Delete zip
+		zipfile = '%s.zip' % d
+		if path.exists(zipfile):
+			deleted.append(zipfile)
+			remove(zipfile)
+		# Delete album
+		deleted.append(d)
+		rmtree(d)
+	print dumps( {
+		'deleted' : deleted,
+		'user'    : user
+	} )
+
+def ban_user(user, reason=""):
+	if not is_admin():
+		print_error('you are not an admin: %s' % environ['REMOTE_ADDR'])
+		return
+	f = open('../.htaccess', 'r')
+	lines = f.read().split('\n')
+	f.close()
+	if not 'allow from all' in lines:
+		print_error('unable to ban user; cannot find "allow from all" in htaccess')
+		return
+	if '  deny from %s' % user in lines:
+		print_error('user is already banned')
+		return
+	reason = reason.replace('\n', '').replace('\r', '')
+	lines.insert(lines.index('allow from all'), '# added by admin %s (reason: %s)' % (environ['REMOTE_ADDR'], reason))
+	lines.insert(lines.index('allow from all'), '  deny from %s' % user)
+	lines.insert(lines.index('allow from all'), '')
+	f = open('../.htaccess', 'w')
+	f.write('\n'.join(lines))
+	f.close()
+	print dumps( {
+		'banned' : user
+	} )
 
 ##############
 # TIME
@@ -496,11 +583,16 @@ def tail(f, lines=1, _buffer=4098):
 	return result
 
 def is_admin():
-	ip = environ['REMOTE_ADDR']
+	user = environ['REMOTE_ADDR']
 	f = open('../admin_ip.txt', 'r')
-	adminip = f.read().replace('\n', '').strip()
+	ips = f.read().split('\n')
 	f.close()
-	return ip == adminip
+	for ip in ips:
+		ip = ip.strip()
+		if len(ip) < 7: continue
+		if ip == user:
+			return True
+	return False
 
 # Entry point. Print leading/trailing characters, executes main()
 if __name__ == '__main__':
