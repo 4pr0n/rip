@@ -215,12 +215,16 @@ function albumHandler(req) {
 	// Get URLs link
 	var urlsa = dce('a');
 	urlsa.className = 'download_box fontmed';
-	urlsa.href = "javascript:void(0)";
 	urlsa.innerHTML = 'get urls';
+	urlsa.href = 'urls_raw.cgi?album=' + album.album;
+	urlsa.setAttribute('target', '_BLANK');
+	/*
+	urlsa.href = "javascript:void(0)";
 	urlsa.setAttribute('album', album.album);
 	urlsa.album = album.album;
 	urlsa.setAttribute('onclick', 'loadUrls(' + album.album + ')');
 	urlsa.onclick = function() { loadUrls(this.album) }
+	*/
 	gebi('get_urls').innerHTML = '';
 	gebi('get_urls').appendChild(urlsa);
 	
