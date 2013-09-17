@@ -23,6 +23,12 @@ function init() {
 		loadAllAlbums();
 	}
 	window.onscroll = scrollHandler;
+	
+	if (String(window.location.hash) === '#report') {
+		setTimeout(function() {
+			window.location.reload(true);
+		}, 30000);
+	}
 }
 
 //////////////////////
