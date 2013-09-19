@@ -32,6 +32,7 @@ function init() {
 
 function loadAlbum(album, start, count, startOver) {
 	if (album == null) { return; }
+	$('albums_table').attr('loading', 'true');
 	$('#albums_area').hide();
 	$('#status_area').show();
 	$('#thumbs_area').css('display', 'block');
@@ -118,16 +119,17 @@ function loadAlbum(album, start, count, startOver) {
 			
 			var thumba = $('<a />')
 				.attr('href', image.image)
-				.click(function() {
-					return loadImage( $(this).attr('href') );
-				});
+				.click( function() { return false } );
 			
 			var thumbi = $('<img />')
 				.attr('src', image.thumb)
 				.css('visibility', 'hidden')
-				
+				.attr('full', image.image)
 				.load( function() {
 					$(this).css('visibility', 'visible');
+				})
+				.click( function() {
+					loadImage( $(this) );
 				})
 				.appendTo(thumba);
 			thumbtd.append(thumba)
@@ -147,15 +149,14 @@ function loadAlbum(album, start, count, startOver) {
 		// Set the next chunk of albums to retrieve
 		if (album.start + album.count >= album.total) {
 			$('#next').html(album.total + ' images loaded');
-			$('albums_table').attr('loading', 'true');
 		} else {
 			var remaining = album.total - (album.start + album.count);
 			$('#next').attr('album', album.album)
 				.attr('image_index', album.start + album.count)
 				.html(remaining + ' images remaining');
 			$('#albums_table').removeAttr('loading');
+			scrollHandler();
 		}
-		scrollHandler();
 	});
 	return true;
 }
@@ -168,7 +169,7 @@ function loadMoreImages() {
 	// Load more images
 	$('#albums_table').attr('loading', 'true');
 	setTimeout(function() {
-		$('#next').html('<br>loading...'); // Give them hope
+		$('#next').html($('#next').html() + '<br>loading...'); // Give them hope
 	}, 100);
 	
 	setTimeout(function() {
@@ -207,7 +208,6 @@ function loadAllAlbums(after, startOver) {
 	$('#albums_area').show();
 	$('#status_area').hide();
 	$('#thumbs_area').hide();
-	$('#albums_table').attr('loading', 'true');
 	
 	// Remove existing albums if needed
 	if (startOver == undefined || startOver) { 
@@ -231,7 +231,7 @@ function loadAllAlbums(after, startOver) {
 				
 			var $imgtable = $('<table />')
 				.addClass('page album clickable')
-				.attr('id', album.album)
+				.attr('id', album.album.replace('%20', '_'))
 				.attr('show_album', 'true')
 				.attr('album', album.album)
 				.click( function() {
@@ -272,10 +272,8 @@ function loadAllAlbums(after, startOver) {
 			$.each(album.images, function(image_index, image) {
 				var imga = $('<a />')
 					.attr('href', image.image)
-					.attr('album', album.album)
-					.click( function() {
-						return loadImage($(this).attr('href'));
-					})
+					.attr('album', album.album.replace('%20', '_'))
+					.click( function() { return false; } )
 					.mouseover( function() {
 						$('#' + $(this).attr('album')).removeAttr('show_album');
 					})
@@ -285,10 +283,14 @@ function loadAllAlbums(after, startOver) {
 				var imgi = $('<img />')
 					.addClass('image_small')
 					.attr('src', image.thumb)
+					.attr('full', image.image)
 					.css('visibility', 'hidden')
 					.load( function() {
 						$(this).css('visibility', 'visible')
 							.attr('onload', '').unbind('load'); // Prevent future loads from resizing
+					})
+					.click( function() {
+						return loadImage( $(this) );
 					})
 					.appendTo(imga);
 					
@@ -341,8 +343,8 @@ function loadAllAlbums(after, startOver) {
 			$('#next').attr('after', json.after)
 				.html(remaining + ' albums remaining');
 			$('#albums_table').removeAttr('loading');
+			scrollHandler();
 		}
-		scrollHandler();
 	});
 	return true;
 }
@@ -353,6 +355,7 @@ function loadNextAlbum() {
 	}
 	if ( ! $('#next').attr('after') ) {
 		// Already hit end of albums
+		return;
 	}
 	$('#albums_table').attr('loading', 'true');
 	$('#next').html( $('#next').html() )
@@ -402,21 +405,42 @@ function scrollHandler() {
 //////////////////
 // IMAGE DISPLAY
 
-function loadImage(url) {
-	var fg = $('#fgimage');
+function loadImage($image) {
 	
 	var image_click = function() {
-		// hide it
-		$('#fgimage').hide()
-			.attr('src', '');
-		$('#bgimage').hide();
+		// Hide the image
+		$('#bgimage')
+			.unbind('click')
+			.hide();
+		var fg = $('#fgimage')
+			.unbind('click');
+		fg.animate( 
+				{ 
+					'top'    : fg.attr('ttop'),
+					'left'   : fg.attr('tleft'),
+					'height' : fg.attr('theight'),
+					'width'  : fg.attr('twidth'),
+				},
+				500,
+				'linear',
+				function() {
+					$(this)
+						.fadeOut('fast', function() { 
+							$(this).attr('src', '')
+						});
+				}
+			);
 	};
-	fg.load( function() {
+	$('#bgimage').show()
+		.click( image_click );
+	
+	$('#fgimage').load( function() {
+		$(this).unbind('load');
 		if ($(this).attr('src') === '') { return; }
 		var w = window, d = document, e = d.documentElement, g = d.getElementsByTagName('body')[0],
 				SCREEN_WIDTH  = w.innerWidth || e.clientWidth || g.clientWidth,
 				SCREEN_HEIGHT = w.innerHeight|| e.clientHeight|| g.clientHeight;
-		var width  = this.width, height = this.height;
+		var width  = this.width, height = this.height;      // Image width/height
 		var swidth = SCREEN_WIDTH, sheight = SCREEN_HEIGHT; // Screen width/height
 		if (width  > swidth)  { 
 			height = height * (swidth  / width);  width  = swidth;
@@ -424,20 +448,32 @@ function loadImage(url) {
 		if (height > sheight) { 
 			width  = width  * (sheight / height); height = sheight;
 		}
-		var ileft = (swidth  / 2) - (width  / 2);
-		var itop  = (sheight / 2) - (height / 2);
+		// Screen dimensions
+		var bigtop  = (sheight / 2) - (height / 2) + $(document).scrollTop();
+		var bigleft = (swidth  / 2) - (width  / 2);
+		// Thumb dimensions
+		var ttop    = parseInt($image.position().top);
+		var tleft   = parseInt($image.position().left);
+		var theight = parseInt($image.height());
+		var twidth  = parseInt($image.width());
 		$(this).show()
-			.css('visibility', 'visible')
-			.css('left', ileft + 'px')
-			.css('top', itop  + 'px');
-		})
-		.attr('src', url)
-		.attr('alt', 'loading')
-		.click(image_click);
-	
-	var bg = $('#bgimage');
-	$('#bgimage').show()
-		.click( image_click );
+			.css('position','absolute')
+			.css('top',    ttop).css('left',   tleft).css('height', theight).css('width',  twidth)
+			.removeAttr('ttop').removeAttr('tleft').removeAttr('theight').removeAttr('twidth')
+			.attr('ttop', ttop).attr('tleft', tleft).attr('theight', theight).attr('twidth', twidth)
+			.animate( 
+				{ 
+					'top'    : bigtop,
+					'left'   : bigleft,
+					'height' : height,
+					'width'  : width
+				},
+				500
+			);
+
+	})
+	.attr('src', $image.attr('full'))
+	.click(image_click);
 	
 	return false;
 }
