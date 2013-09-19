@@ -227,7 +227,7 @@ div.load_content {
 	              0px -4px 10px rgba(150, 150, 150, 0.6);
 }
 
-.bgimage {
+#bgimage {
 	display: none;
 	z-index: 2;
 	position: fixed;
@@ -240,7 +240,7 @@ div.load_content {
 	filter: alpha(opacity=80); /* IE6+ */
 }
 
-.fgimage {
+#fgimage {
 	display: none;
 	z-index: 3;
 	position: fixed;
