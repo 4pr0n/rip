@@ -11,14 +11,14 @@ function init() {
 		return;
 	}
 	var url = String(window.location);
-	if (window.location.hash !== '' && window.location.hash.indexOf('_') >= 0) {
-		// Viewing specific album
-		loadAlbum(window.location.hash.substring(1))
-	} else {
+	if (!window.location.hash || window.location.hash.indexOf('_') == -1) {
 		// Viewing all albums
 		loadAllAlbums();
+	} else {
+		// Viewing specific album
+		loadAlbum(window.location.hash.substring(1))
 	}
-	window.onscroll = scrollHandler;
+	$(window).scroll(scrollHandler);
 	
 	if (String(window.location.hash) === '#report') {
 		setTimeout(function() {
@@ -28,19 +28,17 @@ function init() {
 }
 
 //////////////////////
-// SINGLE ALBUM
+// LOAD SINGLE ALBUM
 
 function loadAlbum(album, start, count, startOver) {
 	if (album == null) { return; }
 	$('#albums_area').hide();
-	$('#status_area').css('display', 'block');
+	$('#status_area').show();
 	$('#thumbs_area').css('display', 'block');
 	if (start == undefined) start = 0;
 	if (count == undefined) count = IMAGES_PER_PAGE;
 	if (startOver == undefined || startOver) {
-		try{
-			$('#thumbs_table').html('');
-		} catch (error) { }
+		$('#thumbs_table').html('');
 	}
 	var req = 'view.cgi';
 	req += '?start=' + start;
@@ -55,20 +53,16 @@ function loadAlbum(album, start, count, startOver) {
 		}
 		var album = json.album;
 		if (album.images.length == 0) {
-			$('#album_title').html('album not found');
-			$('#album_download_title').hide();
-			$('#album_download').hide();
-			$('#album_url_title').hide();
-			$('#album_url').hide();
-			$('#report').hide();
-			$('#thumbs_area').hide();
+			// Album not found
+			$('#status_area').hide();
+			$('#thumbs_area')
+				.css('text-align', 'center')
+				.append($('<h1 />').html('album not found'))
+				.append($('<div />').html('this album (' + window.location.hash.replace('#','') + ') is no longer available'))
+				.css('padding-bottom', '30px');
 			return;
 		}
 		$('#album_title').html(album.album + ' (' + album.total + ' images)');
-		$('#album_download').css('display', 'table-cell');
-		$('#album_url').css(     'display', 'table-cell');
-		$('#report').css(        'display', 'table-cell');
-		$('#thumbs_area').css(   'display', 'table');
 		
 		if (album.report_reasons != undefined) {
 			showReportsToAdmin(album);
@@ -76,8 +70,9 @@ function loadAlbum(album, start, count, startOver) {
 			// Show report link
 			$('<a />')
 				.html('report this album')
-				.addClass('bold red')
+				.addClass('bold red shadow')
 				.attr('href', '')
+				.attr('title', 'let the site admins know if any content should be looked at or removed')
 				.attr('album', album.album)
 				.click(function() {
 					report($(this).attr('album'))
@@ -90,6 +85,7 @@ function loadAlbum(album, start, count, startOver) {
 		$('<a />')
 			.html(album.archive.replace('./', ''))
 			.attr('href', album.archive)
+			.attr('title', 'download a .zip archive containing these photos')
 			.addClass('download_box')
 			.appendTo( $('#album_download').html('') );
 
@@ -98,27 +94,27 @@ function loadAlbum(album, start, count, startOver) {
 		$('<a />')
 			.html(album.url)
 			.attr('href', album.url)
+			.attr('title', 'link to external site where these images were grabbed')
 			.addClass('bold')
 			.attr('target', '_BLANK')
 			.attr('rel', 'noreferrer')
-			.appendTo( $('#album_url') );
+			.appendTo( $('#album_url').html('') );
 		
 		// Get URLs link
 		$('#get_urls').empty();
 		$('<a />')
-			.html('get urls')
+			.html('get list of urls')
+			.attr('title', 'easy to copy and paste into imgur')
 			.addClass('download_box')
 			.attr('href', 'urls_raw.cgi?album=' + album.album)
 			.attr('target', '_BLANK')
 			.appendTo( $('#get_urls') );
 		
 		// Append thumbnails to table in rows
-		var thumbrow = $('<tr />');
+		var $thumbrow = $('<tr />');
 		$.each(album.images, function(i, image) {
 			var thumbtd = $('<td />')
-				.addClass('image')
-				.css('height', '150px')
-				.css('width',  '150px');
+				.addClass('image');
 			
 			var thumba = $('<a />')
 				.attr('href', image.image)
@@ -128,22 +124,25 @@ function loadAlbum(album, start, count, startOver) {
 			
 			var thumbi = $('<img />')
 				.attr('src', image.thumb)
-				.css('min-height', '150px')
-				.css('min-width',  '150px')
 				.css('visibility', 'hidden')
+				
 				.load( function() {
 					$(this).css('visibility', 'visible');
 				})
 				.appendTo(thumba);
 			thumbtd.append(thumba)
-				.appendTo(thumbrow);
-			if ((i + 1) % SINGLE_ALBUM_IMAGE_BREAKS == 0 && i != album.images.length - 1) {
-				$('#thumbs_table').append(thumbrow);
-				thumbrow = $('<tr />');
+				.appendTo($thumbrow);
+			if ((i + 1) % SINGLE_ALBUM_IMAGE_BREAKS == 0 || i == album.images.length - 1) {
+				$thumbrow.hide();
+				$('#thumbs_table').append($thumbrow);
+				// Fade in
+				$thumbrow.fadeIn(1000);
+				$thumbrow.css('display', 'table-row');
+				$thumbrow = $('<tr />');
 			}
 			
 		});
-		$('#thumbs_table').append(thumbrow);
+		// Slide down
 		
 		// Set the next chunk of albums to retrieve
 		if (album.start + album.count >= album.total) {
@@ -187,7 +186,7 @@ function loadMoreImages() {
 function getAllAlbumUrl(after) {
 	var hash = window.location.hash;
 	var req = 'view.cgi';
-	if (hash === '') {
+	if (!hash) {
 		req += '?view_all=true';
 	} else if (hash.indexOf('user=') != -1) {
 		hash = hash.substring(hash.indexOf('user=')+5);
@@ -205,9 +204,9 @@ function getAllAlbumUrl(after) {
 
 function loadAllAlbums(after, startOver) {
 	if (after == undefined) after = '';
-	$('#albums_area').css('display', 'block');
-	$('#status_area').css('display', 'none');
-	$('#thumbs_area').css('display', 'none');
+	$('#albums_area').show();
+	$('#status_area').hide();
+	$('#thumbs_area').hide();
 	$('#albums_table').attr('loading', 'true');
 	
 	// Remove existing albums if needed
@@ -230,9 +229,8 @@ function loadAllAlbums(after, startOver) {
 					.css('padding-left', '20px');
 			}
 				
-			var imgtable = $('<table />')
+			var $imgtable = $('<table />')
 				.addClass('page album clickable')
-				.css('width', '100%')
 				.attr('id', album.album)
 				.attr('show_album', 'true')
 				.attr('album', album.album)
@@ -249,23 +247,24 @@ function loadAllAlbums(after, startOver) {
 				.append( $('<td />')
 					.addClass('all_album_title')
 					.attr('colspan', ALBUM_PREVIEW_IMAGE_BREAKS)
-					.html(album.album + ' (' + album.total + ') images)')
+					.html(album.album + ' (' + album.total + ' images)')
 				)
-				.appendTo(imgtable);
+				.appendTo($imgtable);
 			
 			if (album.reports) {
 				// Display number of reports on album
 				$('<tr />')
 					.css('vertical-align', 'top')
-					.addClass('fontsmall orange bold')
+					.addClass('fontsmall red bold shadow')
 					.append( 
 							$('<td />')
 								.attr('colspan', ALBUM_PREVIEW_IMAGE_BREAKS)
 								.css('margin',  '0px')
 								.css('padding', '0px')
+								.css('padding-bottom', '5px')
 								.html('reports: ' + album.reports)
 							)
-					.appendTo(imgtable);
+					.appendTo($imgtable);
 			}
 
 			var imgrow = $('<tr />');
@@ -288,9 +287,7 @@ function loadAllAlbums(after, startOver) {
 					.attr('src', image.thumb)
 					.css('visibility', 'hidden')
 					.load( function() {
-						var w = parseInt($(this).attr('width'));
 						$(this).css('visibility', 'visible')
-							.css('width', w > 100 ? w * 0.5 : w) // Resize to small thumb if needed
 							.attr('onload', '').unbind('load'); // Prevent future loads from resizing
 					})
 					.appendTo(imga);
@@ -301,17 +298,32 @@ function loadAllAlbums(after, startOver) {
 					.appendTo(imgrow);
 				if ( (image_index + 1) % ALBUM_PREVIEW_IMAGE_BREAKS == 0 && 
 				      image_index != album.images.length - 1 ) {
-					imgtable.append(imgrow);
+					$imgtable.append(imgrow);
 					imgrow = $('<tr />');
 				}
-				imgtable.append(imgrow);
+				$imgtable.append(imgrow);
 			}); // End of for-each-image
 			albumstable.append(
 				albumsrow.append(
 					albumscell.append(
-						imgtable)
+						$imgtable)
 					)
 				);
+
+			// Slide up
+			$imgtable.css('margin-top', '+100px');
+			$imgtable.animate({'margin-top': '-=100'}, 750, 'swing');
+			/*
+			// Slide in from sides
+			if (album_index % 2 == 0) {
+				$imgtable.css('margin-left', '-500px');
+				$imgtable.animate({'margin-left': '+=500'});
+			} else {
+				$imgtable.css('margin-left', '1000px');
+				$imgtable.animate({'margin-left': '-=1000'});
+			}
+			*/
+
 			if ( (album_index + 1) % 2 == 0 && 
 			      album_index < json.albums.length - 1 ) {
 				albumsrow = $('<tr />');
@@ -370,12 +382,14 @@ function updateAlbum(album) {
 // INFINITE SCROLLING
 
 function scrollHandler() {
-	var page   = document.documentElement.scrollHeight;
-	var client = document.documentElement.clientHeight;
-	var scroll = document.documentElement.scrollTop || window.pageYOffset;
-	var remain = (page - client) - scroll;
-	if (remain < 200) {
-		if (window.location.hash === '' || window.location.hash.indexOf('_') == -1) {
+	// Heights
+	var page     = $(document).height(); // Height of document
+	var viewport = $(window).height();   // Height of viewing window
+	var scroll   = $(document).scrollTop() || window.pageYOffset; // Scroll position (top)
+	var remain = page - (viewport + scroll);
+	if (viewport > page || // Viewport is bigger than entire page
+	    remain < 250) {    // User has scrolled down far enough
+		if (!window.location.hash || window.location.hash.indexOf('_') == -1) {
 			// Viewing all albums
 			loadNextAlbum();
 		} else {
@@ -412,7 +426,7 @@ function loadImage(url) {
 		}
 		var ileft = (swidth  / 2) - (width  / 2);
 		var itop  = (sheight / 2) - (height / 2);
-		$(this).css('display', 'block')
+		$(this).show()
 			.css('visibility', 'visible')
 			.css('left', ileft + 'px')
 			.css('top', itop  + 'px');
@@ -448,7 +462,7 @@ var TOS_VERSION = '1';
 function over18() {
 	if (getCookie('rip_tos_v' + TOS_VERSION) === 'true') { return false; }
 	// User hasn't agreed to TOS or verified age.
-	$('#main_table').hide();
+	$('#maintable').hide();
 	$('#albums_table').attr('loading', 'true');
 	var maindiv = $('<div />')
 		.addClass('warning')
@@ -501,7 +515,7 @@ function over18() {
 
 function i_agree() {
 	setCookie('rip_tos_v' + TOS_VERSION, 'true');
-	$('#main_table').show();
+	$('#maintable').show();
 	$('#maindiv').hide();
 	$('#albums_table').removeAttr('loading');
 	init(); // Load the page
@@ -517,16 +531,19 @@ function showReportsToAdmin(album) {
 	// Display list of reasons for reporting
 	$('#report')
 		.html('')
-		.addClass('fontsmall red');
+		.addClass('fontsmall red shadow');
 	if (album.report_reasons.length == 0) {
 		// No reports
 		$('<span />')
 			.html('no reports')
+			.addClass('green')
+			.css('padding-left', '5px')
 			.appendTo( $('#report') );
 	} else {
 		// Show reports
 		$('<div />')
-			.html('')
+			.addClass('shadow')
+			.html('reports:')
 			.appendTo( $('#report') );
 		var reasonlist = $('<ol />');
 		$.each(album.report_reasons, function(i, reasonattr) {
@@ -638,7 +655,7 @@ function report(album) {
 	if (reason == "enter reason here") {
 		$('#report')
 			.html('you must enter a valid reason')
-			.addClass('red bold');
+			.addClass('red bold shadow');
 		return false;
 	}
 	$('<img />')
@@ -651,20 +668,20 @@ function report(album) {
 		if (json.error) {
 			$('#report')
 				.html(json.error)
-				.addClass('red');
+				.addClass('red shadow');
 		
 		} else if (json.warning) {
 			$('#report')
 				.html(json.warning)
-				.addClass('orange');
+				.addClass('orange shadow');
 		} else if (json.reported) {
 			$('#report')
 				.html('album has been reported')
-				.addClass('green');
+				.addClass('green shadow');
 		} else {
 			$('#report')
 				.html('unexpected response')
-				.addClass('red');
+				.addClass('red shadow');
 		}
 	});
 	return false;
@@ -674,17 +691,17 @@ function clearReports(album) {
 	$.getJSON('view.cgi?clear_reports=' + album, function(json) {
 		if (json.error != null) {
 			$('#report_clear_status')
-				.addClass('red')
+				.addClass('red shadow')
 				.html(json.error);
 		}
 		else if (json.warning != null) {
 			$('#report_clear_status')
-				.addClass('warning')
+				.addClass('warning shadow')
 				.html(json.warning);
 		}
 		else if (json.ok != null) {
 			$('#report_clear_status')
-				.addClass('green')
+				.addClass('green shadow')
 				.html(json.ok);
 		}
 	});
@@ -701,17 +718,17 @@ function deleteAlbum(album) {
 	$.getJSON('view.cgi?delete=' + album, function(json) {
 		if (json.error != null) {
 			$('#report_clear_status')
-				.addClass('red')
+				.addClass('red shadow')
 				.html(json.error);
 		}
 		else if (json.warning != null) {
 			$('#report_clear_status')
-				.addClass('warning')
+				.addClass('warning shadow')
 				.html(json.warning);
 		}
 		else if (json.ok != null) {
 			$('#report_clear_status')
-				.addClass('green')
+				.addClass('green shadow')
 				.html(json.ok);
 		}
 	});
@@ -728,7 +745,7 @@ function deleteAllAlbums(user) {
 	$.getJSON('view.cgi?delete_user=' + user, function(json) {
 		if (json.error != null) {
 			$('#report_clear_status')
-				.addClass('red')
+				.addClass('red shadow')
 				.html(json.error);
 		}
 		else if (json.deleted != null) {
@@ -739,6 +756,7 @@ function deleteAllAlbums(user) {
 					.appendTo(delol);
 			});
 			$('#delete_status')
+				.addClass('green shadow')
 				.append( $('<br>') )
 				.html('deleted ' + json.deleted.length + ' files/directories from ' + json.user + ':')
 				.append(delol);
@@ -755,7 +773,7 @@ function banUser(user) {
 	if (reason == "enter reason here") {
 		$('#ban_status')
 			.html('you must enter a reason')
-			.addClass('red bold');
+			.addClass('red bold shadow');
 		return;
 	}
 	$('<img />')
@@ -766,12 +784,12 @@ function banUser(user) {
 	$.getJSON('view.cgi?ban_user' + user + '&reason=' + reason, function(json) {
 		if (json.error != null) {
 			$('#ban_status')
-				.addClass('red')
+				.addClass('red shadow')
 				.html(json.error);
 		}
 		else if (json.banned != null) {
 			$('#ban_status')
-				.addClass('green')
+				.addClass('green shadow')
 				.html('banned ' + json.banned + ' forever!');
 		}
 	});

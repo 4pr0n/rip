@@ -20,42 +20,32 @@ a:hover {
 	padding-bottom: 0px;
 }
 
-.bold {
-	font-weight: bold;
-}
-.center {
-	text-align: center;
-}
-.underline {
-	text-decoration: underline;
-}
-.white {
-	color: #fff;
-}
-.red {
-	color: #f00;
-}
-a.red:hover {
-	color: #f55;
-}
-.orange {
-	color: #f50;
-}
-.green {
-	color: #0f0;
-}
-.fontsmall {
-	font-size: 0.8em;
-}
-.fontmed {
-	font-size: 1.0em;
-}
-.fontbig {
-	font-size: 1.2em;
-}
+.bold { font-weight: bold; }
+.center { text-align: center; }
+.right { text-align: right; }
+.top { vertical-align: top; }
+.underline { text-decoration: underline; }
+.white { color: #fff; }
+.red { color: #f11; }
+.red:hover { color: #f55; }
+.orange { color: #f50; }
+.green { color: #0f0; }
+.fontsmall { font-size: 0.8em; }
+.fontmed { font-size: 1.0em; }
+.fontbig { font-size: 1.2em; }
 .space {
 	padding-top: 5px;
 	padding-left: 5px;
+}
+.shadow {
+	text-shadow:  4px  0px 6px rgba(0, 0, 0, 0.4),
+	              0px  4px 6px rgba(0, 0, 0, 0.4),
+	             -4px  0px 6px rgba(0, 0, 0, 0.4),
+	              0px -4px 6px rgba(0, 0, 0, 0.4);
+}
+
+#maintable {
+	width: 100%;
 }
 
 .page {
@@ -70,7 +60,6 @@ a.red:hover {
 .clickable:active {
 	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.6);
 }
-	
 
 table.header {
 	padding: 15px;
@@ -111,7 +100,7 @@ div.subheader {
 	background-color: #111;
 	color: #fff;
 	border-radius: 5px;
-	padding: 2px;
+	padding: 4px;
 	padding-left: 10px;
 	padding-right: 10px;
 	white-space: nowrap;
@@ -197,26 +186,41 @@ img:hover {
 	            5px  5px  5px rgba( 10,  10,  10, 0.3);
 }
 
+table.album {
+	height: 200px;
+	width: 100%;
+}
+table.album:hover {
+	cursor: pointer;
+	background-color: #555;
+}
+
 td.image {
 	vertical-align: middle;
 	text-align: center;
 	min-width: 200px;
 	min-height: 200px;
 	padding: 0px;
+	padding-bottom: 5px;
+	padding-top: 5px;
 	margin: 0px;
+}
+img.image {
+	min-width: 200px;
+	min-height: 200px;
 }
 
 td.image_small {
 	vertical-align: middle;
 	text-align: center;
-	min-width: 120px;
-	min-height: 120px;
 	padding: 0px;
 	margin: 0px;
 }
 img.image_small {
-	max-width: 120px;
-	max-height: 120px;
+	max-width:  115px;
+	max-height: 115px;
+	min-width:  80px;
+	min-height: 80px;
 }
 
 div.load_content {
@@ -258,32 +262,24 @@ div.load_content {
 .stat_title {
 	padding-left: 20px;
 	padding-right: 15px;
+	padding-top: 5px;
 }
 .stat {
 	padding-bottom: 5px;
-}
-
-table.album {
-	height: 180px;
-}
-table.album:hover {
-	cursor: pointer;
-	background-color: #555;
+	padding-top: 5px;
 }
 
 .thumbs {
-	padding: 10px;
-	padding-top: 20px;
+	padding: 20px;
+	padding-top: 30px;
+	margin-top: 30px;
+	width: 100%;
 }
 
 div.footer {
 	padding-left: 30px;
 	padding-top: 20px;
 	font-size: 0.7em;
-}
-
-#main_table {
-	width: 100%;
 }
 
 input.button {

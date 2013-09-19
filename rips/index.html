@@ -11,20 +11,21 @@
 		<table id="maintable">
 			<!-- Page title & subheader -->
 			<tr><td class="top">
-					<table class="page header">
-						<tr>
-							<td>
-								<a class="header" href="./">
-									<div class="supheader center">rarchives.com</div>
-									<div class="header center">album viewer</div>
-								</a>
-							</td>
-						</tr>
-					</table>
+					<div style="float: left; width: 45%;">
+						<table class="page header clickable">
+							<tr>
+								<td>
+									<a class="header" href="./">
+										<div class="supheader center">rarchives.com</div>
+										<div class="header center">album viewer</div>
+									</a>
+								</td>
+							</tr>
+						</table>
+					</div>
 			
 			<!-- Disclaimer -->
-			</td></tr><tr><td colspan="2">
-				<div class="center fontmed">
+				<div class="center fontmed" style="float: right; width: 55%">
 					<h3>note: these albums will be deleted soon</h3>
 						the server only holds 100GB of albums/zips at any time.<br>
 						the least-recently-viewed albums will be removed to make room for new content.<br>
@@ -33,21 +34,21 @@
 				</div>
 					
 				
-			</td></tr><tr><td id="albums_area" style="display: none;">
+			</td></tr><tr><td id="albums_area" style="display: none;" colspan="2">
 				<div id="albums_table"></div>
 				
-			</td></tr><tr><td class="page" id="status_area" style="display: none;">
+			</td></tr><tr><td class="page" id="status_area" style="display: none;" colspan="2">
 				<div id="status_div" class="section">
 					<div class="section_title" id="album_title">title (0 images)</div>
 					<table>
 						<tr>
-							<td class="stat stat_title" id="album_download_title">zip:</td>
+							<td class="stat stat_title right" id="album_download_title">zip:</td>
 							<td class="stat left" colspan="3" id="album_download">...</td>
 						</tr><tr>
-							<td class="stat stat_title" id="album_url_title">url:</td>
+							<td class="stat stat_title right" id="album_url_title">source:</td>
 							<td class="stat left" colspan="3" id="album_url">...</td>
 						</tr><tr>
-							<td></td>
+							<td class="stat stat_title right">urls:</td>
 							<td class="stat left" id="get_urls">
 							</td>
 						</tr><tr>
@@ -57,13 +58,13 @@
 					</table>
 				</div>
 		
-			</td></tr><tr><td class="page" id="thumbs_area" style="display: none; width: auto;">
+			</td></tr><tr><td class="page" id="thumbs_area" style="display: none" colspan="2">
 				<table class="thumbs" id="thumbs_table">
 
 				</table>
 				
 
-			</td></tr><tr><td>
+			</td></tr><tr><td colspan="2">
 				<div style="padding-top: 20px; padding-left: 20px; text-align: center; width: 100%;">
 					<span id="nav_info"></span><br>
 					<div class="load_content" id="next"></div>

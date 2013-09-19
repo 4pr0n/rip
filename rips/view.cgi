@@ -18,20 +18,13 @@ from shutil   import rmtree
 def main():
 	keys = get_keys()
 	
-	start   = 0  # Starting index
-	count   = 20 # Number of images/albums to grab
-	after   = '' # Last album to retrieve
-	preview = 10
-	if 'start' in keys and keys['start'].isdigit():
-		start = int(keys['start'])
-	if 'count' in keys and keys['count'].isdigit():
-		count = int(keys['count'])
-	if 'preview' in keys and keys['preview'].isdigit():
-		preview = int(keys['preview'])
-	if 'after' in keys:
-		after = keys['after']
+	# Gets keys or defaults
+	start   = int(keys.get('start',   0))  # Starting index (album/images)
+	count   = int(keys.get('count',   20)) # Number of images/thumbs to retrieve
+	preview = int(keys.get('preview', 10)) # Number of images to retrieve
+	after   =     keys.get('after',   '')  # Next album to retrieve
 	
-	if  'view_all' in keys and keys['view_all'] == 'true':
+	if  'view_all' in keys:
 		# Retrieve list of all albums
 		get_all_albums(count, preview, after)
 
@@ -42,7 +35,7 @@ def main():
 
 	elif 'update' in keys:
 		update_album(keys['update'])
-		print dumps( { 'date' : utime_to_hrdate(int(strftime('%s'))) } )
+		print dumps( { 'updated' : True } )
 	
 	elif 'urls' in keys:
 		get_urls_for_album(keys['urls'])
@@ -51,11 +44,7 @@ def main():
 		get_albums_for_user(keys['user'], count, preview, after)
 		
 	elif 'report' in keys:
-		if 'reason' in keys:
-			reason = keys['reason']
-		else:
-			reason = ''
-		report_album(keys['report'], reason=reason)
+		report_album(keys['report'], reason=keys.get('reason', ''))
 		
 	elif 'get_report' in keys:
 		get_reported_albums(count, preview, after)
@@ -70,10 +59,7 @@ def main():
 		delete_albums_by_user(keys['delete_user'])
 	
 	elif 'ban_user' in keys:
-		reason = ''
-		if 'reason' in keys:
-			reason = keys['reason']
-		ban_user(keys['ban_user'], reason=reason)
+		ban_user(keys['ban_user'], reason=keys.get('reason', ''))
 		
 	else:
 		print_error('unsupported method')
@@ -306,7 +292,8 @@ def get_images_for_album(album, start, count, thumbs=False):
 
 def get_album(album, start, count):
 	result = get_images_for_album(album, start, count)
-	update_album(album) # Mark album as recently-viewed
+	if start == 0:
+		update_album(album) # Mark album as recently-viewed
 	result['url'] = get_url_for_album(album)
 	if start == 0 and is_admin():
 		result['report_reasons'] = get_report_reasons(album)
@@ -499,31 +486,6 @@ def ban_user(user, reason=""):
 		'banned' : user
 	} )
 
-##############
-# TIME
-
-# Epoch seconds to date (YYYY-MM-DD HH:MM:SS)
-def utime_to_hrdate(utime):
-	dt = datetime.fromtimestamp(utime)
-	return dt.strftime('%Y-%m-%d %H:%M:%S')
-
-# Epoch seconds to human-readable (1d 12h 30m 15s)
-def utime_to_hrdate2(utime):
-	dt = datetime.fromtimestamp(utime)
-	delta = dt - datetime.now()
-	result = ''
-	if delta.days > 0:
-		result += '%dd' % delta.days
-	s = delta.seconds
-	if s > 3600:
-		result += ' %dh' % (s / 3600)
-	s = s % 3600
-	if s > 60:
-		result += ' %dm' % (s / 60)
-	s = s % 60
-	if s > 0:
-		result += ' %ds' % (s)
-	return result
 
 ##############
 # UPDATE
@@ -547,41 +509,7 @@ def update_file_modified(f):
 		return False
 	return True
 
-################
-# LOGS
-
-# Retrieve lines from an album's log file
-def get_logs(album, lines):
-	recents = []
-	try:
-		f = open('%s/log.txt', 'r')
-		recents = tail(f, lines=lines)
-		f.close()
-	except:  pass
-	
-	print dumps( { 
-		'log' : recents
-		} )
-
-# Tail a file and get X lines from the end
-def tail(f, lines=1, _buffer=4098):
-	lines_found = []
-	block_counter = -1
-	while len(lines_found) < lines:
-			try:
-					f.seek(block_counter * _buffer, SEEK_END)
-			except IOError:  # either file is too small, or too many lines requested
-					f.seek(0)
-					lines_found = f.readlines()
-					break
-			lines_found = f.readlines()
-			if len(lines_found) > lines:
-					break
-			block_counter -= 1
-	result = [word.strip() for word in lines_found[-lines:]]
-	result.reverse()
-	return result
-
+# True if user IP is in the admin list, false otherwise
 def is_admin():
 	user = environ['REMOTE_ADDR']
 	f = open('../admin_ip.txt', 'r')
