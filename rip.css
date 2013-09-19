@@ -361,7 +361,7 @@ td.recent {
 	font-size: 0.9em;
 }
 div#recent {
-	height: 350px;
+	min-height: 350px;
 }
 li.recent {
 	padding-top: 15px;
