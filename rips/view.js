@@ -409,7 +409,8 @@ function loadImage($image) {
 			.unbind('click')
 			.fadeOut(100);
 		var fg = $('#fgimage')
-			.unbind('click');
+			.unbind('click')
+			.unbind('load');
 		fg.fadeOut(300)
 			.animate( 
 				{ 
@@ -422,7 +423,8 @@ function loadImage($image) {
 					queue: false,
 					duration: 200,
 					easing: 'swing'
-				}
+				},
+				function() { fg.removeAttr('src') }
 			);
 	};
 	// Dim the background
@@ -434,6 +436,7 @@ function loadImage($image) {
 	$('#fgimage')
 		.stop() // Stop all other animations
 		.click(image_click)
+		.removeAttr('src')
 		.attr('src', $image.attr('full'))
 		.one('load', function() { // When the image loads
 			$(this).hide();
