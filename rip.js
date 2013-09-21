@@ -201,14 +201,13 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 			.append( $('<span />').html('share: ') )
 			.append( $('<input />')
 					.addClass('textbox')
+					.attr('id', 'share_box')
 					.css('width', '75%')
 					.css('font-size', '0.8em')
-					.val(String(window.location.href))
-					.focus( function() {
-						$(this).select();
-					})
+					.focus(   function() { $(this).select(); })
 					.mouseup( function() { return false; })
 					.prop('readonly', true)
+					.val(window.location.href)
 			)
 			.appendTo($result);
 		
