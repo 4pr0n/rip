@@ -240,8 +240,8 @@ div.load_content {
 	width: 100%;
 	height: 100%;
 	background-color: gray;
-	opacity: .80;              /* Normal browsers */
-	filter: alpha(opacity=80); /* IE6+ */
+	opacity: .50;              /* Normal browsers */
+	filter: alpha(opacity=50); /* IE6+ */
 }
 
 #fgimage {

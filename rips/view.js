@@ -406,69 +406,88 @@ function loadImage($image) {
 		// Hide the image
 		$('#bgimage')
 			.unbind('click')
-			.fadeOut();
+			.fadeOut(100);
 		var fg = $('#fgimage')
 			.unbind('click');
-		fg.animate( 
+		fg.fadeOut(300)
+			.animate( 
 				{ 
 					'top'    : fg.attr('ttop'),
 					'left'   : fg.attr('tleft'),
 					'height' : fg.attr('theight'),
 					'width'  : fg.attr('twidth'),
 				},
-				300,
-				'linear',
-				function() {
-					$(this)
-						.fadeOut('fast', function() { 
-							$(this).attr('src', '')
-						});
+				{
+					queue: false,
+					duration: 200,
+					easing: 'swing'
 				}
 			);
 	};
-	$('#bgimage').fadeIn()
+	// Dim the background
+	$('#bgimage')
+		.stop()
+		.fadeIn()
 		.click( image_click );
-	
-	$('#fgimage').load( function() {
-		$(this).unbind('load');
-		if ($(this).attr('src') === '') { return; }
-		var w = window, d = document, e = d.documentElement, g = d.getElementsByTagName('body')[0],
-				SCREEN_WIDTH  = w.innerWidth || e.clientWidth || g.clientWidth,
-				SCREEN_HEIGHT = w.innerHeight|| e.clientHeight|| g.clientHeight;
-		var width  = this.width, height = this.height;      // Image width/height
-		var swidth = SCREEN_WIDTH, sheight = SCREEN_HEIGHT; // Screen width/height
-		if (width  > swidth)  { 
-			height = height * (swidth  / width);  width  = swidth;
-		}
-		if (height > sheight) { 
-			width  = width  * (sheight / height); height = sheight;
-		}
-		// Screen dimensions
-		var bigtop  = (sheight / 2) - (height / 2) + $(document).scrollTop();
-		var bigleft = (swidth  / 2) - (width  / 2);
-		// Thumb dimensions
-		var ttop    = parseInt($image.position().top);
-		var tleft   = parseInt($image.position().left) + 2;
-		var theight = parseInt($image.height());
-		var twidth  = parseInt($image.width());
-		$(this).show()
-			.css('position','absolute')
-			.css('top',    ttop).css('left',   tleft).css('height', theight).css('width',  twidth)
-			.removeAttr('ttop').removeAttr('tleft').removeAttr('theight').removeAttr('twidth')
-			.attr('ttop', ttop).attr('tleft', tleft).attr('theight', theight).attr('twidth', twidth)
-			.animate( 
-				{ 
-					'top'    : bigtop,
-					'left'   : bigleft,
-					'height' : height,
-					'width'  : width
-				},
-				300
-			);
+	// Setup iamge to be displayed
+	$('#fgimage')
+		.stop() // Stop all other animations
+		.click(image_click)
+		.attr('src', $image.attr('full'))
+		.one('load', function() { // When the image loads
+			$(this).hide();
+			var screen_width  = $(window).width(), screen_height = $(window).height();
+			var image_width  = this.width, image_height = this.height;      // Image width/height
+			if (image_width  > screen_width)  { 
+				image_height = image_height * (screen_width  / image_width);
+				image_width  = screen_width;
+			}
+			if (image_height > screen_height) { 
+				image_width  = image_width  * (screen_height / image_height);
+				image_height = screen_height;
+			}
+			// Screen dimensions
+			var image_top  = (screen_height / 2) - (image_height / 2) + $(document).scrollTop();
+			var image_left = (screen_width  / 2) - (image_width  / 2);
+			// Thumb dimensions
+			var ttop    = parseInt($image.position().top);
+			var tleft   = parseInt($image.position().left) + 2;
+			var theight = parseInt($image.height());
+			var twidth  = parseInt($image.width());
+			$(this)
+				.css('position','absolute')
+				.css('opacity', 1)
+				.css('top',   ttop)
+				.css('left',  tleft)
+				.css('height',theight)
+				.css('width', twidth)
+				.removeAttr('ttop')
+				.removeAttr('tleft')
+				.removeAttr('theight')
+				.removeAttr('twidth')
+				.attr('ttop',   ttop)
+				.attr('tleft',  tleft)
+				.attr('theight',theight)
+				.attr('twidth', twidth)
+				.fadeIn(200)
+				.animate( 
+					{ 
+						'top'    : image_top,
+						'left'   : image_left,
+						'height' : image_height,
+						'width'  : image_width
+					},
+					{
+						queue: false,
+						duration: 400,
+						easing: 'swing'
+					}
+				);
 
-	})
-	.attr('src', $image.attr('full'))
-	.click(image_click);
+		})
+		.each(function() {
+			if (this.complete) $(this).load();
+		});
 	
 	return false;
 }
