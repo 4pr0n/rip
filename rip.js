@@ -1,4 +1,5 @@
 var MAX_USER_ALBUMS = 20; // Maximum number of rips allowed per user
+var TOS_VERSION = 1;
 
 function init() { // Executes when document has loaded
 	// Safari is BAD. 
@@ -8,7 +9,7 @@ function init() { // Executes when document has loaded
 
 	handleResize(); // Trigger resize event to set bottom bar
 	
-	over18(); // Check if user has agreed to TOS
+	if (!over18()) return; // Check if user has agreed to TOS
 	if (! $('#rip_text').length ) { return; } // Stop here if they haven't agreed
 
 	$('#vid_text').bind('keyup', function(e) {
@@ -440,8 +441,8 @@ function getCookie(key) {
 }
 var TOS_VERSION = '1';
 function over18() {
-	if (! $('#rip_text') ) { return; } // Not at the rip page
-	if (getCookie('rip_tos_v' + TOS_VERSION) === 'true') { return; } // Already agreed
+	if (! $('#rip_text') ) { return true; } // Not at the rip page
+	if (getCookie('rip_tos_v' + TOS_VERSION) === 'true') { return true; } // Already agreed
 	// User hasn't agreed to TOS or verified age.
 	$('#maintable').hide();
 	$('#footer').hide();
@@ -480,6 +481,7 @@ function over18() {
 		.appendTo($tos);
 	
 	$(document.body).append($tos);
+	return false;
 }
 
 function i_agree() {
@@ -487,6 +489,7 @@ function i_agree() {
 	$('#maintable').show()
 	$('#footer').show()
 	$('#maindiv').hide()
+	init(); // Load the page again
 }
 
 ////////////////

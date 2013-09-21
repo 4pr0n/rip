@@ -518,52 +518,41 @@ function over18() {
 	// User hasn't agreed to TOS or verified age.
 	$('#maintable').hide();
 	$('#albums_table').attr('loading', 'true');
-	var maindiv = $('<div />')
+	var $tos = $('<div />')
+		.append( $('<h1 />').html('Warning: This site contains explicit content') )
 		.addClass('warning')
-		.css('margin', '20px')
-		.attr('id', 'maindiv');
-
-	$('<h1 />').html('Warning: This site contains explicit content')
-			.appendTo(maindiv);
+		.attr('id', 'maindiv')
+		.css('margin', '20px');
+		
 	$('<div />')
-		.html('This website contains adult content and is intended for persons over the age of 18.<p>By entering this site, you agree to the following terms of use:')
-		.appendTo(maindiv);
+		.html(
+			'This website contains adult content and is intended for persons over the age of 18.' +
+			'<p>' +
+			'By entering this site, you agree to the following terms of use:')
+		.appendTo($tos);
 	
-	var ul = $('<ul />');
-	$('<li />')
-		.html('I am over eighteen years old')
-		.appendTo(ul);
-	$('<li />')
-		.html('I will not use this site to download illegal material, or to acquire illegal material in any way.')
-		.appendTo(ul);
-	$('<li />')
-		.html('I will report illegal content to the site administrator immediately via reddit or email')
-		.appendTo(ul);
-	$('<li />')
-		.html('I will not hog the resources of this site, and will not rip more than 20 albums per day.')
-		.appendTo(ul);
-	maindiv.append(ul);
+	$('<ul />') // LIST OF TOS
+		.append( $('<li />').html('I am over eighteen years old') )
+		.append( $('<li />').html('I will not use this site to download illegal material, or to acquire illegal material in any way.') )
+		.append( $('<li />').html('I will report illegal content to the site administrator immediately via reddit or email') )
+		.append( $('<li />').html('I will not hog the resources of this site, and will not rip more than 20 albums per day.') )
+		.appendTo($tos);
+
+	$('<input />') // AGREE
+		.attr('type', 'button')
+		.val('Agree & Enter')
+		.addClass('button')
+		.click(function() { i_agree() })
+		.appendTo($tos);
+	$('<input />') // DISAGREE
+		.attr('type', 'button')
+		.val('Leave')
+		.addClass('button')
+		.css('margin-left', '20px')
+		.click(function() { window.location.href = 'about:blank' })
+		.appendTo($tos);
 	
-	var lowerdiv = $('<div />');
-	$('<input />')
-		.attr('type', 'button')
-		.attr('value', 'Agree & Enter')
-		.addClass('button')
-		.click( function() {
-			i_agree();
-		})
-		.appendTo(lowerdiv);
-	$('<input />')
-		.attr('type', 'button')
-		.attr('value', 'Leave')
-		.css('margin-left', '30px')
-		.addClass('button')
-		.click( function() {
-			i_disagree();
-		})
-		.appendTo(lowerdiv);
-	maindiv.append(lowerdiv);
-	$(document.body).append(maindiv);
+	$(document.body).append($tos);
 	return true;
 }
 
@@ -573,9 +562,6 @@ function i_agree() {
 	$('#maindiv').hide();
 	$('#albums_table').removeAttr('loading');
 	init(); // Load the page
-}
-function i_disagree() {
-	window.location.href = 'about:blank';
 }
 
 ////////////////////////
