@@ -476,12 +476,16 @@ def ban_user(user, reason=""):
 		print_error('user is already banned')
 		return
 	reason = reason.replace('\n', '').replace('\r', '')
-	lines.insert(lines.index('allow from all'), '# added by admin %s (reason: %s)' % (environ['REMOTE_ADDR'], reason))
+	lines.insert(lines.index('allow from all'), '# added by admin %s at %s (reason: %s)' % (environ['REMOTE_ADDR'], strftime('%s'), reason))
 	lines.insert(lines.index('allow from all'), ' deny from %s' % user)
 	lines.insert(lines.index('allow from all'), '')
-	f = open('../.htaccess', 'w')
-	f.write('\n'.join(lines))
-	f.close()
+	try:
+		f = open('../.htaccess', 'w')
+		f.write('\n'.join(lines))
+		f.close()
+	except Exception, e:
+		print_error('failed to ban %s: %s' % (user, str(e)))
+		return
 	print dumps( {
 		'banned' : user
 	} )

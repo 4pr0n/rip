@@ -154,6 +154,7 @@ function loadAlbum(album, start, count, startOver) {
 		// Set the next chunk of albums to retrieve
 		if (album.start + album.count >= album.total) {
 			$('#next').html(album.total + ' images loaded');
+			$('#albums_table').attr('loading', 'true');
 		} else {
 			var remaining = album.total - (album.start + album.count);
 			$('#next').attr('album', album.album)
@@ -386,7 +387,7 @@ function scrollHandler() {
 	var scroll   = $(document).scrollTop() || window.pageYOffset; // Scroll position (top)
 	var remain = page - (viewport + scroll);
 	if (viewport > page || // Viewport is bigger than entire page
-	    remain < 250) {    // User has scrolled down far enough
+	    remain < 300) {    // User has scrolled down far enough
 		if (!window.location.hash || window.location.hash.indexOf('_') == -1) {
 			// Viewing all albums
 			loadNextAlbum();
@@ -705,33 +706,36 @@ function report(album) {
 	if (reason == "enter reason here") {
 		$('#report')
 			.html('you must enter a valid reason')
-			.addClass('red bold shadow');
+			.removeClass().addClass('red bold shadow');
 		return false;
 	}
-	$('<img />')
-		.attr('src', '../spinner_dark.gif')
-		.css('border', 'none')
-		.css('padding-right', '5px')
-		.appendTo( $('#report') );
+	$('#report')
+		.empty()
+		.append(
+			$('<img />')
+				.attr('src', '../spinner_dark.gif')
+				.css('border', 'none')
+				.css('padding-right', '5px')
+		);
 	
 	$.getJSON('view.cgi?report=' + album + '&reason=' + reason, function(json) {
 		if (json.error) {
 			$('#report')
 				.html(json.error)
-				.addClass('red shadow');
+				.removeClass().addClass('red shadow');
 		
 		} else if (json.warning) {
 			$('#report')
 				.html(json.warning)
-				.addClass('orange shadow');
+				.removeClass().addClass('orange shadow');
 		} else if (json.reported) {
 			$('#report')
 				.html('album has been reported')
-				.addClass('green shadow');
+				.removeClass().addClass('green shadow');
 		} else {
 			$('#report')
 				.html('unexpected response')
-				.addClass('red shadow');
+				.removeClass().addClass('red shadow');
 		}
 	});
 	return false;
@@ -741,17 +745,17 @@ function clearReports(album) {
 	$.getJSON('view.cgi?clear_reports=' + album, function(json) {
 		if (json.error != null) {
 			$('#report_clear_status')
-				.addClass('red shadow')
+				.removeClass().addClass('red shadow')
 				.html(json.error);
 		}
 		else if (json.warning != null) {
 			$('#report_clear_status')
-				.addClass('warning shadow')
+				.removeClass().addClass('warning shadow')
 				.html(json.warning);
 		}
 		else if (json.ok != null) {
 			$('#report_clear_status')
-				.addClass('green shadow')
+				.removeClass().addClass('green shadow')
 				.html(json.ok);
 		}
 	});
@@ -759,26 +763,29 @@ function clearReports(album) {
 }
 
 function deleteAlbum(album) {
-	$('<img />')
-		.attr('src', '../spinner_dark.gif')
-		.css('border', 'none')
-		.css('padding-right', '5px')
-		.appendTo( $('#delete_status') );
+	$('#delete_status')
+		.empty()
+		.append(
+			$('<img />')
+				.attr('src', '../spinner_dark.gif')
+				.css('border', 'none')
+				.css('padding-right', '5px')
+		);
 	
 	$.getJSON('view.cgi?delete=' + album, function(json) {
 		if (json.error != null) {
 			$('#delete_status')
-				.addClass('red shadow')
+				.removeClass().addClass('red shadow')
 				.html(json.error);
 		}
 		else if (json.warning != null) {
 			$('#delete_status')
-				.addClass('warning shadow')
+				.removeClass().addClass('warning shadow')
 				.html(json.warning);
 		}
 		else if (json.ok != null) {
 			$('#delete_status')
-				.addClass('green shadow')
+				.removeClass().addClass('green shadow')
 				.html(json.ok);
 		}
 	});
@@ -786,16 +793,19 @@ function deleteAlbum(album) {
 }
 
 function deleteAllAlbums(user) {
-	$('<img />')
-		.attr('src', '../spinner_dark.gif')
-		.css('border', 'none')
-		.css('padding-right', '5px')
-		.appendTo( $('#delete_status') );
+	$('#delete_status')
+		.empty()
+		.append(
+			$('<img />')
+				.attr('src', '../spinner_dark.gif')
+				.css('border', 'none')
+				.css('padding-right', '5px')
+		);
 	
 	$.getJSON('view.cgi?delete_user=' + user, function(json) {
 		if (json.error != null) {
 			$('#delete_status')
-				.addClass('red shadow')
+				.removeClass().addClass('red shadow')
 				.html(json.error);
 		}
 		else if (json.deleted != null) {
@@ -806,9 +816,8 @@ function deleteAllAlbums(user) {
 					.appendTo(delol);
 			});
 			$('#delete_status')
-				.addClass('green shadow')
-				.append( $('<br>') )
-				.html('deleted ' + json.deleted.length + ' files/directories from ' + json.user + ':')
+				.removeClass().addClass('green shadow')
+				.html('<br>deleted ' + json.deleted.length + ' files/directories from ' + json.user + ':')
 				.append(delol);
 		}
 	});
@@ -823,24 +832,27 @@ function banUser(user) {
 	if (reason == "enter reason here") {
 		$('#ban_status')
 			.html('you must enter a reason')
-			.addClass('red bold shadow');
+			.removeClass().addClass('red bold shadow');
 		return;
 	}
-	$('<img />')
-		.attr('src', '../spinner_dark.gif')
-		.css('border', 'none')
-		.css('padding-right', '5px')
-		.appendTo( $('#delete_status') );
-	$.getJSON('view.cgi?ban_user' + user + '&reason=' + reason, function(json) {
+	$('#ban_status')
+		.empty()
+		.append(
+			$('<img />')
+				.attr('src', '../spinner_dark.gif')
+				.css('border', 'none')
+				.css('padding-right', '5px')
+		);
+	$.getJSON('view.cgi?ban_user=' + user + '&reason=' + reason, function(json) {
 		if (json.error != null) {
 			$('#ban_status')
-				.addClass('red shadow')
+				.removeClass().addClass('red shadow')
 				.html(json.error);
 		}
 		else if (json.banned != null) {
 			$('#ban_status')
-				.addClass('green shadow')
-				.html('banned ' + json.banned + ' forever!');
+				.removeClass().addClass('green shadow')
+				.html('IP-banned ' + json.banned + ' forever');
 		}
 	});
 	return false;
