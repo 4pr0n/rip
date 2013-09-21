@@ -411,7 +411,7 @@ function loadImage($image) {
 		// Hide the image
 		$('#bgimage')
 			.unbind('click')
-			.hide();
+			.fadeOut();
 		var fg = $('#fgimage')
 			.unbind('click');
 		fg.animate( 
@@ -421,7 +421,7 @@ function loadImage($image) {
 					'height' : fg.attr('theight'),
 					'width'  : fg.attr('twidth'),
 				},
-				500,
+				300,
 				'linear',
 				function() {
 					$(this)
@@ -431,7 +431,7 @@ function loadImage($image) {
 				}
 			);
 	};
-	$('#bgimage').show()
+	$('#bgimage').fadeIn()
 		.click( image_click );
 	
 	$('#fgimage').load( function() {
@@ -468,7 +468,7 @@ function loadImage($image) {
 					'height' : height,
 					'width'  : width
 				},
-				500
+				300
 			);
 
 	})
@@ -753,17 +753,17 @@ function deleteAlbum(album) {
 	
 	$.getJSON('view.cgi?delete=' + album, function(json) {
 		if (json.error != null) {
-			$('#report_clear_status')
+			$('#delete_status')
 				.addClass('red shadow')
 				.html(json.error);
 		}
 		else if (json.warning != null) {
-			$('#report_clear_status')
+			$('#delete_status')
 				.addClass('warning shadow')
 				.html(json.warning);
 		}
 		else if (json.ok != null) {
-			$('#report_clear_status')
+			$('#delete_status')
 				.addClass('green shadow')
 				.html(json.ok);
 		}
@@ -780,7 +780,7 @@ function deleteAllAlbums(user) {
 	
 	$.getJSON('view.cgi?delete_user=' + user, function(json) {
 		if (json.error != null) {
-			$('#report_clear_status')
+			$('#delete_status')
 				.addClass('red shadow')
 				.html(json.error);
 		}

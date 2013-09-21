@@ -9,13 +9,13 @@
 	</head>
 
 	<body>
-		<table id="maintable">
+		<table id="maintable width100">
 			<tr>
 				<!-- Page title & subheader -->
 				<td class="top">
-					<table class="page header">
+					<table class="page header width100">
 						<tr>
-							<td>
+							<td class="width100">
 								<a class="header" href="./">
 									<div class="supheader center">rarchives.com</div>
 									<div class="header center">album ripper</div>
@@ -33,8 +33,7 @@
 											 id   ="rip_text" 
 											 value="http://imgur.com/a/RdXNa" 
 											 size =38
-											 onFocus="this.select();"
-											 onKeyUp="ripboxKeyUp(event);" />
+											 onFocus="this.select();" />
 							</td>
 						</tr><tr>
 							<!-- Ripper buttons -->
@@ -48,7 +47,7 @@
 											       value  ="rip &amp; zip"
 											       onClick="startRip();" />
 										</td><td class="left">
-											<label id="label_cached" class="checkbox">
+											<label id="label_cached" class="checkbox" style="display: none">
 												<input class="checkbox"
 												       type   ="checkbox"
 												       id     ="rip_cached"
@@ -120,7 +119,7 @@
 					
 					<!-- Recent rips -->
 
-					<table class="page">
+					<table class="page width100">
 						<tr>
 							<td class="title width100">
 								recent rips
@@ -172,8 +171,7 @@
 											       id   ="vid_text" 
 											       value="http://www.xvideos.com/video1861562/ebony_girl_first_time" 
 											       size =39
-											       onFocus="this.select()"
-											       onKeyUp="vidboxKeyUp(event)" />
+														 onFocus="this.select()" />
 										</td>
 									</tr>
 								</table>
@@ -188,7 +186,7 @@
 							</td>
 						</tr><tr>
 							<td colspan="2">
-								<div class="statusbar" id="vid_status_bar">&nbsp;</div>
+								<div class="statusbar center" id="vid_status">&nbsp;</div>
 							</td>
 						</tr>
 					</table>
@@ -465,6 +463,7 @@
 		</div>
 		<br>
 		
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 		<script type="text/javascript" src="rip.js"></script>
 	</body>
 </html>
