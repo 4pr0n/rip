@@ -25,6 +25,11 @@ function init() {
 			window.location.reload(true);
 		}, 30000);
 	}
+	// Prevent double-click selection
+	document.ondblclick = function(evt) {
+		if (window.getSelection)     window.getSelection().removeAllRanges();
+		else if (document.selection) document.selection.empty();
+	}
 }
 
 //////////////////////
@@ -274,11 +279,11 @@ function loadAllAlbums(after, startOver) {
 					.attr('href', image.image)
 					.attr('album', album.album.replace('%20', '_'))
 					.click( function() { return false; } )
-					.mouseover( function() {
-						$('#' + $(this).attr('album')).removeAttr('show_album');
+					.mouseenter( function() {
+						$('#' + $(this).attr('album')).removeAttr('show_album').removeClass('clickable');
 					})
-					.mouseout( function() {
-						$('#' + $(this).attr('album')).attr('show_album', 'true');
+					.mouseleave( function() {
+						$('#' + $(this).attr('album')).attr('show_album', 'true').addClass('clickable');
 					});
 				var imgi = $('<img />')
 					.addClass('image_small')
@@ -315,16 +320,6 @@ function loadAllAlbums(after, startOver) {
 			// Slide up
 			$imgtable.css('margin-top', '+100px');
 			$imgtable.animate({'margin-top': '-=100'}, 750, 'swing');
-			/*
-			// Slide in from sides
-			if (album_index % 2 == 0) {
-				$imgtable.css('margin-left', '-500px');
-				$imgtable.animate({'margin-left': '+=500'});
-			} else {
-				$imgtable.css('margin-left', '1000px');
-				$imgtable.animate({'margin-left': '-=1000'});
-			}
-			*/
 
 			if ( (album_index + 1) % 2 == 0 && 
 			      album_index < json.albums.length - 1 ) {
@@ -453,7 +448,7 @@ function loadImage($image) {
 		var bigleft = (swidth  / 2) - (width  / 2);
 		// Thumb dimensions
 		var ttop    = parseInt($image.position().top);
-		var tleft   = parseInt($image.position().left);
+		var tleft   = parseInt($image.position().left) + 2;
 		var theight = parseInt($image.height());
 		var twidth  = parseInt($image.width());
 		$(this).show()

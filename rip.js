@@ -9,7 +9,7 @@ function init() { // Executes when document has loaded
 	handleResize(); // Trigger resize event to set bottom bar
 	
 	over18(); // Check if user has agreed to TOS
-	if (! $('#rip_text')) { return; } // Stop here if they haven't agreed
+	if (! $('#rip_text').length ) { return; } // Stop here if they haven't agreed
 	
 	// Display cache if needed
 	if (getCookie('cache_enabled') == 'true') {
@@ -35,7 +35,7 @@ function refreshRecent() { // Refresh list of "recent rips"
 			var $li = $('<li />').addClass('recent');
 			$('<a />') // DOWNLOAD
 				.addClass('download_box download_arrow')
-				.html('  ')
+				.html('&nbsp;&nbsp;')
 				.attr('album', url)
 				.attr('href', '#' + $(this).album)
 				.click(function() {
@@ -102,9 +102,11 @@ function getQueryString(start) { // Gets URL for backend album rip
 }
 
 function setHash(url) { // Adds a site to the URL hash
-	url = url.replace('http://', '').replace('https://', '')
-	url = escape(url).replace(/\//g, '%2F');
-	window.location.hash = url;
+	if (url) {
+		url = url.replace('http://', '').replace('https://', '')
+		url = escape(url).replace(/\//g, '%2F');
+		window.location.hash = url;
+	}
 }
 
 function disableControls() {
