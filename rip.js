@@ -10,7 +10,17 @@ function init() { // Executes when document has loaded
 	
 	over18(); // Check if user has agreed to TOS
 	if (! $('#rip_text').length ) { return; } // Stop here if they haven't agreed
-	
+
+	$('#vid_text').bind('keyup', function(e) {
+		if (e.keyCode == 13) {
+			startVid();
+		}
+	});
+	$('#rip_text').bind('keyup', function(e) {
+		if (e.keyCode == 13) {
+			startRip(); // Start rip when user presses enter
+		}
+	});
 	// Display cache if needed
 	if (getCookie('cache_enabled') == 'true') {
 		$('#rip_cached').show();
@@ -133,12 +143,13 @@ function startRip() { // Start ripping album
 			$statbar.empty()
 				.attr('has_download_link', 'false')
 				.append( $('<img />').attr('src', 'spinner_dark.gif') )
-				.append( $('<span />').html(' loading...') );
+				.append( $('<span />').html(' loading...') )
+				.slideDown();
 		});
 	
 	var query = getQueryString(true);
 	$.getJSON(query, ripRequestHandler);
-	setTimeout(function() { checkRip(); }, 500);
+	setTimeout(function() { checkRip() }, 500);
 }
 
 function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'check')
@@ -150,7 +161,7 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 		$statbar.empty()
 			.hide()
 			.append(err)
-			.fadeIn(400, function() {
+			.slideDown(400, function() {
 				enableControls();
 				setProgress(0);
 			});
@@ -201,6 +212,7 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 			)
 			.appendTo($result);
 		
+		setProgress(0);
 		$statbar
 			.slideUp(400, function() {
 				$statbar.empty()
@@ -208,7 +220,6 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 				.append($result)
 				.slideDown(750, function() {
 					enableControls();
-					setProgress(0);
 				})
 				.css('opacity', '0')
 				.animate(
@@ -217,11 +228,10 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 				)
 			});
 	}
-	else if (json.log) {
+	else if (json.log || json.log == '') {
 		var log = json.log.replace(/\n/g, '');
-		if (log === ''
-				|| !$('#rip_button').prop('disabled')
-				|| $statbar.attr('has_download_link') === 'true')
+		if ( !$('#rip_button').prop('disabled')
+		   || $statbar.attr('has_download_link') === 'true')
 		{
 			return; // Already ripped, nothing to see here
 		}
@@ -237,20 +247,23 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 			var denom = parseFloat(log.substr(k+1, j));
 			setProgress(num / denom);
 		}
-		$('<div />')
-			.append( $('<img />')
-					.attr('src', 'spinner_dark.gif')
-					.css('padding-right', '10px')
-					.css('padding-left', '10px')
-			)
-			.append( $('<span />').html(log) )
-			.appendTo($result);
 		
-		$statbar.empty()
-			append($result);
+		if (log !== '') {
+			$statbar.empty();
+			$('<div />')
+				.append( $('<img />')
+						.attr('src', 'spinner_dark.gif')
+						.css('padding-right', '10px')
+						.css('padding-left', '10px')
+				)
+				.append( $('<span />').html(log) )
+				.appendTo($statbar);
+			
+			$statbar.show();
+		}
 		
 		// Check for more updates in 0.5 sec
-		if ($('#rip_button').prop('disabled')) {
+		if ( $('#rip_button').prop('disabled') ) {
 			setTimeout(function() { 
 				checkRip();
 			}, 500);
@@ -270,12 +283,6 @@ function checkRip() { // Check the status of the currently-ripping album
 	var query = getQueryString(false);
 	$.getJSON(query, ripRequestHandler);
 }
-
-$('#rip_text').bind('keyup', function(e) {
-	if (e.keyCode == 13) {
-		startRip(); // Start rip when user presses enter
-	}
-});
 
 function setExample(site) {
 	var dic = {
@@ -333,11 +340,6 @@ function setProgress(perc) {
 /////////////////////
 // Video ripper
 
-$('#vid_text').bind('keyup', function(e) {
-	if (e.keyCode == 13) {
-		startVid();
-	}
-});
 
 // Start ripping album
 function startVid() {
