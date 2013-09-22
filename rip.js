@@ -112,9 +112,9 @@ function refreshRecent() { // Refresh list of "recent rips"
 				.addClass('download_box download_arrow')
 				.html('&nbsp;&nbsp;')
 				.attr('album', url)
-				.attr('href', '#' + $(this).album)
+				.attr('href', '#' + escape(url).replace(/\//g, '%2F'))
 				.click(function() {
-					return loadAlbum($(this).album);
+					return loadAlbum($(this).attr('album'));
 				})
 				.appendTo($li);
 			$('<a />') // VIEW ALBUM
