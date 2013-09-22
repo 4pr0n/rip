@@ -325,8 +325,8 @@ def get_site_drtuber(siteurl):
 	import urllib2
 	v = urllib2.unquote(a)
 	r = web.get("http://www.drtuber.com/player/config.php?"+v)
-	return web.between(r, '<video_file>', '</video_file>')[0]
-
+	# to be safe probably should use unquote
+	return web.between(r, '<video_file>', '</video_file>')[0].replace('&amp;', '&')
 
 def is_supported(url):
 	for not_supported in ['youtube.com/']:
