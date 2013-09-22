@@ -86,6 +86,9 @@ def get_url(siteurl):
 		return get_site_vporn(siteurl)
 	if 'pornhub.com' in siteurl:
 		return get_site_pornbb(siteurl)	
+	if 'drtuber.com' in siteurl:
+		return get_site_drtuber(siteurl)
+
 
 	site_key = None
 	for key in sites.keys():
@@ -291,6 +294,21 @@ def get_site_pornbb(siteurl):
 	v = urllib2.unquote(v)
 	f = aes.decrypt( v, title.replace("+"," "), 256 )	
 	return f
+
+def get_site_drtuber(siteurl):
+	r = web.get(siteurl)
+	import re
+	r = re.sub(r"' \+ '",'',r)
+	a = "".join(re.findall(r'params \+= \'(.*?)\'',r))
+	v = a.split('=')[-1]
+	import hashlib
+	m = hashlib.md5()
+	m.update(v+'PT6l13umqV8K827')
+	a = a+"&pkey="+m.hexdigest()
+	import urllib2
+	v = urllib2.unquote(a)
+	r = web.get("http://www.drtuber.com/player/config.php?"+v)
+	return web.between(r, '<video_file>', '</video_file>')[0]
 
 
 def is_supported(url):
