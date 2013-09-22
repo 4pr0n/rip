@@ -84,7 +84,7 @@ def get_url(siteurl):
 		return get_site_pornably(siteurl)
 	if 'vporn.com' in siteurl:
 		return get_site_vporn(siteurl)
-	if 'localhost' in siteurl:
+	if 'pornhub.com' in siteurl:
 		return get_site_pornbb(siteurl)	
 
 	site_key = None
