@@ -14,8 +14,7 @@ from shutil   import rmtree
 ##################
 # MAIN
 
-# Prints JSON response to query
-def main():
+def main(): # Prints JSON response to query
 	keys = get_keys()
 	
 	# Gets keys or defaults
@@ -23,70 +22,32 @@ def main():
 	count   = int(keys.get('count',   20)) # Number of images/thumbs to retrieve
 	preview = int(keys.get('preview', 10)) # Number of images to retrieve
 	after   =     keys.get('after',   '')  # Next album to retrieve
-	
-	if  'view_all' in keys:
-		# Retrieve list of all albums
-		get_all_albums(count, preview, after)
 
-	elif 'view' in keys:
-		# Retrieve images from one album
-		album = keys['view'].replace(' ', '%20')
-		get_album(album, start, count)
+	# Get from list of all albums
+	if  'view_all' in keys: get_all_albums(count, preview, after)
 
-	elif 'update' in keys:
-		update_album(keys['update'])
-		print dumps( { 'updated' : True } )
-	
-	elif 'urls' in keys:
-		get_urls_for_album(keys['urls'])
-	
-	elif 'user' in keys:
-		get_albums_for_user(keys['user'], count, preview, after)
-		
-	elif 'report' in keys:
-		report_album(keys['report'], reason=keys.get('reason', ''))
-		
-	elif 'get_report' in keys:
-		get_reported_albums(count, preview, after)
-	
-	elif 'clear_reports' in keys:
-		clear_reports(keys['clear_reports'])
-	
-	elif 'delete' in keys:
-		delete_album(keys['delete'])
-	
-	elif 'delete_user' in keys:
-		delete_albums_by_user(keys['delete_user'])
-	
-	elif 'ban_user' in keys:
-		ban_user(keys['ban_user'], reason=keys.get('reason', ''))
-		
-	else:
-		print_error('unsupported method')
+	# Get images from one album
+	elif 'view'          in keys: get_album(keys['view'].replace(' ', '%20'), start, count)
+	# Get URLs for an album
+	elif 'urls'          in keys: get_urls_for_album(keys['urls'])
+	# Get albums ripped by a user
+	elif 'user'          in keys: get_albums_for_user(keys['user'], count, preview, after)
+	# Report an album
+	elif 'report'        in keys: report_album(keys['report'], reason=keys.get('reason', ''))
+	# Get from list of reported album
+	elif 'get_report'    in keys: get_reported_albums(count, preview, after)
+	# Remove all reports or an album
+	elif 'clear_reports' in keys: clear_reports(keys['clear_reports'])
+	# Delete an album, add to blacklist
+	elif 'delete'        in keys: delete_album(keys['delete'])
+	# Delete all albums from a user
+	elif 'delete_user'   in keys: delete_albums_by_user(keys['delete_user'])
+	# Permanently ban a user
+	elif 'ban_user'      in keys: ban_user(keys['ban_user'], reason=keys.get('reason', ''))
 
-##################
-# HELPER FUNCTIONS
+	# Unexpected key(s)
+	else: print_error('unsupported method(s)')
 
-# Print error in JSON format
-def print_error(text):
-	print dumps( { 'error' : text } )
-
-# Retrieves key/value pairs from query, puts in dict
-def get_keys():
-	form = cgi.FieldStorage()
-	keys = {}
-	for key in form.keys():
-		keys[key] = form[key].value
-	return keys
-
-# Get thumbnail based on image, or 'nothumb.png' if not found
-def get_thumb(img):
-	fs = img.split(sep)
-	fs.insert(-1, 'thumbs')
-	f = sep.join(fs)
-	if not path.exists(f.replace('%25', '%')):
-		return 'nothumb.png'
-	return sep.join(fs)
 
 ###################
 # ALBUMS
@@ -109,6 +70,7 @@ def get_all_albums(count, preview_size, after):
 	
 	# Filter results
 	filter_albums(thedirs, count, preview_size, after, found_after)
+
 
 def get_albums_for_user(user, count, preview_size, after):
 	found_after = False # User-specified 'after' was found in list of directories
@@ -137,6 +99,7 @@ def get_albums_for_user(user, count, preview_size, after):
 	# Filter results
 	filter_albums(thedirs, count, preview_size, after, found_after)
 	
+
 def get_reported_albums(count, preview_size, after):
 	if not is_admin():
 		print_error('')
@@ -164,7 +127,7 @@ def get_reported_albums(count, preview_size, after):
 	
 	# Filter results
 	filter_albums(thedirs, count, preview_size, after, found_after)
-	
+
 
 def filter_albums(thedirs, count, preview_size, after, found_after):
 	dcount = 0 # Number of albums retrieved & returned to user
@@ -249,6 +212,7 @@ def filter_albums(thedirs, count, preview_size, after, found_after):
 		'count'  : dtotal
 		} )
 
+
 ##################
 # SINGLE ALBUM
 def get_images_for_album(album, start, count, thumbs=False):
@@ -290,6 +254,7 @@ def get_images_for_album(album, start, count, thumbs=False):
 	result['archive'] = './%s.zip' % album.replace(' ', '%20').replace('%20', '%2520')
 	return result
 
+
 def get_album(album, start, count):
 	result = get_images_for_album(album, start, count)
 	if start == 0:
@@ -305,6 +270,7 @@ def get_album(album, start, count):
 			result['user'] = ip
 	print dumps( { 'album' : result } )
 
+
 # Return external URL for album that was ripped
 def get_url_for_album(album):
 	logtxt = path.join(album, 'log.txt')
@@ -317,6 +283,7 @@ def get_url_for_album(album):
 	if not ' ' in url: return ''
 	return url[url.rfind(' ')+1:]
 
+
 # Return all URLs for an album
 def get_urls_for_album(album):
 	album = quote(album)
@@ -327,49 +294,42 @@ def get_urls_for_album(album):
 	for f in listdir(album):
 		f = path.join(album, f)
 		if f.endswith('.txt'): continue
+		if f.endswith('.html'): continue
 		if path.isdir(f): continue
 		result.append( f )
 	result = sorted(result)
 	print dumps( { 'urls' : result } )
+
 
 #############
 # REPORT
 def report_album(album, reason=""):
 	album = quote(album)
 	if '..' in album or '/' in album or not path.isdir(album):
-		print dumps( {
-			'album'    : album,
-			'reported' : False,
-			'error'    : 'invalid album specified: %s' % album
-		} )
+		print_error('unable to reported: invalid album specified')
+		return
+	if not path.exists(album):
+		print_error('album does not exist: %s' % album)
 		return
 	reports = path.join(album, 'reports.txt')
-	if not path.exists(album):
-		print dumps( {
-			'album'    : album,
-			'reported' : False,
-			'error'    : 'album does not exist: %s' % album
-		} )
-		return
 	if path.exists(reports):
 		f = open(reports, 'r')
 		lines = f.read().split('\n')
 		f.close()
 		for line in lines:
 			if line.startswith(environ['REMOTE_ADDR']):
-				print dumps( {
-					'album'    : album,
-					'reported' : False,
-					'warning'  : 'you have already reported this album'
-				} )
+				print_warning('you (%s) have already reported this album' % environ['REMOTE_ADDR'])
 				return
-	f = open(reports, 'a')
-	f.write('%s:%s\n' % (environ['REMOTE_ADDR'], reason))
-	f.close()
-	print dumps( { 
-		'album' : album,
-		'reported' : True
-	} )
+	try:
+		f = open(reports, 'a')
+		f.write('%s:%s\n' % (environ['REMOTE_ADDR'], reason))
+		f.close()
+	except Exception, e:
+		print_error('unable to report album: %s' % str(e))
+		return
+
+	print_ok('this album has been reported. the admins will look into this soon')
+
 
 def get_report_reasons(album):
 	# Sanitization, check if album
@@ -407,34 +367,59 @@ def clear_reports(album):
 		return
 	# No album
 	if not path.exists(album):
-		print_error('album not found: %s' % album)
+		print_warning('album not found: %s' % album)
 		return
 	# No reports
 	reports = path.join(album, 'reports.txt')
 	if not path.exists(reports):
-		print_error('no reports found: %s' % reports)
+		print_warning('no reports found: %s' % reports)
 		return
 	remove(reports)
-	print dumps( { 'ok' : 'reports cleared' } )
+	print_ok('reports cleared')
 	
 def delete_album(album):
 	if not is_admin():
 		print_error('you are not an admin: %s' % environ['REMOTE_ADDR'])
 		return
 	album = quote(album)
+	zipdel = albumdel = False
 	# Sanitization, check if album
 	if '..' in album or '/' in album or not path.isdir(album):
 		print_error('album is not valid: %s' % album)
 		return
 	# No album
 	if not path.exists(album):
-		print_error('album not found: %s' % album)
+		print_warning('album not found: %s' % album)
 		return
-	zipfile = '%s.zip' % album
-	if path.exists(zipfile):
-		remove(zipfile)
-	rmtree(album)
-	print dumps( { 'ok' : 'album and/or zip deleted' } )
+	
+	# Delete zip
+	try:
+		remove('%s.zip' % album)
+		zipdel = True
+	except: pass
+
+	# Add URL to blacklist
+	url = get_url_for_album(album)
+	if url != '':
+		try:
+			f = open('../url_blacklist.txt', 'a')
+			f.write('%s\n' % url)
+			f.close()
+		except: pass
+	
+	# Delete album dir
+	try:
+		rmtree(album)
+		albumdel = True
+	except: pass
+	if albumdel and zipdel:
+		print_ok('album and zip were both deleted')
+	elif albumdel:
+		print_warning('album was deleted, zip was not found')
+	elif zipdel:
+		print_warning('zip was deleted, album was not found')
+	else:
+		print_error('neither album nor zip was deleted')
 
 def delete_albums_by_user(user):
 	if not is_admin():
@@ -450,13 +435,15 @@ def delete_albums_by_user(user):
 		f.close()
 		if ip != user: continue
 		# Delete zip
-		zipfile = '%s.zip' % d
-		if path.exists(zipfile):
+		try: 
+			remove('%s.zip' % d)
 			deleted.append(zipfile)
-			remove(zipfile)
+		except: pass
 		# Delete album
-		deleted.append(d)
-		rmtree(d)
+		try: 
+			rmtree(d)
+			deleted.append(d)
+		except: pass
 	print dumps( {
 		'deleted' : deleted,
 		'user'    : user
@@ -464,16 +451,20 @@ def delete_albums_by_user(user):
 
 def ban_user(user, reason=""):
 	if not is_admin():
-		print_error('you are not an admin: %s' % environ['REMOTE_ADDR'])
+		print_error('you (%s) are not an admin' % environ['REMOTE_ADDR'])
 		return
-	f = open('../.htaccess', 'r')
-	lines = f.read().split('\n')
-	f.close()
+	try:
+		f = open('../.htaccess', 'r')
+		lines = f.read().split('\n')
+		f.close()
+	except:
+		print_error('unable to read from ../.htaccess file -- user not banned.')
+		return
 	if not 'allow from all' in lines:
-		print_error('unable to ban user; cannot find "allow from all" in htaccess')
+		print_error('unable to ban user; cannot find "allow from all" line in htaccess')
 		return
 	if ' deny from %s' % user in lines:
-		print_error('user is already banned')
+		print_warning('user is already banned')
 		return
 	reason = reason.replace('\n', '').replace('\r', '')
 	lines.insert(lines.index('allow from all'), '# added by admin %s at %s (reason: %s)' % (environ['REMOTE_ADDR'], strftime('%s'), reason))
@@ -486,24 +477,48 @@ def ban_user(user, reason=""):
 	except Exception, e:
 		print_error('failed to ban %s: %s' % (user, str(e)))
 		return
-	print dumps( {
-		'banned' : user
-	} )
+	print_ok('permanently banned %s' % user)
+
+
+##################
+# HELPER FUNCTIONS
+
+# Print generic messages in JSON format
+def print_error  (text): print dumps( { 'error'   : text } )
+def print_warning(text): print dumps( { 'warning' : text } )
+def print_ok     (text): print dumps( { 'ok'      : text } )
+
+def get_keys(): # Retrieve key/value pairs from query, puts in dict
+	form = cgi.FieldStorage()
+	keys = {}
+	for key in form.keys():
+		keys[key] = form[key].value
+	return keys
+
+def get_thumb(img): # Get thumbnail based on image, or 'nothumb.png' if not found
+	fs = img.split(sep)
+	fs.insert(-1, 'thumbs')
+	f = sep.join(fs)
+	if f.endswith('.mp4'):
+		return 'playthumb.png'
+	if f.endswith('.html'):
+		return 'albumthumb.png'
+	if not path.exists(f.replace('%25', '%')):
+		return 'nothumb.png'
+	return sep.join(fs)
 
 
 ##############
 # UPDATE
 
-# Mark album as recently-viewed
-def update_album(album):
+def update_album(album): # Mark album as recently-viewed
 	if path.exists(album):
 		update_file_modified(album)
 	zipfile = '%s.zip' % album
 	if path.exists(zipfile):
 		update_file_modified(zipfile)
 	
-# Updates system 'modified time' for file to current time.
-def update_file_modified(f):
+def update_file_modified(f): # Sets system 'modified time' to current time
 	st = stat(f)
 	atime = int(st.st_atime)
 	mtime = int(strftime('%s'))
@@ -513,8 +528,7 @@ def update_file_modified(f):
 		return False
 	return True
 
-# True if user IP is in the admin list, false otherwise
-def is_admin():
+def is_admin(): # True if user's IP is in the admin list
 	user = environ['REMOTE_ADDR']
 	f = open('../admin_ip.txt', 'r')
 	ips = f.read().split('\n')
@@ -526,7 +540,7 @@ def is_admin():
 			return True
 	return False
 
-# Entry point. Print leading/trailing characters, executes main()
+# Entry point. Print leading/trailing characters, execute main()
 if __name__ == '__main__':
 	print "Content-Type: application/json"
 	print ""
