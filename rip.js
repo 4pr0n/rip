@@ -1,5 +1,11 @@
 var MAX_USER_ALBUMS = 20; // Maximum number of rips allowed per user
 var TOS_VERSION = 1;
+var SUPPORTED_VIDEO_SITES = [
+	'vimeo.com', 'dailymotion.com', 'tumblr.com', 'vine.co', 'pornhub.com', 
+	'xvideos.com', 'beeg.com', '4tube.com', 'youporn.com', 'redtube.com',
+	'motherless.com', 'videobam.com', 'videarn.com', 'fapmenow.com', 'xtube.com',
+	'youjizz.com', 'mobypicture.com', 'sexykarma.com', 'fapjacks.com', 'setsdb.org',
+	'spankbang.com', 'fapdu.com', 'pornably.com', 'vporn.com']
 
 function init() { // Executes when document has loaded
 	// Safari is BAD. 
@@ -12,16 +18,69 @@ function init() { // Executes when document has loaded
 	if (!over18()) return; // Check if user has agreed to TOS
 	if (! $('#rip_text').length ) { return; } // Stop here if they haven't agreed
 
-	$('#vid_text').bind('keyup', function(e) {
+	$('#vid_text').keyup( function(e) {
 		if (e.keyCode == 13) {
 			startVid();
 		}
 	});
-	$('#rip_text').bind('keyup', function(e) {
+	$('#rip_text').keyup( function(e) {
 		if (e.keyCode == 13) {
 			startRip(); // Start rip when user presses enter
 		}
 	});
+	// Hover list of supported video sites
+	var $vids = $('#video_sites')
+		.bind('click mouseenter', function(e) {
+			$('#list_of_video_sites')
+				.stop()
+				.remove();
+			var $sites = $('<table />')
+				.css('cell-spacing', '15px');
+			var $siterow = $('<tr />');
+			$.each(SUPPORTED_VIDEO_SITES, function(i, site) {
+				$('<td />')
+					.addClass('site')
+					.html( site.substr(0, site.indexOf('.')) )
+					.appendTo($siterow);
+				if ( (i+1) % 4 == 0
+					|| i == SUPPORTED_VIDEO_SITES.length - 1) {
+					$sites.append($siterow);
+					$siterow = $('<tr />');
+				}
+			});
+			$sites
+				.attr('id', 'list_of_video_sites')
+				.hide()
+				.appendTo(document.body)
+				.css({
+					'position' : 'absolute',
+					'z-index' : 99,
+					'top' : $vids.position().top + $vids.height() + 5,
+					'left' : $('#video_desc').position().left + ($('#video_desc').width() / 2) - ($sites.width() / 2),
+					'background-color' : '#444',
+					'color' : '#fff',
+					'box-shadow' : '0px  0px 40px rgba(255, 255, 255, 1.0)',
+					'padding' : '10px',
+					'text-align' : 'center',
+					'border-radius' : '20px',
+					'font-size' : '0.9em',
+				})
+				.click(function() {
+					$(this)
+						.css('margin-top', '0px')
+						.animate({'margin-top': '-=200', queue: false}, 400, 'swing')
+						.fadeOut({queue: false, duration: 400}, function() { $(this).remove() })
+				})
+				.css('margin-top', '+200px')
+				.fadeIn({queue: false, duration: 400})
+				.animate({'margin-top': '-=200', queue: false}, 400, 'swing');
+		})
+		.bind('mouseout', function(e) {
+			$('#list_of_video_sites')
+				.css('margin-top', '0px')
+				.animate({'margin-top': '-=200', queue: false}, 400, 'swing')
+				.fadeOut({queue: false, duration: 400}, function() { $(this).remove() })
+		});
 	// Display cache if needed
 	if (getCookie('cache_enabled') == 'true') {
 		$('#rip_cached').show();
@@ -203,12 +262,13 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 			.append( $('<input />')
 					.addClass('textbox')
 					.attr('id', 'share_box')
+					.attr('name', 'share_box')
 					.css('width', '75%')
 					.css('font-size', '0.8em')
 					.focus(   function() { $(this).select(); })
 					.mouseup( function() { return false; })
 					.prop('readonly', true)
-					.val(window.location.href)
+					.val($(window.location).attr('href'))
 			)
 			.appendTo($result);
 		
@@ -218,15 +278,14 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 				$statbar.empty()
 				.hide()
 				.append($result)
-				.slideDown(750, function() {
-					enableControls();
-				})
+				.slideDown(750)
 				.css('opacity', '0')
 				.animate(
 						{ opacity: 1 },
 						{ queue: false, duration: 750 }
 				)
 			});
+		enableControls();
 	}
 	else if (json.log || json.log == '') {
 		var log = json.log.replace(/\n/g, '');
