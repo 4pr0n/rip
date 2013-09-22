@@ -294,7 +294,7 @@ def get_site_pornbb(siteurl):
 
 
 def is_supported(url):
-	for not_supported in ['pornhub.com/', 'youtube.com/']:
+	for not_supported in ['youtube.com/']:
 		if not_supported in url:
 			raise Exception('%s is not supported' % not_supported)
 
