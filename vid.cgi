@@ -13,7 +13,7 @@ def main():
 	keys = get_keys()
 	if 'url' in keys:
 		get_video_url(keys['url'])
-	elif 'download' in keys:
+	elif 'download' in keys: 
 		get_download(keys['download'])
 	else:
 		print_error("expected 'url' or 'download' not found")
@@ -84,6 +84,8 @@ def get_url(siteurl):
 		return get_site_pornably(siteurl)
 	if 'vporn.com' in siteurl:
 		return get_site_vporn(siteurl)
+	if 'localhost' in siteurl:
+		return get_site_pornbb(siteurl)	
 
 	site_key = None
 	for key in sites.keys():
@@ -272,6 +274,22 @@ def get_site_vporn(siteurl):
 		f = web.between(r, 'videoUrlLow  = "', '"')[0]
 	else:
 		raise Exception('could not find videourlhd at %s' % siteurl)
+	return f
+
+def get_site_pornbb(siteurl):
+	r = web.get(siteurl)
+	import sites.aes as aes
+	if 'video_title":"' in r:		
+		title = web.between(r, 'video_title":"', '"')[0]		
+	else:
+		raise Exception('could not find videourlhd at %s' % siteurl)
+	if 'quality_480p":"' in r:
+		v = web.between(r, 'quality_480p":"', '"')[0]		
+	else:
+		raise Exception('could not find videourlhd at %s' % siteurl)
+	import urllib2
+	v = urllib2.unquote(v)
+	f = aes.decrypt( v, title.replace("+"," "), 256 )	
 	return f
 
 
