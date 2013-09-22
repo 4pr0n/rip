@@ -26,10 +26,13 @@ class getgonewild(basesite):
 	def download(self):
 		self.init_dir()
 		r = self.web.get(self.url)
+		self.debug('response size from %s: %d' % (self.url, len(r)))
 		index = 0
 		links = self.web.between(r, '","url":"', '"')
 		for link in links:
+			link = link.replace('\\\\', '\\')
 			link = link.replace('\\/', '/')
+			self.debug('found link: %s' % link)
 			if '?' in link: link = link[:link.find('?')]
 			while link.endswith('/'): link = link[:-1]
 			index += 1
@@ -53,6 +56,8 @@ class getgonewild(basesite):
 				args = (link, index, len(links))
 				t = Thread(target=self.download_imgur_image, args=args)
 				t.start()
+			else:
+				self.debug('not sure how to handle this link: %s' % link)
 			if self.hit_image_limit(): break
 		self.wait_for_threads()
 	
