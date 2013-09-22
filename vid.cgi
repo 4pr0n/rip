@@ -42,7 +42,7 @@ def get_url(siteurl):
 			'videobam.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
 			'xhamster.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
 			'videarn.com/'  :  { 'begend' : ["src='",  "'"],        'unquote' : 1 },
-			'drtuber.com/'  :  { 'begend' : ['url%3D', '"'],        'unquote' : 1 },
+			# 'drtuber.com/'  :  { 'begend' : ['url%3D', '"'],        'unquote' : 1 },
 			'youporn.com/'  :  { 'begend' : ['href="', '&amp;'],    'unquote' : 1 },
 			'redtube.com/'  :  { 'begend' : ['&flv_url=', '&'],     'unquote' : 1 },
 			'motherless.com/': { 'begend' : ["__fileurl = '", '"'], 'unquote' : 1 },
@@ -85,7 +85,9 @@ def get_url(siteurl):
 	if 'vporn.com' in siteurl:
 		return get_site_vporn(siteurl)
 	if 'pornhub.com' in siteurl:
-		return get_site_pornbb(siteurl)	
+		return get_site_pornhub(siteurl)	
+	if 'tube8.com' in siteurl:
+		return get_site_tube8(siteurl)	
 	if 'drtuber.com' in siteurl:
 		return get_site_drtuber(siteurl)
 
@@ -279,7 +281,7 @@ def get_site_vporn(siteurl):
 		raise Exception('could not find videourlhd at %s' % siteurl)
 	return f
 
-def get_site_pornbb(siteurl):
+def get_site_pornhub(siteurl):
 	r = web.get(siteurl)
 	import sites.aes as aes
 	if 'video_title":"' in r:		
@@ -292,7 +294,23 @@ def get_site_pornbb(siteurl):
 		raise Exception('could not find videourlhd at %s' % siteurl)
 	import urllib2
 	v = urllib2.unquote(v)
-	f = aes.decrypt( v, title.replace("+"," "), 256 )	
+	f = aes.decrypt(v, title.replace("+", " "), 256)
+	return f
+
+def get_site_tube8(siteurl):
+	r = web.get(siteurl)
+	import sites.aes as aes
+	if 'video_title":"' in r:		
+		title = web.between(r, 'video_title":"', '"')[0]		
+	else:
+		raise Exception('could not find videourlhd at %s' % siteurl)
+	if 'video_url":"' in r:
+		v = web.between(r, 'video_url":"', '"')[0]		
+	else:
+		raise Exception('could not find videourlhd at %s' % siteurl)
+	import urllib2
+	v = urllib2.unquote(v)
+	f = aes.decrypt(v, title, 256)
 	return f
 
 def get_site_drtuber(siteurl):
