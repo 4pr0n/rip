@@ -303,20 +303,19 @@ def get_site_tube8(siteurl):
 	if 'video_title":"' in r:		
 		title = web.between(r, 'video_title":"', '"')[0]		
 	else:
-		raise Exception('could not find videourlhd at %s' % siteurl)
+		raise Exception('could not find video title at %s' % siteurl)
 	if 'video_url":"' in r:
 		v = web.between(r, 'video_url":"', '"')[0]		
 	else:
-		raise Exception('could not find videourlhd at %s' % siteurl)
+		raise Exception('could not find video url at %s' % siteurl)
 	import urllib2
-	v = urllib2.unquote(v)
-	f = aes.decrypt(v, title, 256)
-	return f
+	v = urllib2.unquote(v) # probably not needed
+	return aes.decrypt(v, title, 256)
 
 def get_site_drtuber(siteurl):
 	r = web.get(siteurl)
 	import re
-	r = re.sub(r"' \+ '",'',r)
+	r = re.sub(r"' \+ '",'',r) # this breaks easiest
 	a = "".join(re.findall(r'params \+= \'(.*?)\'',r))
 	v = a.split('=')[-1]
 	import hashlib
