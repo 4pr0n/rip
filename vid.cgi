@@ -42,7 +42,7 @@ def get_url(siteurl):
 			'videobam.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
 			'xhamster.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
 			'videarn.com/'  :  { 'begend' : ["src='",  "'"],        'unquote' : 1 },
-			'drtuber.com/'  :  { 'begend' : ['url%3D', '"'],        'unquote' : 1 },
+			# 'drtuber.com/'  :  { 'begend' : ['url%3D', '"'],        'unquote' : 1 },
 			'youporn.com/'  :  { 'begend' : ['href="', '&amp;'],    'unquote' : 1 },
 			'redtube.com/'  :  { 'begend' : ['&flv_url=', '&'],     'unquote' : 1 },
 			'motherless.com/': { 'begend' : ["__fileurl = '", '"'], 'unquote' : 1 },
@@ -85,7 +85,12 @@ def get_url(siteurl):
 	if 'vporn.com' in siteurl:
 		return get_site_vporn(siteurl)
 	if 'pornhub.com' in siteurl:
-		return get_site_pornbb(siteurl)	
+		return get_site_pornhub(siteurl)	
+	if 'tube8.com' in siteurl:
+		return get_site_tube8(siteurl)	
+	if 'drtuber.com' in siteurl:
+		return get_site_drtuber(siteurl)
+
 
 	site_key = None
 	for key in sites.keys():
@@ -276,7 +281,7 @@ def get_site_vporn(siteurl):
 		raise Exception('could not find videourlhd at %s' % siteurl)
 	return f
 
-def get_site_pornbb(siteurl):
+def get_site_pornhub(siteurl):
 	r = web.get(siteurl)
 	import sites.aes as aes
 	if 'video_title":"' in r:		
@@ -289,9 +294,39 @@ def get_site_pornbb(siteurl):
 		raise Exception('could not find videourlhd at %s' % siteurl)
 	import urllib2
 	v = urllib2.unquote(v)
-	f = aes.decrypt( v, title.replace("+"," "), 256 )	
+	f = aes.decrypt(v, title.replace("+", " "), 256)
 	return f
 
+def get_site_tube8(siteurl):
+	r = web.get(siteurl)
+	import sites.aes as aes
+	if 'video_title":"' in r:		
+		title = web.between(r, 'video_title":"', '"')[0]		
+	else:
+		raise Exception('could not find video title at %s' % siteurl)
+	if 'video_url":"' in r:
+		v = web.between(r, 'video_url":"', '"')[0]		
+	else:
+		raise Exception('could not find video url at %s' % siteurl)
+	import urllib2
+	v = urllib2.unquote(v) # probably not needed
+	return aes.decrypt(v, title, 256)
+
+def get_site_drtuber(siteurl):
+	r = web.get(siteurl)
+	import re
+	r = re.sub(r"' \+ '",'',r) # this breaks easiest
+	a = "".join(re.findall(r'params \+= \'(.*?)\'',r))
+	v = a.split('=')[-1]
+	import hashlib
+	m = hashlib.md5()
+	m.update(v+'PT6l13umqV8K827')
+	a = a+"&pkey="+m.hexdigest()
+	import urllib2
+	v = urllib2.unquote(a)
+	r = web.get("http://www.drtuber.com/player/config.php?"+v)
+	# to be safe probably should use unquote
+	return web.between(r, '<video_file>', '</video_file>')[0].replace('&amp;', '&')
 
 def is_supported(url):
 	for not_supported in ['youtube.com/']:
