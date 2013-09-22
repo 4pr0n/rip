@@ -4,7 +4,8 @@ from basesite import basesite
 from json import loads
 from time import sleep
 
-CLIENT_ID = 'a9b7c98b06ac7ba6cb5ac5b68c7454b3'
+CLIENT_ID = 'ada2177105f94b05b21c3839c21d3794'
+
 """
 	Downloads instagram albums
 """
@@ -63,6 +64,7 @@ class instagram(basesite):
 						sleep(0.5)
 					break
 				if self.hit_image_limit(): break
+			if self.hit_image_limit(): break
 			if not json['more_available'] or last_id == 0: break
 			sleep(2)
 			url = '%s&max_id=%s' % (baseurl, last_id)
