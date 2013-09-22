@@ -3,9 +3,9 @@ var TOS_VERSION = 1;
 var SUPPORTED_VIDEO_SITES = [
 	'vimeo.com', 'dailymotion.com', 'tumblr.com', 'vine.co', 'pornhub.com', 
 	'xvideos.com', 'beeg.com', '4tube.com', 'youporn.com', 'redtube.com',
-	'motherless.com', 'videobam.com', 'videarn.com', 'fapmenow.com', 'xtube.com',
-	'youjizz.com', 'mobypicture.com', 'sexykarma.com', 'fapjacks.com', 'setsdb.org',
-	'spankbang.com', 'fapdu.com', 'pornably.com', 'vporn.com']
+	'tube8.com', 'drtuber.com', 'motherless.com', 'videobam.com', 'videarn.com',
+	'fapmenow.com', 'xtube.com', 'youjizz.com', 'mobypicture.com', 'sexykarma.com',
+	'fapjacks.com', 'setsdb.org', 'spankbang.com', 'fapdu.com', 'pornably.com', 'vporn.com']
 
 function init() { // Executes when document has loaded
 	// Safari is BAD. 
@@ -36,7 +36,12 @@ function init() { // Executes when document has loaded
 				.remove();
 			var $sites = $('<table />')
 				.css('cell-spacing', '15px');
-			var $siterow = $('<tr />');
+			var $siterow = $('<tr />')
+				.append(
+					$('<td colspan="4" />')
+						.append( $('<h2 />').html('compatible with:').css('margin', '3px') )
+				).appendTo($sites);
+			$siterow = $('<tr />');
 			$.each(SUPPORTED_VIDEO_SITES, function(i, site) {
 				$('<td />')
 					.addClass('site')
