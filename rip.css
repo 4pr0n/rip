@@ -28,14 +28,12 @@ input::selection {
 .underline { text-decoration: underline; }
 .pre       { white-space: pre; }
 .pointer   { cursor: pointer; }
+.hidden    { visibility: hidden; }
 
 
 /* ID-specific traits */
 #maintable {
 	padding-top: 0px;
-}
-#recent_spinner {
-	visibility: hidden;
 }
 
 /* Root element traits */
@@ -44,7 +42,6 @@ body {
 	padding: 20px;
 	padding-top: 30px;
 	padding-bottom: 40px;
-	margin-right: 20px;
 	background-color: #666;
 	color: #eee;
 	font-family: Verdana, monospace;
@@ -298,11 +295,7 @@ div.sites_header {
 	text-align: center;
 	padding: 5px;
 }
-td.site {
-	text-align: center;
-	padding-top: 3px;
-}
-div.site {
+div.site, td.site {
 	background-color: #666;
 	border-radius: 10px;
 	padding: 8px;
