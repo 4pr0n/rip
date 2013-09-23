@@ -434,16 +434,23 @@ def delete_albums_by_user(user):
 		ip = f.read().replace('\n', '').strip()
 		f.close()
 		if ip != user: continue
+		delalbum = delzip = False
 		# Delete zip
 		try: 
 			remove('%s.zip' % d)
-			deleted.append(zipfile)
+			delzip = True
 		except: pass
 		# Delete album
 		try: 
 			rmtree(d)
-			deleted.append(d)
+			delalbum = True
 		except: pass
+		if delzip and delalbum:
+			deleted.append('%s/ and %s.zip' % (d, d))
+		elif delzip:
+			deleted.append('%s.zip' % d)
+		elif delalbum:
+			deleted.append('%s/' % d)
 	print dumps( {
 		'deleted' : deleted,
 		'user'    : user
