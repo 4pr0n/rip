@@ -1,11 +1,13 @@
 var MAX_USER_ALBUMS = 20; // Maximum number of rips allowed per user
 var TOS_VERSION = 1;
 var SUPPORTED_VIDEO_SITES = [
-	'vimeo.com', 'dailymotion.com', 'tumblr.com', 'vine.co', 'pornhub.com', 
-	'xvideos.com', 'beeg.com', '4tube.com', 'youporn.com', 'redtube.com',
-	'tube8.com', 'drtuber.com', 'motherless.com', 'videobam.com', 'videarn.com',
-	'fapmenow.com', 'xtube.com', 'youjizz.com', 'mobypicture.com', 'sexykarma.com',
-	'fapjacks.com', 'setsdb.org', 'spankbang.com', 'fapdu.com', 'pornably.com', 'vporn.com']
+	'vimeo.com', 'dailymotion.com', 'tumblr.com', 'vine.co', 
+	'pornhub.com', 'xvideos.com', 'beeg.com', '4tube.com', 
+	'youporn.com', 'redtube.com', 'tube8.com', 'drtuber.com', 
+	'motherless.com', 'videobam.com', 'videarn.com', 'fapmenow.com', 
+	'xtube.com', 'youjizz.com', 'mobypicture.com', 'sexykarma.com',
+	'fapjacks.com', 'setsdb.org', 'spankbang.com', 'fapdu.com', 
+	'pornably.com', 'vporn.com', '', '']
 
 function init() { // Executes when document has loaded
 	// Safari is BAD. 
