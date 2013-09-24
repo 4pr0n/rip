@@ -40,8 +40,6 @@ function loadAlbum(album, start, count, startOver) {
 	if (album == null) { return; }
 	$('albums_table').attr('loading', 'true');
 	$('#albums_area').hide();
-	$('#status_area').show();
-	$('#thumbs_area').css('display', 'block');
 	if (start == undefined) start = 0;
 	if (count == undefined) count = IMAGES_PER_PAGE;
 	if (startOver == undefined || startOver) {
@@ -68,11 +66,27 @@ function loadAlbum(album, start, count, startOver) {
 					.css('text-align', 'center')
 					.append($('<h1 />').html('album not found'))
 					.append($('<div />').html('this album (' + window.location.hash.replace('#','') + ') is no longer available'))
-					.css('padding-bottom', '30px');
+					.css('padding-bottom', '30px')
+					.show();
 				$('#next').html('');
 				$('#albums_table').attr('loading', 'true');
 				// TODO Reverse-encode the album name into a URL. Provide link to URL & Album ripper
 				return;
+			}
+			if (! $('#status_area').is(':visible')) {
+				$('#status_area')
+					.fadeIn()
+					.css('padding-top', '0')
+					.css('padding-bottom', '0')
+					.animate( { 
+						'padding-top' : '10',
+						'padding-bottom' : '10'
+						}, {
+							queue: false,
+							duration: 500
+						}
+					);
+				$('#thumbs_area').fadeIn();
 			}
 			$('#album_title').html(album.album + ' (' + album.total + ' images)');
 			
@@ -450,26 +464,23 @@ function getFSDimensionsForImage($image) {
 }
 
 function thumbLoadHandler($thumb, $thumbnail) {
-	$thumb
-		.unbind('load');
-	var newDim = getFSDimensionsForImage($thumb);
+	$thumb.unbind('load');
 	// Old thumbnail dimensions
-	var ott = parseInt($thumbnail.position().top);
-	var otl = parseInt($thumbnail.position().left);
-	var oth = parseInt($thumbnail.height()) + 'px';
-	var otw = parseInt($thumbnail.width()) + 'px';
+	var oldDim = {
+		'top'    : parseInt($thumbnail.position().top),
+		'left'   : parseInt($thumbnail.position().left),
+		'height' : parseInt($thumbnail.height()) + 'px',
+		'width'  : parseInt($thumbnail.width()) + 'px',
+	};
 	// New thumbnail dimensions
+	var newDim = getFSDimensionsForImage($thumb);
 	$thumb
 		// Store current location of thumbnail
-		.attr('ttop',   ott).attr('tleft',  otl).attr('theight',oth).attr('twidth', otw)
-		.css('position', 'fixed')
-		.css('top', $thumbnail.position().top - $(window).scrollTop())
-		.css('left', $thumbnail.position().left)
-		.width($thumbnail.width())
-		.height($thumbnail.height())
+		.css(oldDim)
 		.css({
 			'position' : 'fixed',
 			'z-index': 45,
+			'top' : oldDim['top'] - $(document).scrollTop(),
 		})
 		.animate( 
 			newDim,
@@ -491,13 +502,13 @@ function thumbLoadHandler($thumb, $thumbnail) {
 		.attr('id', 'fgimage')
 		.hide()
 		.appendTo( $(document.body) )
-		.attr('ttop', ott).attr('tleft', otl).attr('theight', oth).attr('twidth', otw)
 		.css({
 			'position' : 'fixed',
 			'z-index': 50,
-			'top' : ott - $(window).scrollTop(), 'left' : otl,
-			'height' : oth, 'width' : otw,
 		})
+		.attr(oldDim)
+		.css(oldDim)
+		.css('top', oldDim['top'] - $(document).scrollTop())
 		.click(imageClickHandler)
 		.attr('src', $thumbnail.attr('full'))
 		.animate( 
@@ -508,18 +519,18 @@ function thumbLoadHandler($thumb, $thumbnail) {
 				complete: function() { imageLoadHandler($thumb); }
 			}
 		)
-		.load(function() { imageLoadHandler($thumb) })
+		.load(function() { imageLoadHandler($thumb, 'loaded') })
 		.show();
 }
 
-function imageLoadHandler($thumb) {
+function imageLoadHandler($thumb, loaded) {
 	var $image = $('#fgimage');
 	// Only trigger resize after both animation + loading have finished
+	if (loaded === 'loaded') {$thumb.hide().remove(); }
 	if ($image.attr('loaded') != 'true') { 
 		$image.attr('loaded', 'true');
 		return;
 	}
-	$thumb.hide();
 	$image
 		.stop()
 		.css('height', 'auto')
@@ -541,14 +552,12 @@ function imageClickHandler() { // Hide the image
 	var $fg = $('#fgimage');
 	$fg
 		.fadeOut(300)
-		.css('top', $(document).scrollTop())
-		.css('position', 'absolute')
 		.animate( 
 			{ 
-				'top'    : $fg.attr('ttop'),
-				'left'   : $fg.attr('tleft'),
-				'height' : $fg.attr('theight'),
-				'width'  : $fg.attr('twidth'),
+				'top'    : $fg.attr('top') - $(document).scrollTop(),
+				'left'   : $fg.attr('left'),
+				'height' : $fg.attr('height'),
+				'width'  : $fg.attr('width'),
 			},
 			{
 				queue: false,

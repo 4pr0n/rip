@@ -37,6 +37,11 @@ a:hover {
 	padding-top: 5px;
 	padding-left: 5px;
 }
+.spacer {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
 .shadow {
 	text-shadow:  4px  0px 6px rgba(0, 0, 0, 0.4),
 	              0px  4px 6px rgba(0, 0, 0, 0.4),
