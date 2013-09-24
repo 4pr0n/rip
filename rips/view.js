@@ -543,7 +543,12 @@ function imageClickHandler() { // Hide the image
 	$('#bgimage')
 		.unbind('click')
 		.fadeOut(100);
-	$('#fgimage #fgthumb')
+	$('#fgimage')
+		.stop(true, false)
+		.unbind('click')
+		.unbind('load');
+	$('#fgthumb')
+		.stop(true, false)
 		.unbind('click')
 		.unbind('load');
 	$('#fgthumb')
@@ -551,6 +556,7 @@ function imageClickHandler() { // Hide the image
 		.remove();
 	var $fg = $('#fgimage');
 	$fg
+		.attr('stopping', 'true')
 		.fadeOut(300)
 		.animate( 
 			{ 
