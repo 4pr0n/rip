@@ -212,11 +212,10 @@ function startRip() { // Start ripping album
 				.append( $('<img />').attr('src', 'spinner_dark.gif') )
 				.append( $('<span />').html(' loading...') )
 				.slideDown();
+			var query = getQueryString(true);
+			$.getJSON(query, ripRequestHandler);
+			setTimeout(function() { checkRip() }, 500);
 		});
-	
-	var query = getQueryString(true);
-	$.getJSON(query, ripRequestHandler);
-	setTimeout(function() { checkRip() }, 500);
 }
 
 function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'check')
@@ -226,12 +225,9 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 			.addClass('error')
 			.html('error: ' + json.error);
 		$statbar.empty()
-			.hide()
-			.append(err)
-			.slideDown(400, function() {
-				enableControls();
-				setProgress(0);
-			});
+			.append(err);
+		setProgress(0);
+		enableControls();
 		return;
 	}
 	else if (json.zip && $statbar.attr('has_download_link') === 'false') {
