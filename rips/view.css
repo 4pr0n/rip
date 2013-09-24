@@ -205,10 +205,6 @@ td.image {
 	padding-top: 5px;
 	margin: 0px;
 }
-img.image {
-	min-width: 200px;
-	min-height: 200px;
-}
 
 td.image_small {
 	vertical-align: middle;

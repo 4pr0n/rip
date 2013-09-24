@@ -396,12 +396,11 @@ function scrollHandler() {
 //////////////////
 // IMAGE DISPLAY
 
-function loadImage($thumb) {
-	
+function loadImage($thumbnail) {
 	// If the image type isn't supported, open in a new tab
 	var unsupported = false;
 	$.each(Array('.mp4', '.html'), function(i, extension) {
-		var full = $thumb.attr('full');
+		var full = $thumbnail.attr('full');
 		if (full.indexOf(extension) == full.length - extension.length) {
 			window.open(full);
 			unsupported = true;
@@ -409,90 +408,137 @@ function loadImage($thumb) {
 		}
 	});
 	if (unsupported) { return; }
+
 	// Dim background
 	$('#bgimage')
 		.stop()
 		.fadeIn()
 		.click( imageClickHandler );
 
-	// Setup image to be displayed
-	$('#fgimage')
-		.stop() // Stop all other animations
-		.removeAttr('src')
-		.css('width', 'auto')
-		.css('height', 'auto')
-		.attr('src', $thumb.attr('full'))
+	// Remove/create/show thumbnail
+	$('#fgthumb')
+		.stop()
+		.hide()
+		.remove();
+	$('<img />')
+		.attr('id', 'fgthumb')
+		.hide()
+		.appendTo( $(document.body) )
 		.click(imageClickHandler)
-		.one('load', function() {
-			imageLoadHandler($thumb, $(this));
-		})
-		.each(function() {
-			if (this.complete) $(this).load();
-		});
+		.load( function() { thumbLoadHandler($(this), $thumbnail); } )
+		.attr('src', $thumbnail.attr('src')); // Start loading thumbnail
 	
 	return false;
 }
 
-function imageLoadHandler($thumb, $fg) {
-	$fg.hide();
-	var screen_width  = $(window).width(), screen_height = $(window).height();
-	var image_width  = $fg.width(), image_height = $fg.height(); // Image width/height
-	if (image_width  > screen_width)  { 
-		image_height = image_height * (screen_width  / image_width);
-		image_width  = screen_width;
-	}
-	if (image_height > screen_height) { 
-		image_width  = image_width  * (screen_height / image_height);
-		image_height = screen_height;
-	}
-	// Screen dimensions
-	var image_top  = (screen_height / 2) - (image_height / 2) + $(document).scrollTop();
-	var image_left = (screen_width  / 2) - (image_width  / 2);
-	// Thumb dimensions
-	var ttop    = parseInt($thumb.position().top);
-	var tleft   = parseInt($thumb.position().left) + 2;
-	var theight = parseInt($thumb.height());
-	var twidth  = parseInt($thumb.width());
-	$fg
-		.css('position', 'absolute')
-		.css('opacity', 1)
-		.css('top',   ttop)
-		.css('left',  tleft)
-		.css('height',theight)
-		.css('width', twidth)
-		.removeAttr('ttop')
-		.removeAttr('tleft')
-		.removeAttr('theight')
-		.removeAttr('twidth')
-		.attr('ttop',   ttop)
-		.attr('tleft',  tleft)
-		.attr('theight',theight)
-		.attr('twidth', twidth)
-		.fadeIn(200)
+// Return css dict for image expanded to fit the screen
+function getFSDimensionsForImage($image) {
+	var factor = Math.min(
+			$(window).height() / $image.height(), 
+			$(window).width()  / $image.width()
+	);
+	var th = parseInt($image.height() * factor) - 4;
+	var tw = parseInt($image.width() * factor) - 4;
+	var tt = Math.max(0, parseInt( ($(window).height() - th) / 2.0 ) - 4);
+	var tl = Math.max(0, parseInt( ($(window).width() - tw) / 2.0 ));
+	return {
+		'top'    : tt,
+		'left'   : tl,
+		'height' : th + 'px',
+		'width'  : tw + 'px',
+	};
+}
+
+function thumbLoadHandler($thumb, $thumbnail) {
+	$thumb
+		.unbind('load');
+	var newDim = getFSDimensionsForImage($thumb);
+	// Old thumbnail dimensions
+	var ott = parseInt($thumbnail.position().top);
+	var otl = parseInt($thumbnail.position().left);
+	var oth = parseInt($thumbnail.height()) + 'px';
+	var otw = parseInt($thumbnail.width()) + 'px';
+	// New thumbnail dimensions
+	$thumb
+		// Store current location of thumbnail
+		.attr('ttop',   ott).attr('tleft',  otl).attr('theight',oth).attr('twidth', otw)
+		.css('position', 'fixed')
+		.css('top', $thumbnail.position().top - $(window).scrollTop())
+		.css('left', $thumbnail.position().left)
+		.width($thumbnail.width())
+		.height($thumbnail.height())
+		.css({
+			'position' : 'fixed',
+			'z-index': 45,
+		})
 		.animate( 
-			{ 
-				'top'    : image_top,
-				'left'   : image_left,
-				'height' : image_height,
-				'width'  : image_width
-			},
+			newDim,
 			{
 				queue: false,
-				duration: 400,
+				duration: 300,
 				easing: 'swing'
 			}
-		);
+		)
+		.show();
+
+	// Remove existing image
+	$('#fgimage')
+		.hide()
+		.removeAttr('src')
+		.remove();
+	// Load the full-size image
+	$image = $('<img />')
+		.attr('id', 'fgimage')
+		.hide()
+		.appendTo( $(document.body) )
+		.attr('ttop',   ott).attr('tleft',  otl).attr('theight',oth).attr('twidth', otw)
+		//.css(newDim)
+		.css({
+			'position' : 'fixed',
+			'z-index': 50,
+			'top' : ott - $(window).scrollTop(), 'left' : otl,
+			'height' : oth, 'width' : otw,
+		})
+		.click(imageClickHandler)
+		.load(function() { $thumb.hide() })
+		.attr('src', $thumbnail.attr('full'))
+		.animate( 
+			newDim,
+			{
+				queue: false,
+				duration: 300,
+				easing: 'swing',
+				complete: function() { 
+					imageLoadHandler($thumb);
+				}
+			}
+		)
+		.show();
+}
+
+function imageLoadHandler($thumb) {
+	var $image = $('#fgimage')
+		.css('height', 'auto')
+		.css('width', 'auto');
+	var newDim = getFSDimensionsForImage($image);
+	$image.css(newDim);
 }
 
 function imageClickHandler() { // Hide the image
 	$('#bgimage')
 		.unbind('click')
 		.fadeOut(100);
-	var $fg = $('#fgimage')
+	$('#fgimage #fgthumb')
 		.unbind('click')
 		.unbind('load');
+	$('#fgthumb')
+		.hide()
+		.remove();
+	var $fg = $('#fgimage');
 	$fg
 		.fadeOut(300)
+		.css('top', $(document).scrollTop())
+		.css('position', 'absolute')
 		.animate( 
 			{ 
 				'top'    : $fg.attr('ttop'),
@@ -502,11 +548,13 @@ function imageClickHandler() { // Hide the image
 			},
 			{
 				queue: false,
-				duration: 200,
+				duration: 300,
 				easing: 'swing'
 			},
 			function() { 
-				$fg.removeAttr('src')
+				$fg
+					.removeAttr('src')
+					.hide();
 			}
 		);
 }
