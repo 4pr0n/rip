@@ -491,8 +491,7 @@ function thumbLoadHandler($thumb, $thumbnail) {
 		.attr('id', 'fgimage')
 		.hide()
 		.appendTo( $(document.body) )
-		.attr('ttop',   ott).attr('tleft',  otl).attr('theight',oth).attr('twidth', otw)
-		//.css(newDim)
+		.attr('ttop', ott).attr('tleft', otl).attr('theight', oth).attr('twidth', otw)
 		.css({
 			'position' : 'fixed',
 			'z-index': 50,
@@ -500,24 +499,29 @@ function thumbLoadHandler($thumb, $thumbnail) {
 			'height' : oth, 'width' : otw,
 		})
 		.click(imageClickHandler)
-		.load(function() { $thumb.hide() })
 		.attr('src', $thumbnail.attr('full'))
 		.animate( 
 			newDim,
 			{
-				queue: false,
 				duration: 300,
 				easing: 'swing',
-				complete: function() { 
-					imageLoadHandler($thumb);
-				}
+				complete: function() { imageLoadHandler($thumb); }
 			}
 		)
+		.load(function() { imageLoadHandler($thumb) })
 		.show();
 }
 
 function imageLoadHandler($thumb) {
-	var $image = $('#fgimage')
+	var $image = $('#fgimage');
+	// Only trigger resize after both animation + loading have finished
+	if ($image.attr('loaded') != 'true') { 
+		$image.attr('loaded', 'true');
+		return;
+	}
+	$thumb.hide();
+	$image
+		.stop()
 		.css('height', 'auto')
 		.css('width', 'auto');
 	var newDim = getFSDimensionsForImage($image);
