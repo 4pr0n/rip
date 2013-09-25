@@ -105,41 +105,55 @@ function init() { // Executes when document has loaded
 function refreshRecent() { // Refresh list of "recent rips"
 	$('#recent_spinner').css('visibility', 'visible');
 	$('#recent').fadeOut();
-	$.getJSON('rip.cgi?recent=y', function(json) {
-		var $ul = $('<ul />').css('padding-left', '15px');
-		$.each(json.recent, function(i, rec) {
-			var url = rec.url.replace('http://www.', '').replace('http://', '').replace('https://', '');
-			var $li = $('<li />').addClass('recent');
-			$('<a />') // DOWNLOAD
-				.addClass('download_box download_arrow')
-				.html('&nbsp;&nbsp;')
-				.attr('album', url)
-				.attr('href', '#' + escape(url).replace(/\//g, '%2F'))
-				.click(function() {
-					return loadAlbum($(this).attr('album'));
-				})
-				.appendTo($li);
-			$('<a />') // VIEW ALBUM
-				.addClass('download_box')
-				.css('margin-right', '5px')
-				.attr('href', rec.view_url)
-				.attr('target', '_BLANK' + String(Math.random()) )
-				.html('view')
-				.appendTo($li);
-			$('<a />') // SOURCE LINK
-				.css('padding-left', '3px')
-				.attr('href', rec.url)
-				.attr('target', '_BLANK')
-				.html(truncate(url, 18))
-				.appendTo($li);
-			$ul.append($li);
-		});
-		$('#recent')
-			.empty()
-			.append($ul)
-			.fadeIn(400, function() { 
-				$('#recent_spinner').css('visibility', 'hidden');
+	$.getJSON('rip.cgi?recent=y')
+		.fail( function(x, s, e) {
+			$('#recent')
+				.hide()
+				.empty()
+				.addClass('center')
+				.append( $('<h3 />').html('error while contacting server:') )
+				.append( $('<div />').html('status:' + x.status) )
+				.append( $('<div />').html(s + ': "' + e + '"') )
+				//.append( $('<div />').html(x.responseText) )
+				.fadeIn();
+			$('#recent_spinner').css('visibility', 'hidden');
+		})
+		.done(function(json) {
+			console.log('done')
+			var $ul = $('<ul />').css('padding-left', '15px');
+			$.each(json.recent, function(i, rec) {
+				var url = rec.url.replace('http://www.', '').replace('http://', '').replace('https://', '');
+				var $li = $('<li />').addClass('recent');
+				$('<a />') // DOWNLOAD
+					.addClass('download_box download_arrow')
+					.html('&nbsp;&nbsp;')
+					.attr('album', url)
+					.attr('href', '#' + escape(url).replace(/\//g, '%2F'))
+					.click(function() {
+						return loadAlbum($(this).attr('album'));
+					})
+					.appendTo($li);
+				$('<a />') // VIEW ALBUM
+					.addClass('download_box')
+					.css('margin-right', '5px')
+					.attr('href', rec.view_url)
+					.attr('target', '_BLANK' + String(Math.random()) )
+					.html('view')
+					.appendTo($li);
+				$('<a />') // SOURCE LINK
+					.css('padding-left', '3px')
+					.attr('href', rec.url)
+					.attr('target', '_BLANK')
+					.html(truncate(url, 18))
+					.appendTo($li);
+				$ul.append($li);
 			});
+			$('#recent')
+				.empty()
+				.append($ul)
+				.fadeIn(400, function() { 
+					$('#recent_spinner').css('visibility', 'hidden');
+				});
 	});
 }
 
@@ -213,9 +227,50 @@ function startRip() { // Start ripping album
 				.append( $('<span />').html(' loading...') )
 				.slideDown();
 			var query = getQueryString(true);
-			$.getJSON(query, ripRequestHandler);
+			$.getJSON(query)
+				.fail(ripFailHandler)
+				.done(ripRequestHandler);
 			setTimeout(function() { checkRip() }, 500);
 		});
+}
+
+function ripFailHandler(x, s, e) {
+	var $statbar = $('#status_bar');
+	$statbar
+		.slideUp(400, function() {
+			$statbar.empty()
+				.hide()
+				.addClass('center')
+				.append( $('<h3 />').html('error occurred while trying to rip') )
+				.append( $('<div />').html('this sometimes happens. try to rip again.') )
+				.append( 
+					$('<div />')
+						.css('padding-top', '10px')
+						.css('padding-bottom', '10px')
+						.html('if the issue persists, ') 
+						.append( 
+							$('<a />')
+								.html('tell 4_pr0n')
+								.attr('href', 'http://www.reddit.com/message/compose/?to=4_pr0n' +
+									'&subject=about%20rip.rarchives.com&message=' +
+									'Bad%20things%20happened%20when%20I%20tried%20to%20rip%20' + encodeURIComponent($('#rip_text').val()) + 
+									'%0A%0A%20%20%20%20status: ' + encodeURIComponent(x.status) + 
+									'%0A%20%20%20%20' + encodeURIComponent(s) + ': "' + encodeURIComponent(e) + '"' + 
+									'%0A%0A%20%20%20%20' + encodeURIComponent(x.responseText.substring(x.responseText.indexOf('Traceback (most recent')).replace('\n', '\n    ')).replace('%0A', '%0A%20%20%20%20')
+								)
+								.addClass('box')
+								.attr('target', '_BLANK')
+							)
+					)
+				.slideDown(750)
+				.css('opacity', '0')
+				.animate(
+						{ opacity: 1 },
+						{ queue: false, duration: 750 }
+				)
+		});
+	setProgress(0);
+	enableControls();
 }
 
 function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'check')
