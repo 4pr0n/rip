@@ -166,7 +166,8 @@ try:
 	#i = gonearch('http://gonearchiving.com/indexlist.php?author=nutmegster')
 	#i = chanarchive('http://chanarchive.org/4chan/a/70052/can-a-make-a-good-soundtrack-for-netorare')
 	#http://chanarchive.org/4chan/s/10261/madalina-pica
-	i = photobucket('http://s1275.photobucket.com/user/ew4ever/library/EW', urls_only=True, debugging=True)
+	#i = photobucket('http://s1275.photobucket.com/user/ew4ever/library/EW', urls_only=True, debugging=True)
+	i = imgur('http://imgur.com/a/yxHvZ', debugging=True)
 
 	print i.working_dir
 	print i.url

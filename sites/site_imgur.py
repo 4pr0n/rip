@@ -100,7 +100,7 @@ class imgur(basesite):
 		if  self.album_type == 'direct' or \
 				self.album_type == 'domain':
 			# Single album
-			self.download_album(self.url)
+			self.download_album_json(self.url)
 		elif self.album_type == 'subreddit':
 			# Subreddit
 			self.download_subreddit(self.url)
@@ -134,19 +134,13 @@ class imgur(basesite):
 			if not path.exists(self.working_dir):
 				mkdir(self.working_dir)
 			self.log('downloading album (%d/%d) "%s"' % (index + 1, len(covers), alt))
-			self.download_album(url)
+			self.download_album_json(url)
 			self.working_dir = prev_dir
 			if self.hit_image_limit(): break
 		self.wait_for_threads()
 
+	''' Download imgur album using /noscript method '''
 	def download_album(self, album):
-		# Temporary fix (this is ugly)
-		# Use imgur's API to download album, this gets captions as well
-		# Remove below lines to revert back to "noscript" method
-		if '/a/' in album:
-			self.download_album_json(album)
-			self.wait_for_threads()
-			return
 		# Get album source
 		r = self.web.get('%s/noscript' % album)
 		# Get images
@@ -164,6 +158,7 @@ class imgur(basesite):
 				if self.hit_image_limit(): break
 		self.wait_for_threads()
 	
+	''' Escape text '''
 	def safe_text(self, text):
 		escaped = []
 		for c in text:
@@ -173,6 +168,7 @@ class imgur(basesite):
 				escaped.append(c)
 		return ''.join(escaped)
 	
+	''' Download imgur album using API/json request '''
 	def download_album_json(self, album):
 		aid = album[album.find('/a/')+len('/a/'):]
 		if '/' in aid: aid = aid[:aid.find('/')]
@@ -180,6 +176,10 @@ class imgur(basesite):
 		try:
 			json = loads(r)
 		except:
+			return
+		if 'error' in json and 'message' in json['error'] and json['error']['message'].lower().count('limit') > 0:
+			# Exceeded API limits, use fall-back
+			self.download_album(album)
 			return
 		if not 'album' in json: return
 		alb = json['album']
