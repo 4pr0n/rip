@@ -150,7 +150,7 @@ class imgur(basesite):
 		# Get album source
 		r = self.web.get('%s/noscript' % album)
 		# Get images
-		links = self.web.between(r, 'img src="http://i.', '"')
+		links = self.web.between(r, 'img src="//i.', '"')
 		for index, link in enumerate(links):
 			if '?' in link: link = link[:link.find('?')]
 			if '#' in link: link = link[:link.find('#')]
@@ -216,7 +216,7 @@ class imgur(basesite):
 		while True:
 			r = self.web.get('%s/page/%d' % (album, page))
 			# Get images
-			links = self.web.between(r, ' src="http://i.', '"')
+			links = self.web.between(r, ' src="//i.', '"')
 			if len(links) == 0: break
 			if len(first_links) == 0:
 				first_links = links[:]
