@@ -176,9 +176,12 @@ class imgur(basesite):
 		try:
 			json = loads(r)
 		except:
+			self.debug('error parsing json:\n\n%s' % r)
+			self.download_album(album)
 			return
 		if 'error' in json and 'message' in json['error'] and json['error']['message'].lower().count('limit') > 0:
 			# Exceeded API limits, use fall-back
+			self.debug('hit limit; falling back... %s' % json['error']['message'])
 			self.download_album(album)
 			return
 		if not 'album' in json: return
