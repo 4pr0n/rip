@@ -40,7 +40,14 @@ class instagram(basesite):
 			self.wait_for_threads()
 			raise Exception('could not find total photos at %s' % url)
 		chunk = self.web.between(r, '"pod-title">Photos</div>', 'Followers')[0]
-		total = int(self.web.between(chunk, 'value">', '<')[0])
+		value = self.web.between(chunk, 'value">', '<')[0].replace(',', '')
+		if 'k' in value:
+			value = value[:value.find('k')]
+			total = int(float(value) * 1000.0)
+		elif value.isdigit():
+			total = int(self.web.between(chunk, 'value">', '<')[0])
+		else:
+			total = '?'
 		while True:
 			if not '<div class="image">' in r:
 				self.log('could not find image at %s' % url)
@@ -60,7 +67,7 @@ class instagram(basesite):
 			if self.hit_image_limit(): break
 			if not '<div class="next_url">' in r: break
 			next_url = self.web.between(r, '<div class="next_url">', '</div>')[0]
-			if next_url.strip() == '' or index >= total: break
+			if next_url.strip() == '' or total != '?' and index >= total: break
 			d = {
 					'next_url' : next_url,
 					'request'  : next_url
