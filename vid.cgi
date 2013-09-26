@@ -42,54 +42,34 @@ def get_url(siteurl):
 			'videobam.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
 			'xhamster.com/' :  { 'begend' : ['"',      '"'],        'unquote' : 1 },
 			'videarn.com/'  :  { 'begend' : ["src='",  "'"],        'unquote' : 1 },
-			# 'drtuber.com/'  :  { 'begend' : ['url%3D', '"'],        'unquote' : 1 },
 			'youporn.com/'  :  { 'begend' : ['href="', '&amp;'],    'unquote' : 1 },
 			'redtube.com/'  :  { 'begend' : ['&flv_url=', '&'],     'unquote' : 1 },
 			'motherless.com/': { 'begend' : ["__fileurl = '", '"'], 'unquote' : 1 },
 			'vine.co/'      :  { 'begend' : ['source src="', '"'],  'unquote' : 1 },
 		}
-	if 'beeg.com' in siteurl:
-		return get_site_beeg(siteurl)
-	if 'xvideos.com/' in siteurl:
-		return get_site_xvideos(siteurl)
-	if 'fapmenow.com/' in siteurl:
-		return get_site_fapmenow(siteurl)
-	if 'vimeo.com/' in siteurl:
-		return get_site_vimeo(siteurl)
-	if 'tumblr.com/' in siteurl:
-		return get_site_tumblr(siteurl)
-	if '4tube.com/' in siteurl:
-		return get_site_4tube(siteurl)
-	if 'xtube.com' in siteurl:
-		return get_site_xtube(siteurl)
-	if 'youjizz.com' in siteurl:
-		return get_site_youjizz(siteurl)
-	if 'dailymotion.com' in siteurl:
-		return get_site_dailymotion(siteurl)
-	if 'mobypicture.com' in siteurl:
-		return get_site_mobypicture(siteurl)
-	if 'sexykarma.com' in siteurl:
-		return get_site_sexykarma(siteurl)
-	if 'fapjacks.com' in siteurl:
-		return get_site_fapjacks(siteurl)
-	if 'setsdb.org' in siteurl:
-		return get_site_setsdb(siteurl)
-	if 'ashemaletube.com' in siteurl:
-		return get_site_ast(siteurl)
-	if 'spankbang.com' in siteurl:
-		return get_site_spankbang(siteurl)
-	if 'fapdu.com' in siteurl:
-		return get_site_fapdu(siteurl)
-	if 'pornably.com' in siteurl:
-		return get_site_pornably(siteurl)
-	if 'vporn.com' in siteurl:
-		return get_site_vporn(siteurl)
-	if 'pornhub.com' in siteurl:
-		return get_site_pornhub(siteurl)	
-	if 'tube8.com' in siteurl:
-		return get_site_tube8(siteurl)	
-	if 'drtuber.com' in siteurl:
-		return get_site_drtuber(siteurl)
+
+	if 'beeg.com' in siteurl: return get_site_beeg(siteurl)
+	if 'xvideos.com/' in siteurl: return get_site_xvideos(siteurl)
+	if 'fapmenow.com/' in siteurl: return get_site_fapmenow(siteurl)
+	if 'vimeo.com/' in siteurl: return get_site_vimeo(siteurl)
+	if 'tumblr.com/' in siteurl: return get_site_tumblr(siteurl)
+	if '4tube.com/' in siteurl: return get_site_4tube(siteurl)
+	if 'xtube.com' in siteurl: return get_site_xtube(siteurl)
+	if 'youjizz.com' in siteurl: return get_site_youjizz(siteurl)
+	if 'dailymotion.com' in siteurl: return get_site_dailymotion(siteurl)
+	if 'mobypicture.com' in siteurl: return get_site_mobypicture(siteurl)
+	if 'sexykarma.com' in siteurl: return get_site_sexykarma(siteurl)
+	if 'fapjacks.com' in siteurl: return get_site_fapjacks(siteurl)
+	if 'setsdb.org' in siteurl: return get_site_setsdb(siteurl)
+	if 'ashemaletube.com' in siteurl: return get_site_ast(siteurl)
+	if 'spankbang.com' in siteurl: return get_site_spankbang(siteurl)
+	if 'fapdu.com' in siteurl: return get_site_fapdu(siteurl)
+	if 'pornably.com' in siteurl: return get_site_pornably(siteurl)
+	if 'vporn.com' in siteurl: return get_site_vporn(siteurl)
+	if 'pornhub.com' in siteurl: return get_site_pornhub(siteurl)
+	if 'tube8.com' in siteurl: return get_site_tube8(siteurl)
+	if 'drtuber.com' in siteurl: return get_site_drtuber(siteurl)
+	if 'vk.com/video' in siteurl: return get_site_vk(siteurl)
 
 
 	site_key = None
@@ -327,6 +307,16 @@ def get_site_drtuber(siteurl):
 	r = web.get("http://www.drtuber.com/player/config.php?"+v)
 	# to be safe probably should use unquote
 	return web.between(r, '<video_file>', '</video_file>')[0].replace('&amp;', '&')
+
+def get_site_vk(siteurl):
+	r = web.get(siteurl)
+	highest_res = None
+	for size in ['720', '480', '360', '240']:
+		if '\\"url%s\\":\\"' % size in r:
+			highest_res = web.between(r, '\\"url%s\\":\\"' % size, '\\"')[0]
+	if highest_res == None:
+		raise Exception('could not find video link url<res>:')
+	return highest_res.replace('\\/', '/').replace('\\\\', '')
 
 def is_supported(url):
 	for not_supported in ['youtube.com/']:
