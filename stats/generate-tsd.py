@@ -33,9 +33,9 @@ def parse_line(line):
 # Read log file, return dict containing all information about the log
 def parse_log(log):
 	data = {
-			#'day'  : {},
-			#'hour' : {},
-			'5min' : {'seconds': 300},
+			'day'  : {'seconds' : 86400},
+			'hour' : {'seconds' : 3600},
+			'5min' : {'seconds' : 300},
 			#'1min' : {}
 		}
 	try:
@@ -79,15 +79,11 @@ def load_data_from_epoch(tstamp, timekey):
 		return {}
 	print 'loaded %s' % fname.replace(STAT_DIR,''),
 	b = loads(r)
-	ststamp = str(tstamp)
-	if not ststamp in b: 
-		print 'could not find %d in %s' % (ststamp, str(b))
-		return {}
 	a = {}
 	for k in ['hits', 'rips', 'zips', 'album_views', 'images', 'thumbs', 'videos', 'checks', 'cgi', 'others', 'bytes']:
-		if k in b[ststamp]: 
-			a[k] = b[ststamp][k]
-			print '%s=%s' % (k, str(b[ststamp][k]).ljust(4)),
+		if k in b: 
+			a[k] = b[k]
+			print '%s=%s' % (k, str(b[k]).ljust(4)),
 	print ''
 	return a
 
@@ -148,6 +144,6 @@ if __name__ == '__main__':
 				print '%s=%s' % (attr,str(value).ljust(4)),
 			print ''
 			f = open(fname, 'w')
-			f.write('{"%s":%s}\n' % (k, dumps(data[timekey][k])))
+			f.write('%s\n' % dumps(data[timekey][k]))
 			f.close()
 
