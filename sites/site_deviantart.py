@@ -56,11 +56,14 @@ class deviantart(basesite):
 		total = 0
 		already_have = [] # List of images already parsed
 		while True:
-			chunks  = self.web.between(r, 'px;"><a class="thumb', '>')
+			chunks = self.web.between(r, '<a class="thumb', '>')
+			self.debug('"thumbs" chunk size: %d' % len(chunks))
 			total += len(chunks)
 			for chunk in chunks:
 				link = self.web.between(chunk, 'href="', '"')[0]
-				if link in already_have: continue
+				if link in already_have: 
+					total -= 1
+					continue
 				already_have.append(link)
 				if self.hit_image_limit(): break
 				self.download_image(link, len(already_have), total=total) 
@@ -69,7 +72,8 @@ class deviantart(basesite):
 			if next_page == None: break
 			if   '?' in self.url: next_page = '&offset=%s' % next_page
 			else: next_page = '?offset=%s' % next_page
-			r = self.web.getter('%s%s' % (self.url, next_page))
+			self.debug('loading %s%s' % (self.url, next_page))
+			r = self.web.get('%s%s' % (self.url, next_page))
 		self.wait_for_threads()
 	
 	""" Retrive link to 'next' page in gallery. Returns None if last page """
@@ -93,7 +97,7 @@ class deviantart(basesite):
 	
 	""" Downloads image from deviantart image page """
 	def download_image_thread(self, url, index, total, retries=5):
-		r = self.web.getter(url)
+		r = self.web.get(url)
 		img = None
 		if 'id="download-button"' in r:
 			dl = self.web.between(r, 'id="download-button"', '<')[0]
