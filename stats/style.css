@@ -1,0 +1,77 @@
+.top { vertical-align: top; }
+.center { text-align: center; }
+.width50 { width: 50%; }
+.width100 { width: 100%; }
+
+body {
+	padding: 20px;
+	padding-top: 30px;
+	padding-bottom: 40px;
+	padding-right: 40px;
+	background-color: #666;
+	color: #eee;
+	font-family: Verdana, monospace;
+}
+a {
+	text-decoration: underline;
+	color: #eee;
+}
+
+a:hover {
+	color: #fff;
+	text-decoration: underline;
+	text-shadow:  4px  0px 10px rgba(130, 130, 130, 0.9),
+	              0px  4px 10px rgba(130, 130, 130, 0.9),
+	             -4px  0px 10px rgba(130, 130, 130, 0.9),
+	              0px -4px 10px rgba(130, 130, 130, 0.9);
+}
+table.page {
+	background-color: #444;
+	border-radius: 30px;
+	padding: 0px;
+	padding-left: 20px;
+	width: 100%;
+	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.6);
+	margin-bottom: 20px;
+}
+table.header { 
+	padding: 40px;
+	padding-top: 10px;
+	padding-bottom: 15px;
+}
+a.header {
+	text-decoration: none;
+	text-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px  4px 10px rgba(150, 150, 150, 0.6),
+	             -4px  0px 10px rgba(150, 150, 150, 0.6),
+	              0px -4px 10px rgba(150, 150, 150, 0.6);
+}
+div.supheader {
+	font-size: 1.0em;
+	position: relative;
+	top: 28px;
+	left: -50px;
+	letter-spacing: 0.1em;
+}
+div.header {
+	font-size: 4.0em;
+	font-weight: bold;
+	letter-spacing: -0.07em;
+}
+
+table.graph {
+	cursor: pointer;
+}
+table.graph:hover {
+	background-color: #555;
+}
+img.spinner {
+	width: 250px;
+	height: 250px;
+}
+div.graph {
+	margin-top: 10px;
+	display: none;
+	height: 300px;
+	text-align: center;
+}
