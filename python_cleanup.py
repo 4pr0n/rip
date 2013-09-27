@@ -136,13 +136,19 @@ def remove_files(l, reason=''):
 	removed = 0
 	log('removing %d files because %s' % (len(l), reason))
 	for f in l:
-		log('removing %s - %s' % (f, reason))
+		log('removing %s' % f)
 		if os.path.isfile(f):
-			os.remove(f)
-			removed += 1
+			try:
+				os.remove(f)
+				removed += 1
+			except Exception, err:
+				log('failed to remove %s: %s' % (f, err))
 		elif os.path.isdir(f):
-			rmtree(f)
-			removed += 1
+			try:
+				rmtree(f)
+				removed += 1
+			except Exception, err:
+				log('failed to remove %s: %s' % (f, err))
 		else:
 			log('ERROR: not a file or dir, cannot remove %s' % f)
 	log('removed %d files because %s' % (removed, reason))
