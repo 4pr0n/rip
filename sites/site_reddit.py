@@ -44,20 +44,23 @@ class reddit(imgur):
 				index += 1
 				if not 'imgur.com' in url: continue
 				url = url.replace('/m.imgur.com/', '/imgur.com/')
+				if '#' in url: url = url[:url.find('#')]
+				if '?' in url: url = url[:url.find('?')]
 				if 'imgur.com/a/' in url:
-					self.download_album(url)
-				elif not 'i.imgur.com' in url and not (url[-4] == '.' or url[-5] == '.'):
-					# Need to get direct link to image
-					iid = url[url.find('imgur.com/')+len('imgur.com/'):]
-					if '/' in iid: iid = iid[:iid.find('/')]
-					if '?' in iid: iid = iid[:iid.find('?')]
-					if '#' in iid: iid = iid[:iid.find('#')]
-					ir = self.web.get('http://api.imgur.com/2/image/%s' % iid)
-					try: ijs = loads(ir)
-					except: continue
-					if not 'image' in ijs or not 'links' in ijs['image'] or not 'original' in ijs['image']['links']: continue
-					url = ijs['image']['links']['original']
-				self.download_image(url, index, total=total)
+					self.download_album_json(url)
+				else:
+					if not 'i.imgur.com' in url and not (url[-4] == '.' or url[-5] == '.'):
+						# Need to get direct link to image
+						iid = url[url.find('imgur.com/')+len('imgur.com/'):]
+						if '/' in iid: iid = iid[:iid.find('/')]
+						if '?' in iid: iid = iid[:iid.find('?')]
+						if '#' in iid: iid = iid[:iid.find('#')]
+						ir = self.web.get('http://api.imgur.com/2/image/%s' % iid)
+						try: ijs = loads(ir)
+						except: continue
+						if not 'image' in ijs or not 'links' in ijs['image'] or not 'original' in ijs['image']['links']: continue
+						url = ijs['image']['links']['original']
+					self.download_image(url, index, total=total)
 				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
 			count = len(children)
