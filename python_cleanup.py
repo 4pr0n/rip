@@ -114,22 +114,20 @@ def log(line):
 
 def main():
 	log('starting...')
-	while True:
-		removed = 0
-		
-		l = get_incomplete_albums()
-		removed += remove_files(l, 'incomplete (> %d hours)' % (max_incomplete_time / 3600))
-		
-		l = get_orphan_zips()
-		removed += remove_files(l, 'orphan zips (> %d hours)' % (max_orphaned_zip_time / 3600))
-		
-		#l = get_stale_albums()
-		#removed += remove_files(l, 'stale album (> %d hours)' % (max_album_time / 3600))
-		
-		l = get_files_to_remove()
-		removed += remove_files(l, 'max file size reached (> %d gb)' % (max_size / (1024 * 1024 * 1024)))
-		log('sleeping 5 minutes')
-		time.sleep(60 * 5)
+	removed = 0
+	
+	l = get_incomplete_albums()
+	removed += remove_files(l, 'incomplete (> %d hours)' % (max_incomplete_time / 3600))
+	
+	l = get_orphan_zips()
+	removed += remove_files(l, 'orphan zips (> %d hours)' % (max_orphaned_zip_time / 3600))
+	
+	#l = get_stale_albums()
+	#removed += remove_files(l, 'stale album (> %d hours)' % (max_album_time / 3600))
+	
+	l = get_files_to_remove()
+	removed += remove_files(l, 'max file size reached (> %d gb)' % (max_size / (1024 * 1024 * 1024)))
+	log('finished!')
 
 def remove_files(l, reason=''):
 	if len(l) == 0: return 0
