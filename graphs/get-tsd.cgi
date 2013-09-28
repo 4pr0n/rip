@@ -3,33 +3,116 @@
 import cgi, cgitb; cgitb.enable()
 
 from json import loads, dumps
-from time import strftime, localtime
+from time import strftime, localtime, gmtime
 from os   import path, listdir
+
+#METRICS = ['hits', 'rips', 'zips', 'album_views', 'images', 'thumbs', 'videos', 'checks', 'cgi', 'others', 'megabytes']
+METRICS = ['requests', 'rips', 'zips', 'album_views', 'images', 'megabytes']
 
 def main():
 	keys = get_keys()
-	if 'time' in keys:
-		time = keys['time']
-		if time == 'hourly': get_hourly_graphs('hour')
-		if time == 'daily':  get_daily_graphs('day')
-		if time == 'weekly': get_daily_weekly('week')
-	else:
-		print dumps({'error':'unspecified error'})
+	span = 0        # Number of days to get metrics for
+	time = 'hourly' # Type of metrics to retrieve
+	if 'span' in keys and keys['span'].isdigit(): span = int(keys['span'])
+	if 'time' in keys: time = keys['time']
+	#try:
+	get_graphs(time, span)
+	#except Exception, e:
+	#print dumps({'error' : e})
 
-def get_graphs(time, num=24):
+def get_time_span_period(time, span):
+	if time == 'short': 
+		time = '5min'
+		period = 300 # 5 minutes
+		defaultspan = 8 * 12 # X hours of 5min metrics
+	elif time == 'mid':  
+		time = 'hour'
+		period = 3600 # 1 hour
+		defaultspan = 3 * 24 # X days of 1hour metrics
+	elif time == 'long': 
+		time = 'day'
+		period = 86400 # 1 day
+		defaultspan = 30 # X days of 1day metrics
+	else:
+		raise Exception('Unknown time period: %s' % time)
+	if span == 0:
+		span = defaultspan
+	return (time, span, period)
+
+def get_graphs(time, span):
+	(time, timespan, period) = get_time_span_period(time, span)
+	span = timespan
 	cur = int(strftime('%s', localtime()))
-	t = int(cur / 3600) * 3600 # last hour
-	result = []
-	while num > 0:
-		fname = '%d-hour.log' % t
-		if not path.exists(fname): break
-		r = open(fname, 'r').read().strip()
-		result.append({
-			t : loads(r)
-		})
-		num -= 1
-		t -= 3600
+	#cur = 1380335700 # For testing, TODO remove!
+
+	t = int(cur / period) * period # Get starting point for metrics
+	datas = []
+	missed_count = 0
+	while timespan > 0:
+		fname = path.join('logs', '%d-%s.log' % (t, time)) # Path to log file
+		data = {}
+		if path.exists(fname): 
+			r = open(fname, 'r').read().strip()
+			data = loads(r)
+			missed_count = 0
+		else:
+			data = {}
+			missed_count += 1
+			'''
+			if missed_count > 20:
+				datas.append({'time' : t * 1000})
+				t -= (period * timespan)
+				data['time'] = t * 1000
+				datas.append(data)
+				break
+			'''
+		gmt_offset = int(strftime('%s', gmtime())) - cur # convert to GMT
+		data['time'] = (t + gmt_offset) * 1000 # convert to milliseconds
+		if not 'bytes' in data: data['bytes'] = 0
+		if not 'hits'  in data: data['hits']  = 0
+		data['megabytes'] = data['bytes'] / (1024 * 1024)
+		data['requests'] = data['hits']
+		data.pop('bytes')
+		data.pop('hits')
+		datas.append(data)
+		timespan -= 1
+		t -= period
+	datas.reverse()
+	result = {}
+	result['series'] = format_data(datas)
+	if   period == 300:   timerange = '%d hours' % (span / 12)
+	elif period == 3600:  timerange = '%d days'  % (span / 24)
+	elif period == 86400: timerange = '%d days'  % span
+	result['title'] = 'server statistics for the past %s' % timerange
 	print dumps(result)
+
+''' Convert raw data into highchart format '''
+def format_data(datas):
+	data = group_data(datas)
+	result = []
+	for index,key in enumerate(data.keys()):
+		d = {
+				'name' : key,
+				'data' : data[key],
+				'legendIndex' : index
+			}
+		if key in ['requests', 'megabytes']:
+			d['yAxis'] = 1
+		result.append(d)
+	return result
+
+''' Groups all data into lists of timestamps and metrics '''
+def group_data(datas):
+	result = {}
+	for m in METRICS:
+		result[m] = []
+	for data in datas:
+		for m in METRICS:
+			if m in data:
+				result[m].append( [ data['time'], data[m] ] )
+			else:
+				result[m].append( [ data['time'], 0 ] )
+	return result
 
 """ Retrieves key/value pairs from query, puts in dict """
 def get_keys(): 
