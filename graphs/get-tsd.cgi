@@ -46,6 +46,7 @@ def get_graphs(time, span):
 	#cur = 1380335700 # For testing, TODO remove!
 
 	t = int(cur / period) * period # Get starting point for metrics
+	point_start = (t - (timespan * period)) * 1000
 	datas = []
 	missed_count = 0
 	while timespan > 0:
@@ -58,16 +59,6 @@ def get_graphs(time, span):
 		else:
 			data = {}
 			missed_count += 1
-			'''
-			if missed_count > 20:
-				datas.append({'time' : t * 1000})
-				t -= (period * timespan)
-				data['time'] = t * 1000
-				datas.append(data)
-				break
-			'''
-		gmt_offset = int(strftime('%s', gmtime())) - cur # convert to GMT
-		data['time'] = (t + gmt_offset) * 1000 # convert to milliseconds
 		if not 'bytes' in data: data['bytes'] = 0
 		if not 'hits'  in data: data['hits']  = 0
 		data['megabytes'] = data['bytes'] / (1024 * 1024)
@@ -83,6 +74,8 @@ def get_graphs(time, span):
 	if   period == 300:   timerange = '%d hours' % (span / 12)
 	elif period == 3600:  timerange = '%d days'  % (span / 24)
 	elif period == 86400: timerange = '%d days'  % span
+	result['pointStart'] = point_start
+	result['pointInterval'] = period * 1000
 	result['title'] = 'server statistics for the past %s' % timerange
 	print dumps(result)
 
@@ -108,10 +101,7 @@ def group_data(datas):
 		result[m] = []
 	for data in datas:
 		for m in METRICS:
-			if m in data:
-				result[m].append( [ data['time'], data[m] ] )
-			else:
-				result[m].append( [ data['time'], 0 ] )
+			result[m].append( data.get(m, 0) )
 	return result
 
 """ Retrieves key/value pairs from query, puts in dict """

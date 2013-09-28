@@ -59,6 +59,12 @@ function showGraph($t) {
 							opposite: true,
 							title: null,
 						}],
+						plotOptions: {
+							series: {
+								pointStart: json.pointStart,
+								pointInterval: json.pointInterval,
+							},
+						},
 						series: json.series,
 					})
 			});
