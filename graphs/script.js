@@ -14,22 +14,21 @@ function showGraph($t) {
 	if ($t.attr('expanded') === 'true') {
 		$t.removeAttr('expanded');
 		$t.find('span.arrow').addClass('norotate').removeClass('rotate');
-		console.log('remove',$t.find('span.arrow').length);
 		$t.find('div.graph').slideUp();
 		return;
 	}
 	$t.attr('expanded', 'true')
 	$t.find('span.arrow').addClass('rotate').removeClass('norotate');
-	console.log('add',$t.find('span.arrow').length);
 	$t.find( $('div.graph') )
 		.empty()
 		.css('vertical-align', 'middle')
 		.append( 
 				$('<img />')
+					.addClass('center')
 					.attr('src', '../spinner_dark.gif')
 					.css({ width: '80px', height: '80px'})
 		)
-		.append( $('<div />').html(' rendering...') );
+		.append( $('<div />').html(' loading...') );
 	
 	$t.find('div.graph').slideDown(function() {
 		$.getJSON('get-tsd.cgi?time=' + $t.attr('id'))
@@ -106,9 +105,16 @@ function showGraph($t) {
 								},
 							},
 						},
+						tooltip: {
+							backgroundColor: '#333',
+							borderWidth: '3px',
+							style: {
+								color: '#eee',
+							},
+						},
 						credits: {
 							enabled: true,
-							text: 'all times in PST',
+							text: 'data is in ' + (json.interval == '5min' ? '5min' : '1 ' + json.interval) + ' intervals. all times in PST',
 							href: null,
 							style: {
 								color: '#eee',

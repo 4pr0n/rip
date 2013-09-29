@@ -46,7 +46,7 @@ def get_graphs(time, span):
 	#cur = 1380335700 # For testing, TODO remove!
 
 	t = int(cur / period) * period # Get starting point for metrics
-	point_start = (t - (timespan * period)) * 1000
+	point_start = (t - ( (timespan - 1) * period)) * 1000
 	datas = []
 	missed_count = 0
 	while timespan > 0:
@@ -68,6 +68,8 @@ def get_graphs(time, span):
 		datas.append(data)
 		timespan -= 1
 		t -= period
+	if time == '5min':
+		datas.pop(0) # Remove last datapoint for 5min intervals (not stable)
 	datas.reverse()
 	result = {}
 	result['series'] = format_data(datas)
@@ -78,6 +80,7 @@ def get_graphs(time, span):
 	result['pointInterval'] = period * 1000
 	result['title'] = 'server statistics for the past %s' % timerange
 	result['timespan'] = timerange
+	result['interval'] = time
 	print dumps(result)
 
 ''' Convert raw data into highchart format '''
