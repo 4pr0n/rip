@@ -7,7 +7,7 @@ from time import strftime, localtime, gmtime
 from os   import path, listdir
 
 #METRICS = ['hits', 'rips', 'zips', 'album_views', 'images', 'thumbs', 'videos', 'checks', 'cgi', 'others', 'megabytes']
-METRICS = ['requests', 'rips', 'zips', 'album_views', 'images', 'megabytes']
+METRICS = ['requests', 'rips', 'zips', 'album_views', 'images', 'megabytes', '404', 'err', 'ban']
 
 def main():
 	keys = get_keys()

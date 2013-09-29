@@ -10,6 +10,7 @@ LOG_FILE = open('.LOG_FILE', 'r').read().strip() # ~/logs/<site>/http/access.log
 # Breaks log line into separate fields, preserving quoted sections
 def split_fields(line):
 	line = line.replace('\n', '').strip()
+	line = line.replace('\\"', '')
 	inq = False
 	for i in xrange(0, len(line)):
 		if inq and line[i] == '"':
@@ -24,7 +25,14 @@ def split_fields(line):
 
 # Split line into sections, interpret data, return tuple of fields
 def parse_line(line):
-	(ip, x, y, dt, tz, header, status, size, ref, ua) = split_fields(line)
+	fields = split_fields(line)
+	if len(fields) == 10:
+		(ip, x, y, dt, tz, header, status, size, ref, ua) = fields
+	else:
+		print 'unexpected length of fields: %d' % len(fields)
+		print 'line:\n\n%s\n' % line
+		print 'fields:'
+		for f in fields: print '\t"%s"' % f
 	dt = dt.replace('[', '')
 	epoch = int(mktime(strptime(dt, '%d/%b/%Y:%H:%M:%S')))
 	url = header.split(' ')[1]
@@ -57,7 +65,7 @@ def parse_log(log, data, last_line=None):
 				print 'resuming from line %d' % linenumber
 			# We should parse this line and below
 			(ip, epoch, url, status, size, referer, useragent) = parse_line(line)
-			interpret_data(data, epoch, url, size)
+			interpret_data(data, epoch, url, size, status)
 	except KeyboardInterrupt:
 		print '         \ninterrupted'
 		exit(1)
@@ -81,7 +89,7 @@ def load_data_from_epoch(tstamp, timekey):
 	print 'loaded %s' % fname.replace(STAT_DIR,''),
 	b = loads(r)
 	a = {}
-	for k in ['hits', 'rips', 'zips', 'album_views', 'images', 'thumbs', 'videos', 'checks', 'cgi', 'others', 'bytes']:
+	for k in ['hits', 'rips', 'zips', 'album_views', 'images', 'thumbs', 'videos', 'checks', 'cgi', 'others', 'bytes', 'ban', 'err', '404']:
 		if k in b: 
 			a[k] = b[k]
 			print '%s=%s' % (k, str(b[k]).ljust(4)),
@@ -100,38 +108,42 @@ def save_last_line(last):
 	f.flush()
 	f.close()
 
-def interpret_data(data, epoch, url, size):
+def interpret_data(data, epoch, url, size, status):
 	for tim in data.keys():
 		tstamp = int(epoch / data[tim]['seconds']) * data[tim]['seconds']
 		if not tstamp in data[tim]: data[tim][tstamp] = load_data_from_epoch(tstamp, tim)
-		# Hits
-		data[tim][tstamp]['hits'] = data[tim][tstamp].get('hits', 0) + 1
-		# Bytes
-		data[tim][tstamp]['bytes'] = data[tim][tstamp].get('bytes', 0) + int(size)
-		# Rips
-		if 'url=' in url and '&start=true' in url:
-			data[tim][tstamp]['rips'] = data[tim][tstamp].get('rips', 0) + 1
-		# Zips
-		elif url.endswith('.zip'):
-			data[tim][tstamp]['zips'] = data[tim][tstamp].get('zips', 0) + 1
-		# Album views
-		elif 'start=0' in url and '&view=' in url:
-			data[tim][tstamp]['album_views'] = data[tim][tstamp].get('album_views', 0) + 1
-		# Image views
-		elif '.' in url and url[url.rfind('.'):].lower() in ['.jpg', '.jpeg', '.png', '.gif']:
-			if not '/thumbs/' in url:
-				data[tim][tstamp]['images'] = data[tim][tstamp].get('images', 0) + 1
+
+		if status in ['403']: # User is banned or forbidden
+			data[tim][tstamp]['ban'] = data[tim][tstamp].get('ban', 0) + 1
+
+		elif status in ['404']: # not found
+			data[tim][tstamp]['404'] = data[tim][tstamp].get('404', 0) + 1
+
+		elif status.startswith('5'): # Error!
+			data[tim][tstamp]['err'] = data[tim][tstamp].get('err', 0) + 1
+			
+		elif status in ['200', '206', '304']: # Request is OK, partial, or not-modified
+			data[tim][tstamp]['hits'] = data[tim][tstamp].get('hits', 0) + 1           # Hits
+			data[tim][tstamp]['bytes'] = data[tim][tstamp].get('bytes', 0) + int(size) # Bytes
+			if 'url=' in url and '&start=true' in url:
+				data[tim][tstamp]['rips'] = data[tim][tstamp].get('rips', 0) + 1         # Rips
+			elif url.endswith('.zip'):
+				data[tim][tstamp]['zips'] = data[tim][tstamp].get('zips', 0) + 1         # Zips
+			elif 'start=0' in url and '&view=' in url:
+				data[tim][tstamp]['album_views'] = data[tim][tstamp].get('album_views', 0) + 1       # Album views
+			elif '.' in url and url[url.rfind('.'):].lower() in ['.jpg', '.jpeg', '.png', '.gif']: # Image views
+				if not '/thumbs/' in url:
+					data[tim][tstamp]['images'] = data[tim][tstamp].get('images', 0) + 1  # Full-size images
+				else:
+					data[tim][tstamp]['thumbs'] = data[tim][tstamp].get('thumbs', 0) + 1  # Thumbnails
+			elif '.' in url and url[url.find('.'):].lower() in ['.mp4']:
+				data[tim][tstamp]['videos'] = data[tim][tstamp].get('videos', 0) + 1    # Video views
+			elif '&check=true' in url:
+				data[tim][tstamp]['checks'] = data[tim][tstamp].get('checks', 0) + 1    # Status updates on ongoing rips
+			elif '.cgi' in url:
+				data[tim][tstamp]['cgi'] = data[tim][tstamp].get('cgi', 0) + 1          # CGI requests
 			else:
-				data[tim][tstamp]['thumbs'] = data[tim][tstamp].get('thumbs', 0) + 1
-		# Video views
-		elif '.' in url and url[url.find('.'):].lower() in ['.mp4']:
-			data[tim][tstamp]['videos'] = data[tim][tstamp].get('videos', 0) + 1
-		elif '&check=true' in url:
-			data[tim][tstamp]['checks'] = data[tim][tstamp].get('checks', 0) + 1
-		elif '.cgi' in url:
-			data[tim][tstamp]['cgi'] = data[tim][tstamp].get('cgi', 0) + 1
-		else:
-			data[tim][tstamp]['others'] = data[tim][tstamp].get('others', 0) + 1
+				data[tim][tstamp]['others'] = data[tim][tstamp].get('others', 0) + 1    # Misc
 
 if __name__ == '__main__':
 	data = {
