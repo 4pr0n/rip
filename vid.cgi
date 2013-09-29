@@ -44,7 +44,6 @@ def get_url(siteurl):
 			'videarn.com/'  :  { 'begend' : ["src='",  "'"],        'unquote' : 1 },
 			'youporn.com/'  :  { 'begend' : ['href="', '&amp;'],    'unquote' : 1 },
 			'redtube.com/'  :  { 'begend' : ['&flv_url=', '&'],     'unquote' : 1 },
-			'motherless.com/': { 'begend' : ["__fileurl = '", '"'], 'unquote' : 1 },
 			'vine.co/'      :  { 'begend' : ['source src="', '"'],  'unquote' : 1 },
 		}
 
@@ -70,7 +69,7 @@ def get_url(siteurl):
 	if 'tube8.com' in siteurl: return get_site_tube8(siteurl)
 	if 'drtuber.com' in siteurl: return get_site_drtuber(siteurl)
 	if 'vk.com/video' in siteurl: return get_site_vk(siteurl)
-
+	if 'motherless.com' in siteurl: return get_site_motherless(siteurl)
 
 	site_key = None
 	for key in sites.keys():
@@ -317,6 +316,12 @@ def get_site_vk(siteurl):
 	if highest_res == None:
 		raise Exception('could not find video link url<res>:')
 	return highest_res.replace('\\/', '/').replace('\\\\', '')
+
+def get_site_motherless(siteurl):
+	r = web.get(siteurl)
+	if not "__fileurl = '" in r:
+		raise Exception('could not find __fileurl= at ' % r)
+	return web.between(r, "__fileurl = '", "'")[0]
 
 def is_supported(url):
 	for not_supported in ['youtube.com/']:
