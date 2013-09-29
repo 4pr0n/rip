@@ -109,3 +109,63 @@ div.graph {
 	margin-bottom: 20px;
 	width: auto;
 }
+
+#bottom_bar {
+	background-color: #444;
+	width: 100%;
+	position: fixed;
+	left: 0px;
+	top: 2000px;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	box-shadow: 0px -5px 5px rgba(0, 0, 0, 0.6);
+}
+table.bottom {
+	max-height: 10px;
+	width: auto;
+}
+td.bottom {
+	white-space: nowrap;
+}
+td.donate {
+	text-align: right;
+	width: 99%;
+	padding-right: 20px;
+}
+td.donate:hover {
+	background-color: #444;
+}
+td.bottom_active {
+	background-color: #454;
+}
+td.bottom:hover {
+	background-color: #555;
+}
+a.bottom {
+	text-decoration: none;
+	font-size: 0.8em;
+	font-weight: bold;
+	margin-top: 0px;
+	padding: 10px;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+a.bottom:hover {
+	background-color: #555;
+	text-shadow:  4px  0px 5px rgba(130, 130, 130, 0.9),
+	              0px  4px 5px rgba(130, 130, 130, 0.9),
+	             -4px  0px 5px rgba(130, 130, 130, 0.9),
+	              0px -4px 5px rgba(130, 130, 130, 0.9);
+	text-decoration: none;
+}
+
+div.donate_button input {
+	background: transparent url(donate.png);
+	cursor: pointer;
+	width:  92px;
+	height: 26px;
+	border: none;
+}
+div.donate_button input:hover {
+	background: transparent url(donate_color.png);
+}

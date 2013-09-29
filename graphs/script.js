@@ -1,4 +1,5 @@
 function init() {
+	handleResize();
 	$('table#short').click(function() {
 		showGraph( $(this) )
 	});
@@ -8,6 +9,7 @@ function init() {
 	$('table#long').click(function() {
 		showGraph( $(this) )
 	});
+	$('table#short').click();
 }
 
 function showGraph($t) {
@@ -57,9 +59,11 @@ function showGraph($t) {
 						legend: {
 							itemStyle: {
 								color: '#ddd',
+								fontFamily: 'Verdana, monospace',
 							},
 							itemHoverStyle: {
 								color: '#fff',
+								fontFamily: 'Verdana, monospace',
 							}
 						},
 						title: {
@@ -75,6 +79,7 @@ function showGraph($t) {
 							labels: {
 								style: {
 									color: '#eee',
+									fontFamily: 'Verdana, monospace',
 								},
 							},
 						},
@@ -84,6 +89,7 @@ function showGraph($t) {
 							labels: {
 								style: {
 									color: '#eee',
+									fontFamily: 'Verdana, monospace',
 								},
 							},
 						},{
@@ -93,6 +99,7 @@ function showGraph($t) {
 							labels: {
 								style: {
 									color: '#eee',
+									fontFamily: 'Verdana, monospace',
 								},
 							},
 						}],
@@ -102,6 +109,7 @@ function showGraph($t) {
 								pointInterval: json.pointInterval,
 								style: {
 									backgroundColor: '#888',
+									fontFamily: 'Verdana, monospace',
 								},
 							},
 						},
@@ -110,6 +118,7 @@ function showGraph($t) {
 							borderWidth: '3px',
 							style: {
 								color: '#eee',
+								fontFamily: 'Verdana, monospace',
 							},
 						},
 						credits: {
@@ -118,6 +127,7 @@ function showGraph($t) {
 							href: null,
 							style: {
 								color: '#eee',
+								fontFamily: 'Verdana, monospace',
 							},
 						},
 						series: json.series,
@@ -125,5 +135,14 @@ function showGraph($t) {
 			});
 	});
 }
+
+function handleResize() {
+	var $bb = $('#bottom_bar');
+	var t = $(window).height() - $bb.height();
+	$bb.css('top',  t + 'px');
+}
+$(window).resize(function() {
+	handleResize
+});
 
 $(document).ready( init() );
