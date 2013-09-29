@@ -70,6 +70,7 @@ def get_url(siteurl):
 	if 'drtuber.com' in siteurl: return get_site_drtuber(siteurl)
 	if 'vk.com/video' in siteurl: return get_site_vk(siteurl)
 	if 'motherless.com' in siteurl: return get_site_motherless(siteurl)
+	if 'seenive.com' in siteurl: return get_site_seenive(siteurl)
 
 	site_key = None
 	for key in sites.keys():
@@ -320,8 +321,14 @@ def get_site_vk(siteurl):
 def get_site_motherless(siteurl):
 	r = web.get(siteurl)
 	if not "__fileurl = '" in r:
-		raise Exception('could not find __fileurl= at ' % r)
+		raise Exception('could not find __fileurl= at ' % siteurl)
 	return web.between(r, "__fileurl = '", "'")[0]
+
+def get_site_seenive(siteurl):
+	r = web.get(siteurl)
+	if not 'source src="' in r:
+		raise Exception('could not find source src= at %s' % siteurl)
+	return web.between(r, 'source src="', '"')[0]
 
 def is_supported(url):
 	for not_supported in ['youtube.com/']:
