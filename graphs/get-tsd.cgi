@@ -24,7 +24,7 @@ def get_time_span_period(time, span):
 	if time == 'short': 
 		time = '5min'
 		period = 300 # 5 minutes
-		defaultspan = 8 * 12 # X hours of 5min metrics
+		defaultspan = 6 * 12 # X hours of 5min metrics
 	elif time == 'mid':  
 		time = 'hour'
 		period = 3600 # 1 hour
@@ -71,12 +71,13 @@ def get_graphs(time, span):
 	datas.reverse()
 	result = {}
 	result['series'] = format_data(datas)
-	if   period == 300:   timerange = '%d hours' % (span / 12)
-	elif period == 3600:  timerange = '%d days'  % (span / 24)
-	elif period == 86400: timerange = '%d days'  % span
+	if   period == 300:   timerange = '%dH' % (span / 12)
+	elif period == 3600:  timerange = '%dD'  % (span / 24)
+	elif period == 86400: timerange = '%dD'  % span
 	result['pointStart'] = point_start
 	result['pointInterval'] = period * 1000
 	result['title'] = 'server statistics for the past %s' % timerange
+	result['timespan'] = timerange
 	print dumps(result)
 
 ''' Convert raw data into highchart format '''
