@@ -13,16 +13,17 @@ function init() {
 function showGraph($t) {
 	if ($t.attr('expanded') === 'true') {
 		$t.removeAttr('expanded');
-		$t.find('h1').html('&#x25BC; ' + $t.attr('id') + '-term stats');
+		$t.find('span.arrow').addClass('norotate').removeClass('rotate');
+		console.log('remove',$t.find('span.arrow').length);
 		$t.find('div.graph').slideUp();
 		return;
 	}
-	$t
-		.attr('expanded', 'true')
-		.find('h1').html('&#x25B2; ' + $t.attr('id') + '-term stats')
+	$t.attr('expanded', 'true')
+	$t.find('span.arrow').addClass('rotate').removeClass('norotate');
+	console.log('add',$t.find('span.arrow').length);
 	$t.find( $('div.graph') )
 		.empty()
-		.css('vertical-align', 'center')
+		.css('vertical-align', 'middle')
 		.append( 
 				$('<img />')
 					.attr('src', '../spinner_dark.gif')
