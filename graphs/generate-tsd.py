@@ -3,8 +3,10 @@
 from sys import stdout
 from time import mktime, strptime, strftime, localtime
 from json import dumps, loads
-STAT_DIR = open('.STAT_DIR', 'r').read().strip()
-LOG_FILE = open('.LOG_FILE', 'r').read().strip()
+
+STAT_DIR = open('.STAT_DIR', 'r').read().strip() # logs
+LOG_FILE = open('.LOG_FILE', 'r').read().strip() # ~/logs/<site>/http/access.log
+LAST_LOG = open('.LAST_LOG', 'r').read().strip() # ~/logs/<site>/http/access.log.0
 
 # Breaks log line into separate fields, preserving quoted sections
 def split_fields(line):
@@ -31,13 +33,7 @@ def parse_line(line):
 	return (ip, epoch, url, status, size, ref, ua)
 
 # Read log file, return dict containing all information about the log
-def parse_log(log):
-	data = {
-			'day'  : {'seconds' : 86400},
-			'hour' : {'seconds' : 3600},
-			'5min' : {'seconds' : 300},
-			#'1min' : {}
-		}
+def parse_log(log, data):
 	try:
 		last_line = load_last_line()
 		print 'last line: %s...' % last_line[:30]
@@ -47,9 +43,9 @@ def parse_log(log):
 	almost_there = there_yet = False
 	try:
 		for linenumber, line in enumerate(open(log, 'r')):
-			if linenumber % 251 == 0:
-				stdout.write('\r%d\r' % linenumber)
-				stdout.flush()
+			#if linenumber % 251 == 0:
+			#	stdout.write('\r%d\r' % linenumber)
+			#	stdout.flush()
 			if not there_yet:
 				if last_line == '' or not almost_there and last_line in line:
 					almost_there = True
@@ -65,8 +61,8 @@ def parse_log(log):
 	except KeyboardInterrupt:
 		print '         \ninterrupted'
 		pass
-	save_last_line(line)
-	return data
+	if there_yet:
+		save_last_line(line)
 
 def load_data_from_epoch(tstamp, timekey):
 	stime = strftime('%s', localtime(tstamp))
@@ -133,7 +129,14 @@ def interpret_data(data, epoch, url, size):
 			data[tim][tstamp]['others'] = data[tim][tstamp].get('others', 0) + 1
 
 if __name__ == '__main__':
-	data = parse_log(LOG_FILE)
+	data = {
+			'day'  : {'seconds' : 86400},
+			'hour' : {'seconds' : 3600},
+			'5min' : {'seconds' : 300},
+			#'1min' : {}
+		}
+	parse_log(LAST_LOG, data)
+	parse_log(LOG_FILE, data)
 	for timekey in data.keys():
 		for k in sorted(data[timekey].keys()):
 			if k == 'seconds': continue
