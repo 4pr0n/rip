@@ -155,6 +155,7 @@ def rip(url, cached, urls_only):
 	# Rip it
 	try:
 		ripper.download()
+		ripper.wait_for_threads()
 	except Exception, e:
 		print_error('download failed: %s' % str(e))
 		return
