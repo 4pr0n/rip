@@ -1,12 +1,11 @@
 #!/usr/bin/python
 
-from sys import stdout
+from sys import stdout, exit
 from time import mktime, strptime, strftime, localtime
 from json import dumps, loads
 
 STAT_DIR = open('.STAT_DIR', 'r').read().strip() # logs
 LOG_FILE = open('.LOG_FILE', 'r').read().strip() # ~/logs/<site>/http/access.log
-LAST_LOG = open('.LAST_LOG', 'r').read().strip() # ~/logs/<site>/http/access.log.0
 
 # Breaks log line into separate fields, preserving quoted sections
 def split_fields(line):
@@ -33,13 +32,14 @@ def parse_line(line):
 	return (ip, epoch, url, status, size, ref, ua)
 
 # Read log file, return dict containing all information about the log
-def parse_log(log, data):
-	try:
-		last_line = load_last_line()
-		print 'last line: %s...' % last_line[:30]
-	except Exception, e:
-		print 'exception %s' % str(e)
-		last_line = ''
+def parse_log(log, data, last_line=None):
+	if last_line == None:
+		try:
+			last_line = load_last_line()
+			print 'last line: %s...' % last_line[:30]
+		except Exception, e:
+			print 'exception %s' % str(e)
+			last_line = ''
 	almost_there = there_yet = False
 	try:
 		for linenumber, line in enumerate(open(log, 'r')):
@@ -55,14 +55,19 @@ def parse_log(log, data):
 			if almost_there:
 				almost_there = False
 				print 'resuming from line %d' % linenumber
-			# We should log this line and below
+			# We should parse this line and below
 			(ip, epoch, url, status, size, referer, useragent) = parse_line(line)
 			interpret_data(data, epoch, url, size)
 	except KeyboardInterrupt:
 		print '         \ninterrupted'
-		pass
+		exit(1)
+
 	if there_yet:
-		save_last_line(line)
+		# We found our checkpoint and parsed logs, save the last line as the checkpoint
+		save_last_line(line) 
+	else:
+		# We didn't find the checkpoint, start over with brand-new log file
+		parse_log(log, data, last_line='') 
 
 def load_data_from_epoch(tstamp, timekey):
 	stime = strftime('%s', localtime(tstamp))
@@ -133,9 +138,7 @@ if __name__ == '__main__':
 			'day'  : {'seconds' : 86400},
 			'hour' : {'seconds' : 3600},
 			'5min' : {'seconds' : 300},
-			#'1min' : {}
 		}
-	parse_log(LAST_LOG, data)
 	parse_log(LOG_FILE, data)
 	for timekey in data.keys():
 		for k in sorted(data[timekey].keys()):
