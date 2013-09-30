@@ -18,6 +18,6 @@ class ThreadedHTTPServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
 
 if __name__ == '__main__':
 	httpd = ThreadedHTTPServer(("", PORT), Handler)
-    print 'Starting server, use <Ctrl-C> to stop'
+        print 'Starting server, use <Ctrl-C> to stop'
 	print "serving at port", PORT
 	httpd.serve_forever()
