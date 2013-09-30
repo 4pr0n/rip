@@ -41,9 +41,12 @@ class seenive(basesite):
 				else:
 					saveas = link[link.rfind('/')+1:]
 					saveas = saveas[:saveas.find('_')] + '.mp4'
+					saveas = '%03d_%s' % (index, saveas)
 					self.download_image(link, index, total=total, saveas=saveas)
 				if self.hit_image_limit(): break
 			last_posts = self.web.between(r, 'postFeed.lastPostId = "', '"')
+			if len(last_posts) == 0:
+				last_posts = self.web.between(r, '"LastPostId":"', '"')
 			if len(last_posts) == 0: break
 			r = self.web.get('%s/next/%s' % (self.url, last_posts[0]))
 			r = r.replace('\\"', '"')
