@@ -7,6 +7,7 @@ from threading import Thread
 from zipfile   import ZipFile, ZIP_DEFLATED
 from Web       import Web
 from shutil    import rmtree
+from commands  import getstatusoutput
 
 # Try to import Python Image Library
 try:
@@ -273,6 +274,9 @@ class basesite(object):
 		Creates /thumbs/ sub dir & stores thumbnail
 	"""
 	def create_thumb(self, inp):
+		if inp.lower().endswith('.mp4'):
+			self.create_video_thumb(inp)
+			return
 		if Image == None:
 			sys.stderr.write('Python Image Library (PIL) not installed; unable to create thumbnail for %s\n' % inp)
 			sys.stderr.write('Go to http://www.pythonware.com/products/pil/ to install PIL\n')
@@ -293,7 +297,37 @@ class basesite(object):
 			im.save(saveas, 'JPEG')
 			del im
 		except: pass
-		
+	
+	def create_video_thumb(self, inp):
+		fields = inp.split(os.sep)
+		fields.insert(-1, 'thumbs')
+		saveas = os.sep.join(fields)
+		saveas = saveas[:saveas.rfind('.')] + '.png'
+		thumbpath = os.sep.join(fields[:-1])
+		if not os.path.exists(thumbpath):
+			try: os.mkdir(thumbpath)
+			except: pass
+		overlay = 'play_overlay.png'
+
+		ffmpeg = '/usr/bin/ffmpeg'
+		if not os.path.exists(ffmpeg):
+			ffmpeg = '/opt/local/bin/ffmpeg'
+			if not os.path.exists(ffmpeg):
+				return # Can't get images if we can't find ffmpeg
+		cmd = ffmpeg
+		cmd += ' -i "'
+		cmd += inp
+		cmd += '" -vf \'movie='
+		cmd += overlay
+		cmd += ' [watermark]; '
+		cmd += '[in]scale=200:200 [scale]; '
+		cmd += '[scale][watermark] overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2 [out]\' '
+		cmd += saveas
+		try:
+			(s, o) = getstatusoutput(cmd)
+		except:
+			pass
+			
 	"""
 		Add url to list of URLs found. For "URLs Only" feature
 	"""

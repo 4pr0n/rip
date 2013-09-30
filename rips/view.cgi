@@ -507,7 +507,13 @@ def get_thumb(img): # Get thumbnail based on image, or 'nothumb.png' if not foun
 	fs.insert(-1, 'thumbs')
 	f = sep.join(fs)
 	if f.endswith('.mp4'):
-		return 'playthumb.png'
+		fname = fs.pop(-1).replace('.mp4', '.png')
+		fs.append(fname)
+		f = sep.join(fs)
+		if path.exists(f):
+			return f
+		else:
+			return 'playthumb.png'
 	if f.endswith('.html'):
 		return 'albumthumb.png'
 	if not path.exists(f.replace('%25', '%')):
@@ -536,6 +542,7 @@ def update_file_modified(f): # Sets system 'modified time' to current time
 	return True
 
 def is_admin(): # True if user's IP is in the admin list
+	if not 'REMOTE_ADDR' in environ: environ['REMOTE_ADDR'] = '127.0.0.1'
 	user = environ['REMOTE_ADDR']
 	f = open('../admin_ip.txt', 'r')
 	ips = f.read().split('\n')

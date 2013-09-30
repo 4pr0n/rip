@@ -47,6 +47,7 @@ from sites.site_8muses      import  eightmuses
 from sites.site_setsdb      import      setsdb
 from sites.site_nfsfw       import       nfsfw
 from sites.site_shareimage  import  shareimage
+from sites.site_seenive     import     seenive
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -89,7 +90,7 @@ def main():
 		recent(lines)
 	elif 'byuser' in keys:
 		ip = keys['byuser']
-		if ip == 'me': ip = environ['REMOTE_ADDR']
+		if ip == 'me': ip = environ.get('REMOTE_ADDR', '127.0.0.1')
 		albums_by_ip(ip)
 	
 	else:
@@ -167,7 +168,7 @@ def rip(url, cached, urls_only):
 	
 	# Save IP of ripper
 	f = open('%s%sip.txt' % (ripper.working_dir, sep), 'w')
-	f.write(environ["REMOTE_ADDR"])
+	f.write(environ.get('REMOTE_ADDR', '127.0.0.1'))
 	f.close()
 	
 	response = {}
@@ -286,7 +287,8 @@ def get_ripper(url, urls_only):
 			eightmuses,  \
 			setsdb,      \
 			nfsfw,       \
-			shareimage]
+			shareimage,  \
+			seenive]
 	for site in sites:
 		try:
 			ripper = site(url, urls_only)
