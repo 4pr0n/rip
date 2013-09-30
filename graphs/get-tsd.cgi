@@ -7,7 +7,17 @@ from time import strftime, localtime, gmtime
 from os   import path, listdir
 
 #METRICS = ['hits', 'rips', 'zips', 'album_views', 'images', 'thumbs', 'videos', 'checks', 'cgi', 'others', 'megabytes']
-METRICS = ['requests', 'rips', 'zips', 'album_views', 'images', 'megabytes', '404', 'err', 'ban']
+METRICS = {
+	'requests'    : 'requests',
+	'rips'        : 'album rips',
+	'zips'        : 'zip downloads',
+	'album_views' : 'album views',
+	'images'      : 'image views',
+	'megabytes'   : 'mb downloaded',
+	'404'         : 'error: 404',
+	'err'         : 'error: 5xx',
+	'ban'         : 'error: 403'
+}
 
 def main():
 	keys = get_keys()
@@ -93,7 +103,7 @@ def format_data(datas):
 				'data' : data[key],
 				'legendIndex' : index
 			}
-		if key in ['requests', 'megabytes']:
+		if key in ['requests', 'mb downloaded']:
 			d['yAxis'] = 1
 		result.append(d)
 	return result
@@ -101,11 +111,11 @@ def format_data(datas):
 ''' Groups all data into lists of timestamps and metrics '''
 def group_data(datas):
 	result = {}
-	for m in METRICS:
-		result[m] = []
+	for m in METRICS.keys():
+		result[METRICS[m]] = []
 	for data in datas:
-		for m in METRICS:
-			result[m].append( data.get(m, 0) )
+		for m in METRICS.keys():
+			result[METRICS[m]].append( data.get(m, 0) )
 	return result
 
 """ Retrieves key/value pairs from query, puts in dict """

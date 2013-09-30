@@ -44,7 +44,17 @@ function showGraph($t) {
 				$t.find('div.graph')
 					.slideDown()
 					.highcharts({
-						colors: [ '#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'],
+						colors: [ 
+							'#5c3317', // Error
+							'black',   // Ban
+							'red',     // Rips
+							'orange',  // Images
+							'yellow',  // 404
+							'lime',    // megabytes
+							'blue',    // zips
+							'violet',  // album_views
+							'cyan',    // requests
+						],
 						chart: {
 							type: 'line',
 							borderRadius:    '20px',
