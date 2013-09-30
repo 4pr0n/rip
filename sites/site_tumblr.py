@@ -25,8 +25,8 @@ class tumblr(basesite):
 			raise Exception('')
 		if 'www.tumblr.com' in url:
 			raise Exception('Required user.tumblr.com format')
-		if not '/tagged/' in url:
-			raise Exception('Tumblr rip required /tagged/ in URL')
+		# if not '/tagged/' in url:
+		#	raise Exception('Tumblr rip required /tagged/ in URL')
 		return url
 
 	""" Discover directory path based on URL """
@@ -64,6 +64,7 @@ class tumblr(basesite):
 			tag = url[url.find('/tagged/')+len('/tagged/'):]
 			if '/' in tag: tag = tag[:tag.find('/')]
 			tag = tag.replace('-', '+')
+			tag = tag.replace('_', '%20')
 			turl += '&tag=%s' % tag
 		return turl
 
