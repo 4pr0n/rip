@@ -304,8 +304,9 @@ def get_ripper(url, urls_only):
 """ Updates system 'modified time' for file to current time. """
 def update_file_modified(f):
 	st = stat(f)
-	atime = int(strftime('%s'))
-	mtime = int(strftime('%s'))
+	from time import time
+	atime = int(time())
+	mtime = int(time())
 	try:
 		utime(f, (atime, mtime))
 	except: pass
