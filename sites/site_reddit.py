@@ -31,7 +31,7 @@ class reddit(imgur):
 		total = 0
 		while True:
 			url = '%s/submitted.json%s' % (self.url, params)
-			self.debug(url)
+			self.log('loading %s' % url)
 			r = self.web.get(url)
 			try: json = loads(r)
 			except: break
@@ -68,10 +68,9 @@ class reddit(imgur):
 					self.download_image(url, index, total=total, saveas=saveas)
 				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
-			count = len(children)
 			after = json['data']['after']
-			if count == 0 or after == None: break
-			params = '?count=%d&after=%s' % (count, after)
+			if total == 0 or after == None: break
+			params = '?total=%d&after=%s' % (total, after)
 			sleep(2)
 		self.wait_for_threads()
 	
