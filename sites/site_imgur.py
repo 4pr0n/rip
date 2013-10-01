@@ -140,7 +140,7 @@ class imgur(basesite):
 		self.wait_for_threads()
 
 	''' Download imgur album using /noscript method '''
-	def download_album(self, album):
+	def download_album(self, album, postid=''):
 		# Get album source
 		r = self.web.get('%s/noscript' % album)
 		# Get images
@@ -154,7 +154,11 @@ class imgur(basesite):
 			if self.urls_only:
 				self.add_url(index + 1, link, total=len(links))
 			else:
-				self.download_image(link, index + 1, total=len(links)) 
+				fname = link[link.rfind('/')+1:]
+				if '?' in fname: fname = fname[:fname.find('?')]
+				if '#' in fname: fname = fname[:fname.find('#')]
+				saveas = '%s%03d_%s' % (postid, index + 1, fname)
+				self.download_image(link, index + 1, total=len(links), saveas=saveas)
 				if self.hit_image_limit(): break
 		self.wait_for_threads()
 	
@@ -169,7 +173,7 @@ class imgur(basesite):
 		return ''.join(escaped)
 	
 	''' Download imgur album using API/json request '''
-	def download_album_json(self, album):
+	def download_album_json(self, album, postid=''):
 		aid = album[album.find('/a/')+len('/a/'):]
 		if '/' in aid: aid = aid[:aid.find('/')]
 		r = self.web.get('http://api.imgur.com/2/album/%s.json' % aid)
@@ -188,6 +192,12 @@ class imgur(basesite):
 		alb = json['album']
 		if not 'images' in alb: return
 		captions = []
+		header = ''
+		if 'title' in json and json['title'] != None:
+			header += 'title: %s\n' % self.safe_text(json['title'])
+		if 'description' in json and json['description'] != None:
+			header += 'description: %s\n' % self.safe_text(json['description'])
+			
 		total = len(alb['images'])
 		for index, image in enumerate(alb['images']):
 			# Image
@@ -201,12 +211,19 @@ class imgur(basesite):
 			if self.urls_only:
 				self.add_url(index + 1, url, total=total)
 			else:
-				self.download_image(url, index + 1, total=total) 
+				fname = url[url.rfind('/')+1:]
+				if '?' in fname: fname = fname[:fname.find('?')]
+				if '#' in fname: fname = fname[:fname.find('#')]
+				saveas = '%s%03d_%s' % (postid, index + 1, fname)
+				self.download_image(url, index + 1, total=total, saveas=saveas)
 				if self.hit_image_limit(): break
-		if captions != []:
-			f = open('%s/captions.txt' % self.working_dir, 'w')
+		if header != '' or captions != []:
+			f = open('%s/%scaptions.txt' % (self.working_dir, postid), 'w')
+			if header != '':
+				f.write(header)
+				f.write('\n')
 			for meta in captions:
-				f.write('url: %s\n  title: "%s"\n  caption: "%s"\n\n' % (meta[0], meta[1], meta[2]))
+				f.write('image url: %s\n  title: "%s"\n  caption: "%s"\n\n' % (meta[0], meta[1], meta[2]))
 			f.close()
 		
 	def download_subreddit(self, album):

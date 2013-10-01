@@ -41,13 +41,14 @@ class reddit(imgur):
 			total += len(children)
 			for child in children:
 				url = child['data']['url']
+				postid = child['data']['id'] + '-' # to separate postid from index
 				index += 1
 				if not 'imgur.com' in url: continue
 				url = url.replace('/m.imgur.com/', '/imgur.com/')
 				if '#' in url: url = url[:url.find('#')]
 				if '?' in url: url = url[:url.find('?')]
 				if 'imgur.com/a/' in url:
-					self.download_album_json(url)
+					self.download_album_json(url, postid=postid)
 				else:
 					if not 'i.imgur.com' in url and not (url[-4] == '.' or url[-5] == '.'):
 						# Need to get direct link to image
@@ -60,7 +61,11 @@ class reddit(imgur):
 						except: continue
 						if not 'image' in ijs or not 'links' in ijs['image'] or not 'original' in ijs['image']['links']: continue
 						url = ijs['image']['links']['original']
-					self.download_image(url, index, total=total)
+					fname = url[url.rfind('/')+1:]
+					if '?' in fname: fname = fname[:fname.find('?')]
+					if '#' in fname: fname = fname[:fname.find('#')]
+					saveas = '%s%03d_%s' % (postid, index, fname)
+					self.download_image(url, index, total=total, saveas=saveas)
 				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
 			count = len(children)
