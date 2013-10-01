@@ -27,6 +27,7 @@ class reddit(imgur):
 	def download(self):
 		self.init_dir()
 		params = ''
+		already_downloaded = []
 		index = 0
 		total = 0
 		while True:
@@ -44,11 +45,17 @@ class reddit(imgur):
 				postid = child['data']['id'] + '-' # to separate postid from index
 				index += 1
 				if not 'imgur.com' in url: continue
-				url = url.replace('/m.imgur.com/', '/imgur.com/')
 				if '#' in url: url = url[:url.find('#')]
 				if '?' in url: url = url[:url.find('?')]
+				while url[url.find('/a/')+3:].count('/') > 0:
+					url = url[:url.rfind('/')]
 				if 'imgur.com/a/' in url:
-					self.download_album_json(url, postid=postid)
+					aid = url[url.rfind('/')+1:]
+					if not aid in already_downloaded:
+						already_downloaded.append(aid)
+						self.download_album_json(url, postid=postid)
+					else:
+						self.log('already downloaded %s' % url)
 				else:
 					if not 'i.imgur.com' in url and not (url[-4] == '.' or url[-5] == '.'):
 						# Need to get direct link to image
@@ -64,8 +71,12 @@ class reddit(imgur):
 					fname = url[url.rfind('/')+1:]
 					if '?' in fname: fname = fname[:fname.find('?')]
 					if '#' in fname: fname = fname[:fname.find('#')]
-					saveas = '%s%03d_%s' % (postid, index, fname)
-					self.download_image(url, index, total=total, saveas=saveas)
+					if not fname in already_downloaded:
+						already_downloaded.append(fname)
+						saveas = '%s%03d_%s' % (postid, index, fname)
+						self.download_image(url, index, total=total, saveas=saveas)
+					else:
+						self.log('already downloaded %s' % url)
 				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
 			after = json['data']['after']
