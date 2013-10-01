@@ -107,6 +107,7 @@ class imgur(basesite):
 		else:
 			# Account-level album
 			self.download_account(self.url)
+		self.wait_for_threads()
 	
 	def text_to_fs_safe(self, text):
 		safe = 'abcdefghijklmnopqrstuvwxyz0123456789-_ &()'
@@ -123,21 +124,14 @@ class imgur(basesite):
 		for index, cover in enumerate(covers):
 			url = self.web.between(cover, '<a href="', '"')[0]
 			url = 'http:%s' % url
-			alts = self.web.between(cover, 'alt="', '"')
-			if len(alts) > 0:
-				alt = alts[0].replace('"', '').replace('/', '').replace('\\', '')
-			else: 
-				alt = 'untitled'
-			alt = self.text_to_fs_safe(alt)
+			postid = url[url.rfind('/')+1:]
+			if '?' in postid: postid = postid[:postid.find('?')]
+			if '#' in postid: postid = postid[:postid.find('#')]
+			postid = '%03d_%s-' % (index + 1, postid)
 			prev_dir = self.working_dir
-			self.working_dir += '/%03d_%s' % (index + 1, alt)
-			if not path.exists(self.working_dir):
-				mkdir(self.working_dir)
-			self.log('downloading album (%d/%d) "%s"' % (index + 1, len(covers), alt))
-			self.download_album_json(url)
-			self.working_dir = prev_dir
+			self.log('downloading album (%d/%d) - %s' % (index + 1, len(covers), url))
+			self.download_album_json(url, postid=postid)
 			if self.hit_image_limit(): break
-		self.wait_for_threads()
 
 	''' Download imgur album using /noscript method '''
 	def download_album(self, album, postid=''):
@@ -160,7 +154,6 @@ class imgur(basesite):
 				saveas = '%s%03d_%s' % (postid, index + 1, fname)
 				self.download_image(link, index + 1, total=len(links), saveas=saveas)
 				if self.hit_image_limit(): break
-		self.wait_for_threads()
 	
 	''' Escape text '''
 	def safe_text(self, text):
@@ -262,7 +255,6 @@ class imgur(basesite):
 					if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
 			page += 1
-		self.wait_for_threads()
 	
 	def get_filetype(self, url):
 		m = self.web.get_meta(url)
