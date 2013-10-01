@@ -344,6 +344,8 @@ def cliphunt_decrypt(txt):
 	return result
 
 def get_site_cliphunter(siteurl):
+	if 'm.cliphunter.com' in siteurl:
+		siteurl = siteurl.replace('m.cliphunter.com', 'cliphunter.com')
 	r = web.get(siteurl)
 	if not "var flashVars = {d: '" in r:
 		raise Exception('could not find flashVars at %s' % siteurl)
