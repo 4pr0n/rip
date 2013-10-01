@@ -179,7 +179,9 @@ function getCookie(key) { // Retrieves cookie
 }
 
 function getQueryString(start) { // Gets URL for backend album rip
-	var url = escape($('#rip_text').val());
+	// var url = escape($('#rip_text').val());
+	// because python CGI doesn't like // in the url
+	var url = encodeURIComponent($('#rip_text').val());
 	var query = 'rip.cgi?url=' + url;
 	if (start == true) {
 		query += '&start=true';

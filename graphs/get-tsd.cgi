@@ -3,7 +3,8 @@
 import cgi, cgitb; cgitb.enable()
 
 from json import loads, dumps
-from time import strftime, localtime, gmtime
+from time import localtime, gmtime
+import time as tim # you used time as a variable! :(
 from os   import path, listdir
 
 #METRICS = ['hits', 'rips', 'zips', 'album_views', 'images', 'thumbs', 'videos', 'checks', 'cgi', 'others', 'megabytes']
@@ -52,7 +53,7 @@ def get_time_span_period(time, span):
 def get_graphs(time, span):
 	(time, timespan, period) = get_time_span_period(time, span)
 	span = timespan
-	cur = int(strftime('%s', localtime()))
+	cur = int(tim.time())
 	#cur = 1380335700 # For testing, TODO remove!
 
 	t = int(cur / period) * period # Get starting point for metrics
