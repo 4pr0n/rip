@@ -47,30 +47,31 @@ def get_url(siteurl):
 			'vine.co/'      :  { 'begend' : ['source src="', '"'],  'unquote' : 1 },
 		}
 
-	if 'beeg.com' in siteurl: return get_site_beeg(siteurl)
-	if 'xvideos.com/' in siteurl: return get_site_xvideos(siteurl)
-	if 'fapmenow.com/' in siteurl: return get_site_fapmenow(siteurl)
-	if 'vimeo.com/' in siteurl: return get_site_vimeo(siteurl)
-	if 'tumblr.com/' in siteurl: return get_site_tumblr(siteurl)
-	if '4tube.com/' in siteurl: return get_site_4tube(siteurl)
-	if 'xtube.com' in siteurl: return get_site_xtube(siteurl)
-	if 'youjizz.com' in siteurl: return get_site_youjizz(siteurl)
-	if 'dailymotion.com' in siteurl: return get_site_dailymotion(siteurl)
-	if 'mobypicture.com' in siteurl: return get_site_mobypicture(siteurl)
-	if 'sexykarma.com' in siteurl: return get_site_sexykarma(siteurl)
-	if 'fapjacks.com' in siteurl: return get_site_fapjacks(siteurl)
-	if 'setsdb.org' in siteurl: return get_site_setsdb(siteurl)
+	if 'beeg.com'         in siteurl: return get_site_beeg(siteurl)
+	if 'xvideos.com/'     in siteurl: return get_site_xvideos(siteurl)
+	if 'fapmenow.com/'    in siteurl: return get_site_fapmenow(siteurl)
+	if 'vimeo.com/'       in siteurl: return get_site_vimeo(siteurl)
+	if 'tumblr.com/'      in siteurl: return get_site_tumblr(siteurl)
+	if '4tube.com/'       in siteurl: return get_site_4tube(siteurl)
+	if 'xtube.com'        in siteurl: return get_site_xtube(siteurl)
+	if 'youjizz.com'      in siteurl: return get_site_youjizz(siteurl)
+	if 'dailymotion.com'  in siteurl: return get_site_dailymotion(siteurl)
+	if 'mobypicture.com'  in siteurl: return get_site_mobypicture(siteurl)
+	if 'sexykarma.com'    in siteurl: return get_site_sexykarma(siteurl)
+	if 'fapjacks.com'     in siteurl: return get_site_fapjacks(siteurl)
+	if 'setsdb.org'       in siteurl: return get_site_setsdb(siteurl)
 	if 'ashemaletube.com' in siteurl: return get_site_ast(siteurl)
-	if 'spankbang.com' in siteurl: return get_site_spankbang(siteurl)
-	if 'fapdu.com' in siteurl: return get_site_fapdu(siteurl)
-	if 'pornably.com' in siteurl: return get_site_pornably(siteurl)
-	if 'vporn.com' in siteurl: return get_site_vporn(siteurl)
-	if 'pornhub.com' in siteurl: return get_site_pornhub(siteurl)
-	if 'tube8.com' in siteurl: return get_site_tube8(siteurl)
-	if 'drtuber.com' in siteurl: return get_site_drtuber(siteurl)
-	if 'vk.com/video' in siteurl: return get_site_vk(siteurl)
-	if 'motherless.com' in siteurl: return get_site_motherless(siteurl)
-	if 'seenive.com' in siteurl: return get_site_seenive(siteurl)
+	if 'spankbang.com'    in siteurl: return get_site_spankbang(siteurl)
+	if 'fapdu.com'        in siteurl: return get_site_fapdu(siteurl)
+	if 'pornably.com'     in siteurl: return get_site_pornably(siteurl)
+	if 'vporn.com'        in siteurl: return get_site_vporn(siteurl)
+	if 'pornhub.com'      in siteurl: return get_site_pornhub(siteurl)
+	if 'tube8.com'        in siteurl: return get_site_tube8(siteurl)
+	if 'drtuber.com'      in siteurl: return get_site_drtuber(siteurl)
+	if 'vk.com/video'     in siteurl: return get_site_vk(siteurl)
+	if 'motherless.com'   in siteurl: return get_site_motherless(siteurl)
+	if 'seenive.com'      in siteurl: return get_site_seenive(siteurl)
+	if 'cliphunter.com'   in siteurl: return get_site_cliphunter(siteurl)
 
 	site_key = None
 	for key in sites.keys():
@@ -329,6 +330,33 @@ def get_site_seenive(siteurl):
 	if not 'source src="' in r:
 		raise Exception('could not find source src= at %s' % siteurl)
 	return web.between(r, 'source src="', '"')[0]
+
+def cliphunt_decrypt(txt):
+	d = {'$': ':', '&': '.', '(': '=', '-': '-', '1': '1', '0': '0', '3': '3', '2': '2', '5': '5', '4': '4', '7': '7', '6': '6', '9': '9', '8': '8', '=': '/', '?': '?', '_': '_', '^': '&', 'a': 'h', 'c': 'c', 'b': 'b', 'e': 'v', 'd': 'e', 'g': 'f', 'f': 'o', 'i': 'd', 'm': 'a', 'l': 'n', 'n': 'm', 'q': 't', 'p': 'u', 'r': 's', 'w': 'w', 'v': 'p', 'y': 'l', 'x': 'r', 'z': 'i'}
+	result = ''
+	for i in xrange(0, len(txt)):
+		if txt[i].isdigit():
+			result += txt[i]
+		elif txt[i] in d:
+			result += d[txt[i]]
+		else:
+			raise Exception('do not have decryption for %s' % txt[i])
+	return result
+
+def get_site_cliphunter(siteurl):
+	r = web.get(siteurl)
+	if not "var flashVars = {d: '" in r:
+		raise Exception('could not find flashVars at %s' % siteurl)
+	chunk = loads(web.between(r, "var flashVars = {d: '", "'")[0].decode('base64'))
+	if not 'url' in chunk:
+		raise Exception('could not find url in chunk: %s' % chunk)
+	url = loads(chunk['url'].decode('base64'))
+	if not 'u' in url:
+		raise Exception('could not find "u" in "url": %s' % url)
+	u = url['u']
+	if not 'l' in u:
+		raise Exception('could not find "l" in "u": %s' % u)
+	return cliphunt_decrypt(u['l'])
 
 def is_supported(url):
 	for not_supported in ['youtube.com/']:
