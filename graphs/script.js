@@ -1,5 +1,4 @@
 function init() {
-	handleResize();
 	$('table#short').click(function() {
 		showGraph( $(this) )
 	});
@@ -131,12 +130,18 @@ function showGraph($t) {
 					},
 					credits: {
 						enabled: true,
-						text: 'data is in ' + (json.interval == '5min' ? '5min' : '1 ' + json.interval) + ' intervals. all times in PST',
+						text: 'data is in ' + (json.interval == '5min' ? '5min' : '1 ' + json.interval) + ' intervals.<br>all times in PST',
 						align: 'left',
 						href: null,
 						style: {
 							color: '#eee',
 							fontFamily: 'Verdana, monospace',
+						},
+						position: {
+							align: 'left',
+							x: 10,
+							verticalAlign: 'bottom',
+							y: -15,
 						},
 					},
 					series: json.series,
@@ -144,14 +149,5 @@ function showGraph($t) {
 			});
 	});
 }
-
-function handleResize() {
-	var $bb = $('#bottom_bar');
-	var t = $(window).height() - $bb.height();
-	$bb.css('top',  t + 'px');
-}
-$(window).resize(function() {
-	handleResize
-});
 
 $(document).ready( init() );

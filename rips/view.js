@@ -938,16 +938,6 @@ function adminJsonFailHandler(x, s, e) {
 		.removeClass().addClass('red shadow');
 }
 
- 
-////////////////
-// BOTTOM BAR
-$(window).on('load resize', function() {
-	var bb = $('#bottom_bar');
-	if (!bb) { return; }
-	var t = document.documentElement.clientHeight - parseInt(bb.height());
-	bb.css('top', t + 'px');
-});
-
 $(document).ready( function() {
 	init();
 });

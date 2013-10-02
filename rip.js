@@ -16,8 +16,6 @@ function init() { // Executes when document has loaded
 	// More info: http://stackoverflow.com/questions/3485365
 	$('<style></style>').appendTo($(document.body)).remove();
 
-	handleResize(); // Trigger resize event to set bottom bar
-	
 	if (!over18()) return; // Check if user has agreed to TOS
 	if (! $('#rip_text').length ) { return; } // Stop here if they haven't agreed
 
@@ -610,15 +608,6 @@ function i_agree() {
 	$('#maindiv').hide()
 	init(); // Load the page again
 }
-
-////////////////
-// BOTTOM BAR
-function handleResize() {
-	var $bb = $('#bottom_bar');
-	var t = $(window).height() - $bb.height();
-	$bb.css('top',  t + 'px');
-}
-window.onresize = handleResize;
 
 //////////////////////
 // USER'S RECENT RIPS

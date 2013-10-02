@@ -7,7 +7,7 @@
 /* MAIN */
 body {
 	padding: 20px;
-	padding-top: 30px;
+	padding-top: 40px;
 	padding-bottom: 40px;
 	padding-right: 40px;
 	background-color: #666;
@@ -115,10 +115,10 @@ div.graph {
 	width: 100%;
 	position: fixed;
 	left: 0px;
-	top: 2000px;
-	border-top-left-radius: 10px;
-	border-top-right-radius: 10px;
-	box-shadow: 0px -5px 5px rgba(0, 0, 0, 0.6);
+	top: 0px;
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+	box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.6);
 }
 table.bottom {
 	max-height: 10px;
@@ -160,12 +160,12 @@ a.bottom:hover {
 }
 
 div.donate_button input {
-	background: transparent url(donate.png);
+	background: transparent url(../donate.png);
 	cursor: pointer;
 	width:  92px;
 	height: 26px;
 	border: none;
 }
 div.donate_button input:hover {
-	background: transparent url(donate_color.png);
+	background: transparent url(../donate_color.png);
 }
