@@ -97,12 +97,21 @@ def format_data(datas):
 		d = {
 				'name' : key,
 				'data' : data[key],
-				'legendIndex' : index
 			}
-		if key in ['requests', 'mb downloaded']:
-			d['yAxis'] = 1
+		#if key in ['requests', 'mb downloaded']:
+		#	d['yAxis'] = 1
 		result.append(d)
+	result = order_data(result)
 	return result
+
+''' Order the metrics '''
+def order_data(result):
+	result = sorted(result, key=lambda x: x.values(), reverse=True)
+	for i, d in enumerate(result):
+		d['legendIndex'] = i
+		d['total'] = sum(d['data'])
+	return result
+
 
 ''' Groups all data into lists of timestamps and metrics '''
 def group_data(datas):

@@ -41,107 +41,106 @@ function showGraph($t) {
 				Highcharts.setOptions({
 					global: { useUTC: false }
 				});
-				$t.find('div.graph')
-					.slideDown()
-					.highcharts({
-						colors: [ 
-							'#5c3317', // Error
-							'black',   // Ban
-							'red',     // Rips
-							'orange',  // Images
-							'yellow',  // 404
-							'lime',    // megabytes
-							'blue',    // zips
-							'violet',  // album_views
-							'cyan',    // requests
-						],
-						chart: {
-							type: 'line',
-							borderRadius:    '20px',
-							backgroundColor: 'rgba(255, 255, 255, 0.0)',
-							plotBackgroundColor: 'rgba(255, 255, 255, 0.0)',
-							style: {
-								fontFamily: 'Verdana, monospace',
-								fontSize: '1.2em',
-								color: '#fff',
-							},
+				$t.find('div.graph').slideDown();
+				var chart = new Highcharts.Chart({
+					colors: [ 
+						'black',
+						'white',
+						'red',     // Rips
+						'orange',  // Images
+						'yellow',  // 404
+						'lime',    // megabytes
+						'blue',    // zips
+						'violet',  // album_views
+						'cyan',    // requests
+					],
+					chart: {
+						renderTo: $t.find('div.graph')[0],
+						type: 'line',
+						borderRadius:    '20px',
+						backgroundColor: 'rgba(255, 255, 255, 0.0)',
+						plotBackgroundColor: 'rgba(255, 255, 255, 0.0)',
+						style: {
+							fontFamily: 'Verdana, monospace',
+							fontSize: '1.2em',
+							color: '#fff',
 						},
-						legend: {
-							itemStyle: {
-								color: '#ddd',
-								fontFamily: 'Verdana, monospace',
-							},
-							itemHoverStyle: {
-								color: '#fff',
-								fontFamily: 'Verdana, monospace',
-							}
+					},
+					legend: {
+						align: 'left',
+						layout: 'vertical',
+						verticalAlign: 'top',
+						y: 50,
+						itemMarginTop: 10,
+						itemMarginBottom: 10,
+						itemStyle: {
+							color: '#ddd',
+							fontFamily: 'Verdana, monospace',
 						},
-						title: {
-							text: null, //json.title,
-							style: {
-								fontFamily: 'Verdana, monospace',
-								fontSize: '1.4em',
-								color: '#eee',
-							},
+						itemHoverStyle: {
+							color: '#fff',
+							fontFamily: 'Verdana, monospace',
+						}
+					},
+					title: {
+						text: null, //json.title,
+						style: {
+							fontFamily: 'Verdana, monospace',
+							fontSize: '1.4em',
+							color: '#eee',
 						},
-						xAxis: {
-							type: 'datetime',
-							labels: {
-								style: {
-									color: '#eee',
-									fontFamily: 'Verdana, monospace',
-								},
-							},
-						},
-						yAxis: [{
-							min: 0,
-							title: null,
-							labels: {
-								style: {
-									color: '#eee',
-									fontFamily: 'Verdana, monospace',
-								},
-							},
-						},{
-							min: 0,
-							opposite: true,
-							title: null,
-							labels: {
-								style: {
-									color: '#eee',
-									fontFamily: 'Verdana, monospace',
-								},
-							},
-						}],
-						plotOptions: {
-							series: {
-								pointStart: json.pointStart,
-								pointInterval: json.pointInterval,
-								style: {
-									backgroundColor: '#888',
-									fontFamily: 'Verdana, monospace',
-								},
-							},
-						},
-						tooltip: {
-							backgroundColor: '#333',
-							borderWidth: '3px',
+					},
+					xAxis: {
+						type: 'datetime',
+						labels: {
 							style: {
 								color: '#eee',
 								fontFamily: 'Verdana, monospace',
 							},
 						},
-						credits: {
-							enabled: true,
-							text: 'data is in ' + (json.interval == '5min' ? '5min' : '1 ' + json.interval) + ' intervals. all times in PST',
-							href: null,
+					},
+					yAxis: {
+						type: 'logarithmic',
+						min: 1,
+						title: null,
+						labels: {
 							style: {
 								color: '#eee',
 								fontFamily: 'Verdana, monospace',
 							},
 						},
-						series: json.series,
-					})
+					},
+					plotOptions: {
+						series: {
+							pointStart: json.pointStart,
+							pointInterval: json.pointInterval,
+							style: {
+								backgroundColor: '#888',
+								fontFamily: 'Verdana, monospace',
+							},
+						},
+					},
+					tooltip: {
+						backgroundColor: '#555',
+						borderWidth: '3px',
+						style: {
+							color: '#eee',
+							fontFamily: 'Verdana, monospace',
+							fontWeight: 'bold',
+						},
+					},
+					credits: {
+						enabled: true,
+						text: 'data is in ' + (json.interval == '5min' ? '5min' : '1 ' + json.interval) + ' intervals. all times in PST',
+						align: 'left',
+						href: null,
+						style: {
+							color: '#eee',
+							fontFamily: 'Verdana, monospace',
+						},
+					},
+					series: json.series,
+				});
 			});
 	});
 }
