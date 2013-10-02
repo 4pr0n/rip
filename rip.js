@@ -7,7 +7,8 @@ var SUPPORTED_VIDEO_SITES = [
 	'motherless.com', 'videobam.com', 'videarn.com', 'fapmenow.com', 
 	'xtube.com', 'youjizz.com', 'mobypicture.com', 'sexykarma.com',
 	'fapjacks.com', 'setsdb.org', 'spankbang.com', 'fapdu.com', 
-	'pornably.com', 'vporn.com', '', '']
+	'pornably.com', 'vporn.com', 'seenive.com', 'cliphunter.com',
+	'', 'spankwire.com', 'vk.com', '']
 
 function init() { // Executes when document has loaded
 	// Safari is BAD. 
