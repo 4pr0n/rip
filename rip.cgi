@@ -98,7 +98,7 @@ def main():
 
 """ Gets ripper, checks for existing rip, rips and zips as needed. """
 def rip(url, cached, urls_only):
-	url = unquote(url).replace(' ', '%20')
+	url = unquote(url.strip()).replace(' ', '%20')
 	
 	# Check blacklist
 	if path.exists('url_blacklist.txt'):
