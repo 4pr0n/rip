@@ -1,12 +1,14 @@
 #!/usr/bin/python
 
 from basesite  import basesite
-from time      import sleep
+from time      import sleep, time
 from threading import Thread
 from os        import path
 from json      import loads, dumps
 
 BATCH_COUNT = 200 # Number of tweets per request (max)
+SLEEP_TIME = 2.5
+MAX_REQUESTS_PER_RIP = 15
 
 # Key must contain base64-encoding of UTF-8-encoded 'consumer_key:consumer_secret'
 # See https://dev.twitter.com/docs/auth/application-only-auth
@@ -50,6 +52,28 @@ class twitter(basesite):
 		self.debug('request: %s' % req)
 		return req
 
+	def check_rate_limit(self, headers):
+		url = 'https://api.twitter.com/1.1/application/rate_limit_status.json?resources=statuses'
+		r = self.web.getter(url, headers=headers)
+		print r
+		json = loads(r)
+		stats = json['resources']['statuses']['/statuses/user_timeline']
+		remaining = stats['remaining']
+		if remaining < 20:
+			# Not enough requests remaining to rip!
+			now = int(time())
+			diff = stats['reset'] - now # Seconds until reset
+			dtime = ''
+			if diff > 3600:
+				dtime = '%d hours ' % (diff / 3600)
+				diff %= 3600
+			if diff > 60:
+				dtime += '%d min ' % (diff / 60)
+				diff %= 60
+			if dtime == '' or diff != 0:
+				dtime += '%d sec' % diff
+			raise Exception('twitter is rate-limited, try again in %s' % dtime)
+
 	""" Magic! """
 	def download(self):
 		self.init_dir()
@@ -57,44 +81,54 @@ class twitter(basesite):
 		token = self.get_access_token()
 		if token == '' or token == None:
 			self.wait_for_threads()
-			return
+			raise Exception('twitter API token not found')
 		headers = { 'Authorization' : 'Bearer %s' % token }
-		# Make request
-		turl = self.get_request(self.url)
-		r = self.web.getter(turl, headers=headers)
+		self.check_rate_limit(headers)
+
 		index = 0
-		max_id = -1
-		while r.strip() != '[]' and r.strip() != '':
-			json = loads(r)
-			self.debug(dumps(json, indent=2))
+		page  = 1
+		turl = self.get_request(self.url)
+		while page < MAX_REQUESTS_PER_RIP:
+			# Make request
+			r = self.web.getter(turl, headers=headers)
+
+			try:
+				json = loads(r)
+			except Exception, e:
+				self.wait_for_threads()
+				raise Exception('invalid response from twitter: %s' % r)
+
+			if 'errors' in json:
+				self.wait_for_threads()
+				raise Exception('twitter: %s' % json['errors']['message'])
+			elif len(json) == 0:
+				break # Empty response, time to go
+
+			max_id = '0'
 			for tweet in json:
-				if not type(tweet) == dict or not 'id' in tweet:
-					self.wait_for_threads()
-					raise Exception('twitter rate limit, try again in 1 hour')
-				this_id = int(tweet.get('id'))
-				if max_id == -1 or this_id < max_id:
-					max_id = this_id - 1
+				max_id = str(tweet.get('id', 1) - 1)
 				index = self.get_media(tweet, index)
 				index = self.get_url(tweet, index)
+				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
-			if max_id == -1: break
+
+			if max_id == '0': break
 			turl = self.get_request(self.url, max_id=max_id)
-			self.log('loading tweets... - %s' % turl)
-			sleep(2)
-			r = self.web.getter(turl, headers=headers)
+			page += 1
+			self.log('loading tweets page %d - %s' % (page, turl))
+			sleep(SLEEP_TIME)
 		self.wait_for_threads()
 	
 	""" Retrieve all 'media' URLs from tweet """
 	def get_media(self, json, index):
-		if not 'entities' in json:   return index
-		entities = json.get('entities')
-		if not 'media' in entities:  return index
-		medias = entities.get('media')
-		if len(medias) == 0:          return index
+		try:
+			medias = json['entities']['media']
+		except: # Tweet does not contain media, or some other error occurred
+			return index
+
 		for media_chunk in medias:
 			if not 'media_url' in media_chunk: continue
-			url = media_chunk.get('media_url')
-			#url = url.replace('\\/', '/')
+			url = media_chunk['media_url']
 			self.debug('media_url: %s' % url)
 			if '.twimg.com/' in url:
 				url += ':large'
@@ -102,24 +136,24 @@ class twitter(basesite):
 			if self.urls_only:
 				self.add_url(index, url)
 			else:
+				sleep(0.5)
 				self.download_image(url, index)
 		return index
 
 	""" Retrieve all 'expanded_url' from tweet """
 	def get_url(self, json, index):
-		if not 'entities' in json: return index
-		entities = json.get('entities')
-		if not 'urls' in entities: return index
-		urls = entities.get('urls')
-		if len(urls) == 0: return index
-		downloaded_count = 0
+		try:
+			urls = json['entities']['urls']
+		except: # Tweet does not contain urls, or some other error occurred
+			return index
 		for url_chunk in urls:
 			if not 'display_url' in url_chunk: continue
 			url = url_chunk.get('display_url')
 			#url = url.replace('\\/', '/')
 			self.debug('display_url: %s' % url)
 			if  'twitpic.com/' in url or \
-					'tumblr.com/'  in url:
+					'tumblr.com/'  in url or \
+					'vine.co/'     in url:
 				index += 1
 				while self.thread_count > self.max_threads: sleep(0.1)
 				self.thread_count += 1
@@ -130,15 +164,21 @@ class twitter(basesite):
 	""" Download image from some URL """
 	def handle_url(self, url, index):
 		try:
+			if not url.startswith('http'): url = 'http://%s' % url
 			self.debug('handle_url: %s' % url)
 			ext = url.lower()[url.rfind('.')+1:]
+			imgs = []
 			if ext in ['jpg', 'jpeg', 'gif', 'png']:
 				imgs = [url]
 			else:
 				r = self.web.get(url)
-				imgs = self.web.between(r, '<meta name="twitter:image" value="', '"')
-				if len(imgs) == 0:
-					imgs = self.web.between(r, '<meta name="twitter:image" content="', '"')
+				for name in ['twitter:player:stream', 'twitter:image']:
+					if '<meta name="%s" value="' % name in r:
+						imgs = self.web.between(r, '<meta name="%s" value="' % name, '"')
+						break
+					if '<meta name="%s" content="' % name in r:
+						imgs = self.web.between(r, '<meta name="%s" content="' % name, '"')
+						break
 			if len(imgs) > 0:
 				img = imgs[0]
 				if '?' in img: img = img[:img.find('?')]
