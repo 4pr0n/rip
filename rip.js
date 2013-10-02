@@ -119,7 +119,6 @@ function refreshRecent() { // Refresh list of "recent rips"
 			$('#recent_spinner').css('visibility', 'hidden');
 		})
 		.done(function(json) {
-			console.log('done')
 			var $ul = $('<ul />').css('padding-left', '15px');
 			$.each(json.recent, function(i, rec) {
 				var url = rec.url.replace('http://www.', '').replace('http://', '').replace('https://', '');
