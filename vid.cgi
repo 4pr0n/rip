@@ -333,15 +333,21 @@ def get_site_seenive(siteurl):
 	return web.between(r, 'source src="', '"')[0]
 
 def cliphunt_decrypt(txt):
-	d = {'$': ':', '&': '.', '(': '=', '-': '-', '1': '1', '0': '0', '3': '3', '2': '2', '5': '5', '4': '4', '7': '7', '6': '6', '9': '9', '8': '8', '=': '/', '?': '?', '_': '_', '^': '&', 'a': 'h', 'c': 'c', 'b': 'b', 'e': 'v', 'd': 'e', 'g': 'f', 'f': 'o', 'i': 'd', 'm': 'a', 'l': 'n', 'n': 'm', 'q': 't', 'p': 'u', 'r': 's', 'w': 'w', 'v': 'p', 'y': 'l', 'x': 'r', 'z': 'i'}
+	d = {'$': ':', '&': '.', '(': '=', '-': '-', 
+		 '_': '_', '^': '&', 'a': 'h', 'c': 'c', 
+		 'b': 'b', 'e': 'v', 'd': 'e', 'g': 'f', 
+		 'f': 'o', 'i': 'd', 'm': 'a', 'l': 'n', 
+		 'n': 'm', 'q': 't', 'p': 'u', 'r': 's', 
+		 'w': 'w', 'v': 'p', 'y': 'l', 'x': 'r', 
+		 'z': 'i', '=': '/', '?': '?' }
 	result = ''
-	for i in xrange(0, len(txt)):
-		if txt[i].isdigit():
-			result += txt[i]
+	for i in txt:
+		if i.isdigit():
+			result += i
 		elif txt[i] in d:
-			result += d[txt[i]]
+			result += d[i]
 		else:
-			raise Exception('do not have decryption for %s' % txt[i])
+			raise Exception('do not have decryption for %s' % i)
 	return result
 
 def get_site_cliphunter(siteurl):
