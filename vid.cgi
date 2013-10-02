@@ -72,6 +72,7 @@ def get_url(siteurl):
 	if 'motherless.com'   in siteurl: return get_site_motherless(siteurl)
 	if 'seenive.com'      in siteurl: return get_site_seenive(siteurl)
 	if 'cliphunter.com'   in siteurl: return get_site_cliphunter(siteurl)
+	if 'spankwire.com'    in siteurl: return get_site_spankwire(siteurl)
 
 	site_key = None
 	for key in sites.keys():
@@ -359,6 +360,18 @@ def get_site_cliphunter(siteurl):
 	if not 'l' in u:
 		raise Exception('could not find "l" in "u": %s' % u)
 	return cliphunt_decrypt(u['l'])
+
+def get_site_spankwire(siteurl):
+	r = web.get(siteurl)
+	vid = None
+	for qual in ['720', '480', '320', '240', '180']:
+		if 'flashvars.quality_%sp = "' % qual in r:
+			vid = web.between(r, 'flashvars.quality_%sp = "' % qual, '"')[0]
+			if vid != '': break
+	if vid == None:
+		raise Exception('could not find flashvars.quality_XXXp at %s' % siteurl)
+	return unquote(vid)
+
 
 def is_supported(url):
 	for not_supported in ['youtube.com/']:
