@@ -27,6 +27,7 @@ class setsdb(basesite):
 		self.init_dir()
 		r = self.web.get(self.url)
 		chunks = self.web.between(r, '</span></p>', '<div class=')
+		self.debug('chunks: %d' % len(chunks))
 		if len(chunks) == 0:
 			self.wait_for_threads()
 			raise Exception('unable to download album at %s' % self.url)
@@ -42,12 +43,15 @@ class setsdb(basesite):
 	def download_image(self, url, index, total):
 		r = self.web.get(url)
 		before = None
+		add_domain = False
 		if 'sharenxs' in url:
-			before = 'imgsize()\'><img src="'
+			before = '\n<img src="'
 			after = '"'
+			add_domain = True
 		elif 'imagevenue.com' in url:
 			before = 'scaleImg();"   SRC="'
 			after = '"'
+			add_domain = True
 		elif 'imgchili.com' in url:
 			before = '      src="'
 			after = '"'
@@ -58,9 +62,11 @@ class setsdb(basesite):
 			return
 		image = self.web.between(r, before, after)[0]
 		
-		if 'imagevenue.com' in url:
+		if add_domain:
 			temp = url.replace('http://', '')
-			image = 'http://%s%s' % (temp[:temp.find('/')+1], image)
+			temp = temp[:temp.find('/')+1]
+			temp = temp.replace('//', '/')
+			image = 'http://%s%s' % (temp, image)
 		
 		if self.urls_only:
 			self.add_url(index, image, total=total)
