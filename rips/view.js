@@ -451,13 +451,13 @@ function getFSDimensionsForImage($image) {
 			$(window).height() / $image.height(), 
 			$(window).width()  / $image.width()
 	);
-	var th = parseInt($image.height() * factor) - 4;
+	var th = parseInt($image.height() * factor) - 2;
 	var tw = parseInt($image.width() * factor) - 4;
-	var tt = Math.max(0, parseInt( ($(window).height() - th) / 2.0 ) - 4);
+	var tt = Math.max(0, parseInt( ($(window).height() - th) / 2.0 ));
 	var tl = Math.max(0, parseInt( ($(window).width() - tw) / 2.0 ));
 	return {
-		'top'    : tt,
-		'left'   : tl,
+		'top'    : tt - 2,
+		'left'   : tl - 2,
 		'height' : th + 'px',
 		'width'  : tw + 'px',
 	};
@@ -516,27 +516,46 @@ function thumbLoadHandler($thumb, $thumbnail) {
 			{
 				duration: 300,
 				easing: 'swing',
-				complete: function() { imageLoadHandler($thumb); }
+				queue: false,
+				complete: function() { imageLoadHandler($thumb, 'animation'); }
 			}
 		)
-		.load(function() { imageLoadHandler($thumb, 'loaded') })
+		.load(function() { imageLoadHandler($thumb, 'load') })
 		.show();
 }
 
-function imageLoadHandler($thumb, loaded) {
+function imageLoadHandler($thumb, loaded_from) {
 	var $image = $('#fgimage');
-	// Only trigger resize after both animation + loading have finished
-	if (loaded === 'loaded') {$thumb.hide().remove(); }
-	if ($image.attr('loaded') != 'true') { 
-		$image.attr('loaded', 'true');
+	$thumb.stop();
+	var top    = $thumb.position().top, 
+	    left   = $thumb.position.left, 
+	    width  = $thumb.width(), 
+	    height = $thumb.height();
+	if ($image.attr('already_loaded') == 'true') {
 		return;
 	}
+	$image.attr('already_loaded', 'true');
 	$image
-		.stop()
 		.css('height', 'auto')
-		.css('width', 'auto');
+		.css('width',  'auto');
 	var newDim = getFSDimensionsForImage($image);
-	$image.css(newDim);
+	$image
+		.css('top', top)
+		.css('left', left)
+		.css('width',  width  + 'px')
+		.css('height', height + 'px');
+	$image
+		.animate(
+				newDim, 
+				{
+					queue: false,
+					duration: 300,
+					easing: 'swing',
+					complete: function() {
+						$thumb.hide()
+					},
+				})
+		.show();
 }
 
 function imageClickHandler() { // Hide the image
