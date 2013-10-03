@@ -10,6 +10,7 @@ from os   import path, listdir
 METRICS = {
 	'requests'    : 'requests',
 	'rips'        : 'album rips',
+	'users'       : 'users',
 	'zips'        : 'zip downloads',
 	'album_views' : 'album views',
 	'images'      : 'image views',
@@ -49,7 +50,7 @@ def get_graphs(graphtype, span):
 	(graphtype, timespan, period) = get_graphtype_span_period(graphtype, span)
 	span = timespan
 	cur = int(time.time())
-	#cur = 1380335700 # For testing, TODO remove!
+	#cur = 1380782100 # For testing, TODO remove!
 
 	t = int(cur / period) * period # Get starting point for metrics
 	point_start = (t - ( (timespan - 1) * period)) * 1000
@@ -65,6 +66,7 @@ def get_graphs(graphtype, span):
 		else:
 			data = {}
 			missed_count += 1
+		if 'users' in data: data['users'] = len(data['users']) # Return # of unique IPs, NOT the IPs
 		if not 'bytes' in data: data['bytes'] = 0
 		if not 'hits'  in data: data['hits']  = 0
 		data['megabytes'] = data['bytes'] / (1024 * 1024)

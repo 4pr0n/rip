@@ -1,11 +1,17 @@
 #!/usr/bin/python
 
 from sys import stdout, exit
-from time import mktime, strptime, strftime, localtime
+from time import mktime, strptime, strftime, localtime, time
 from json import dumps, loads
+from os import path, mkdir, remove
 
-STAT_DIR = open('.STAT_DIR', 'r').read().strip() # logs
 LOG_FILE = open('.LOG_FILE', 'r').read().strip() # ~/logs/<site>/http/access.log
+STAT_DIR = open('.STAT_DIR', 'r').read().strip() # logs
+if not path.exists(STAT_DIR):
+	mkdir(STAT_DIR)
+
+def log(text, level='INFO'):
+	print '[%s] [%s] %s' % (strftime('%Y-%m-%dT%H:%M:%S'), level, text)
 
 # Breaks log line into separate fields, preserving quoted sections
 def split_fields(line):
@@ -29,10 +35,13 @@ def parse_line(line):
 	if len(fields) == 10:
 		(ip, x, y, dt, tz, header, status, size, ref, ua) = fields
 	else:
-		print 'unexpected length of fields: %d' % len(fields)
-		print 'line:\n\n%s\n' % line
-		print 'fields:'
-		for f in fields: print '\t"%s"' % f
+		log('', level='ERROR')
+		log('unexpected length of log line fields: %s' % len(fields), level='ERROR')
+		log('fields:', level='ERROR')
+		for f in fields: 
+			log('    %s' % f, level='ERROR')
+		log('', level='ERROR')
+		raise Exception('unexpected length of line')
 	dt = dt.replace('[', '')
 	epoch = int(mktime(strptime(dt, '%d/%b/%Y:%H:%M:%S')))
 	url = header.split(' ')[1]
@@ -40,17 +49,19 @@ def parse_line(line):
 	return (ip, epoch, url, status, size, ref, ua)
 
 # Read log file, return dict containing all information about the log
-def parse_log(log, data, last_line=None):
+def parse_log(logfile, data, last_line=None):
 	if last_line == None:
 		try:
+			log('loading last line...')
 			last_line = load_last_line()
-			print 'last line: %s...' % last_line[:30]
+			log('last line: %s...' % last_line[:50])
 		except Exception, e:
-			print 'exception %s' % str(e)
+			log('failed to load last line, defauling to empty line (starting over)', level='WARN')
+			log('    exception: %s' % str(e), level='WARN')
 			last_line = ''
 	almost_there = there_yet = False
 	try:
-		for linenumber, line in enumerate(open(log, 'r')):
+		for linenumber, line in enumerate(open(logfile, 'r')):
 			#if linenumber % 251 == 0:
 			#	stdout.write('\r%d\r' % linenumber)
 			#	stdout.flush()
@@ -62,20 +73,31 @@ def parse_log(log, data, last_line=None):
 				if not there_yet: continue
 			if almost_there:
 				almost_there = False
-				print 'resuming from line %d' % linenumber
+				log('resuming from line #%d' % linenumber)
 			# We should parse this line and below
-			(ip, epoch, url, status, size, referer, useragent) = parse_line(line)
-			interpret_data(data, epoch, url, size, status)
+			try:
+				(ip, epoch, url, status, size, referer, useragent) = parse_line(line)
+				interpret_data(data, epoch, url, size, status, ip)
+			except: pass
 	except KeyboardInterrupt:
-		print '         \ninterrupted'
+		log('         \ninterrupted', level='WARN')
 		exit(1)
+		return
+	except Exception, e:
+		log('', level='WARN')
+		log('got exception while generating TSD: %s' % str(e), level='WARN')
+		log('exiting early without saving!', level='WARN')
+		log('', level='WARN')
+		exit(1)
+		return
+		
 
 	if there_yet:
 		# We found our checkpoint and parsed logs, save the last line as the checkpoint
 		save_last_line(line) 
 	else:
 		# We didn't find the checkpoint, start over with brand-new log file
-		parse_log(log, data, last_line='') 
+		parse_log(logfile, data, last_line='') 
 
 def load_data_from_epoch(tstamp, timekey):
 	stime = strftime('%s', localtime(tstamp))
@@ -85,15 +107,26 @@ def load_data_from_epoch(tstamp, timekey):
 		r = f.read().strip()
 		f.close()
 	except Exception, e:
+		log('could not load data in %s' % (fname.replace(STAT_DIR,'')), level='WARN')
+		log('   %s' % str(e), level='WARN')
 		return {}
-	print 'loaded %s' % fname.replace(STAT_DIR,''),
+	log('loaded %s' % fname.replace(STAT_DIR,''))
+	#return loads(r)
 	b = loads(r)
 	a = {}
-	for k in ['hits', 'rips', 'zips', 'album_views', 'images', 'thumbs', 'videos', 'checks', 'cgi', 'others', 'bytes', 'ban', 'err', '404']:
+	output = ''
+	for k in ['hits', 'rips', 'zips', 'album_views', 'images', 
+	          'thumbs', 'videos', 'checks', 'cgi', 'others', 
+	          'bytes', 'ban', 'err', '404', 'users']:
 		if k in b: 
 			a[k] = b[k]
-			print '%s=%s' % (k, str(b[k]).ljust(4)),
-	print ''
+			if k != 'users':
+				output += ('%s:%s ' % (k, str(b[k]))).rjust(12)
+				if len(output) >= 48:
+					log('    %s' % output)
+					output = ''
+	if output != '':
+		log('    %s' % output)
 	return a
 
 def load_last_line():
@@ -108,7 +141,7 @@ def save_last_line(last):
 	f.flush()
 	f.close()
 
-def interpret_data(data, epoch, url, size, status):
+def interpret_data(data, epoch, url, size, status, ip):
 	for tim in data.keys():
 		tstamp = int(epoch / data[tim]['seconds']) * data[tim]['seconds']
 		if not tstamp in data[tim]: data[tim][tstamp] = load_data_from_epoch(tstamp, tim)
@@ -145,7 +178,38 @@ def interpret_data(data, epoch, url, size, status):
 			else:
 				data[tim][tstamp]['others'] = data[tim][tstamp].get('others', 0) + 1    # Misc
 
+		# Unique IP check
+		if not 'users' in data[tim][tstamp]: data[tim][tstamp]['users'] = []
+		if not ip in data[tim][tstamp]['users']:
+			data[tim][tstamp]['users'].append(ip)
+
+
+''' Find and delete old logs we don't care about anymore '''
+def cleanup_old_logs():
+	log('searching for old logs')
+	to_remove = []
+	for label, period, threshold in [
+	      ('5min',  300,    86400), #  5 min logs expire after  1 day
+	      ('hour', 3600,  3888000), # 1-hour logs expire after 45 days
+	      ('day', 86400, 31536000), #  1-day logs expire after  1 year
+	    ]:
+		curtime = ( int( int(time()) / period) * period ) - threshold
+		while True:
+			logname = '%s/%d-%s.log' % (STAT_DIR, curtime, label)
+			if not path.exists(logname): break
+			to_remove.append(logname)
+			curtime -= period
+	
+	if len(to_remove) == 0: return
+	log('removing %d stale logs:' % len(to_remove))
+	for f in to_remove:
+		remove(f)
+		log('    removed: %s' % f)
+
 if __name__ == '__main__':
+	log('starting...')
+	cleanup_old_logs()
+
 	data = {
 			'day'  : {'seconds' : 86400},
 			'hour' : {'seconds' : 3600},
@@ -157,10 +221,17 @@ if __name__ == '__main__':
 			if k == 'seconds': continue
 			stime = strftime('%s', localtime(int(k)))
 			fname = '%s/%s-%s.log' % (STAT_DIR, stime, timekey)
-			print 'writing %s:' % fname.replace(STAT_DIR, ''),
+			log('writing %s' % fname.replace(STAT_DIR, ''))
+			output = ''
 			for attr,value in data[timekey][k].iteritems():
-				print '%s=%s' % (attr,str(value).ljust(4)),
-			print ''
+				if attr != 'users':
+					output += ('%s:%d ' % (attr, value)).rjust(12)
+					if len(output) >= 48:
+						log('    %s' % output)
+						output = ''
+			if output != '':
+				log('    %s' % output)
+
 			f = open(fname, 'w')
 			f.write('%s\n' % dumps(data[timekey][k]))
 			f.close()
