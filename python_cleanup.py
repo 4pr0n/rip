@@ -71,6 +71,8 @@ def get_stale_albums():
 
 def get_files_to_remove():
 	all_files = []
+	total_size = 0
+	remove_size = 0
 	for f in os.listdir('rips'):
 		if f == 'txt': continue
 		if f.startswith('gonewild_'): continue # ignore gonewild albums
@@ -84,6 +86,7 @@ def get_files_to_remove():
 		else:
 			log('ERROR: neither file nor dir "%s"' % fp)
 			continue
+		total_size += size
 		all_files.append( (fp, os.path.getatime(fp), size) )
 	all_files.sort(key=lambda tup: tup[1], reverse=True)
 	to_remove = []
@@ -92,8 +95,9 @@ def get_files_to_remove():
 		total += filesize
 		if total > max_size: 
 			total -= filesize
+			remove_size += fielsize
 			to_remove.append(filename)
-	return to_remove
+	return (total_size, remove_size, to_remove)
 
 def get_dir_size(d):
 	size = 0
@@ -125,8 +129,8 @@ def main():
 	#l = get_stale_albums()
 	#removed += remove_files(l, 'stale album (> %d hours)' % (max_album_time / 3600))
 	
-	l = get_files_to_remove()
-	removed += remove_files(l, 'max file size reached (> %d gb)' % (max_size / (1024 * 1024 * 1024)))
+	(total_size, remove_size, l) = get_files_to_remove()
+	removed += remove_files(l, 'max file size reached (%d > %d gb) removing %d bytes' % (total_size, max_size / (1024 * 1024 * 1024), remove_size))
 	log('finished!')
 
 def remove_files(l, reason=''):
@@ -134,15 +138,16 @@ def remove_files(l, reason=''):
 	removed = 0
 	log('removing %d files because %s' % (len(l), reason))
 	for f in l:
-		log('removing %s' % f)
 		if os.path.isfile(f):
 			try:
+				log('removing %s (%d)' % (f.rjust(25), os.path.getsize(f)))
 				os.remove(f)
 				removed += 1
 			except Exception, err:
 				log('failed to remove %s: %s' % (f, err))
 		elif os.path.isdir(f):
 			try:
+				log('removing %s (%d)' % (f.rjust(25), get_dir_size(f)))
 				rmtree(f)
 				removed += 1
 			except Exception, err:
