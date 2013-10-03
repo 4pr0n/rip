@@ -510,27 +510,28 @@ function thumbLoadHandler($thumb, $thumbnail) {
 		.css(oldDim)
 		.css('top', oldDim['top'] - $(document).scrollTop())
 		.click(imageClickHandler)
-		.attr('src', $thumbnail.attr('full'))
 		.animate( 
 			newDim,
 			{
 				duration: 300,
 				easing: 'swing',
 				queue: false,
-				complete: function() { imageLoadHandler($thumb, 'animation'); }
+				complete: function() { /*imageLoadHandler($thumb, 'animation');*/ }
 			}
 		)
-		.load(function() { imageLoadHandler($thumb, 'load') })
-		.show();
+		//.load(function() { imageLoadHandler($thumb, 'load') })
+		.attr('src', $thumbnail.attr('full'))
+		.show()
+		.imagesLoaded( function() { imageLoadHandler($thumb, 'load') } );
 }
 
 function imageLoadHandler($thumb, loaded_from) {
 	var $image = $('#fgimage');
-	$thumb.stop();
 	var top    = $thumb.position().top, 
 	    left   = $thumb.position.left, 
 	    width  = $thumb.width(), 
 	    height = $thumb.height();
+	$thumb.hide();
 	if ($image.attr('already_loaded') == 'true') {
 		return;
 	}
@@ -552,7 +553,7 @@ function imageLoadHandler($thumb, loaded_from) {
 					duration: 300,
 					easing: 'swing',
 					complete: function() {
-						$thumb.hide()
+						//$thumb.hide()
 					},
 				})
 		.show();
@@ -955,6 +956,27 @@ function adminJsonFailHandler(x, s, e) {
 		.append( $('<div />').addClass('red')     .html(s + ': "' + e + '"') )
 		.append( $('<div />').addClass('white left fontsmall').html(x.responseText) )
 		.removeClass().addClass('red shadow');
+}
+
+$.fn.imagesLoaded = function(callback, fireOne) {
+	var
+		args = arguments,
+		elems = this.filter('img'),
+		elemsLen = elems.length - 1;
+
+	elems
+		.bind('load', function(e) {
+			if (fireOne) {
+				!elemsLen-- && callback.call(elems, e);
+			} else {
+				callback.call(this, e);
+			}
+		}).each(function() {
+			// cached images don't fire load sometimes, so we reset src.
+			if (this.complete || this.complete === undefined){
+				this.src = this.src;
+			}
+		});
 }
 
 $(document).ready( function() {
