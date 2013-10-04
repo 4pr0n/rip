@@ -3,14 +3,25 @@
 from basesite import basesite
 from json import loads
 from time import sleep
-
-CLIENT_ID = 'ada2177105f94b05b21c3839c21d3794'
+from os   import path
 
 """
 	Downloads instagram albums
 """
 class instagram(basesite):
 	
+	""" Retrieves API key from local file """
+	def get_api_key(self):
+		api_path = path.join(path.dirname(__file__), 'instagram_api.key')
+		api_key = ''
+		if path.exists(api_path):
+			f = open(api_path, 'r')
+			api_key = f.read().replace('\n', '').strip()
+			f.close()
+		if api_key == '':
+			raise Exception('no instagram API key found at %s' % api_path)
+		return api_key
+
 	""" Parse/strip URL to acceptable format """
 	def sanitize_url(self, url):
 		if'instagram.com/' in url:
@@ -35,7 +46,8 @@ class instagram(basesite):
 
 	def download(self):
 		self.init_dir()
-		baseurl = '%s/media?client_id=%s' % (self.url, CLIENT_ID)
+		client_id = self.get_api_key()
+		baseurl = '%s/media?client_id=%s' % (self.url, client_id)
 		url = baseurl
 		index = 0
 		while True:
