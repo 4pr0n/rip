@@ -4,20 +4,22 @@ from basesite import basesite
 from time     import sleep
 from os       import path
 
-# Key for querying tumblr's API
-if path.exists('tumblr_api.key'):
-	f = open('tumblr_api.key', 'r')
-elif path.exists('sites/tumblr_api.key'):
-	f = open('sites/tumblr_api.key', 'r')
-else:
-	raise Exception('no tumblr API key found!')
-API_KEY = f.read().replace('\n', '').strip()
-f.close()
-
 """
 	Downloads tumblr albums
 """
 class tumblr(basesite):
+
+	""" Retrieves API key from local file """
+	def get_api_key(self):
+		api_path = path.join(path.dirname(__file__), 'tumblr_api.key')
+		api_key = ''
+		if path.exists(api_path):
+			f = open(api_path, 'r')
+			api_key = f.read().replace('\n', '').strip()
+			f.close()
+		if api_key == '':
+			raise Exception('no tumblr API key found at %s' % api_path)
+		return api_key
 	
 	""" Parse/strip URL to acceptable format """
 	def sanitize_url(self, url):
@@ -55,10 +57,11 @@ class tumblr(basesite):
 
 	""" Returns URL to retrieve content with """
 	def get_base_url(self, url, media='photo', offset=0):
+		api_key = self.get_api_key()
 		user  = self.get_user(url)
 		turl  = 'http://api.tumblr.com/v2/blog/%s' % user
 		turl += '.tumblr.com/posts/%s' % media
-		turl += '?api_key=%s' % API_KEY
+		turl += '?api_key=%s' % api_key
 		turl += '&offset=%d' % offset
 		if '/tagged/' in url:
 			tag = url[url.find('/tagged/')+len('/tagged/'):]
@@ -104,6 +107,7 @@ class tumblr(basesite):
 
 	""" Mystery! """
 	def download(self):
+		api_key = self.get_api_key()
 		self.init_dir()
 		index = 0
 		total = 0
@@ -114,7 +118,7 @@ class tumblr(basesite):
 			if '/' in tagnum: tagnum = tagnum[:tagnum.find('/')]
 			if '?' in tagnum: tagnum = tagnum[:tagnum.find('?')]
 			if '#' in tagnum: tagnum = tagnum[:tagnum.find('#')]
-			url = 'http://api.tumblr.com/v2/blog/%s.tumblr.com/posts?id=%s&api_key=%s' % (user, tagnum, API_KEY)
+			url = 'http://api.tumblr.com/v2/blog/%s.tumblr.com/posts?id=%s&api_key=%s' % (user, tagnum, api_key)
 			self.debug(url)
 			r = self.web.get(url)
 			if total == 0: total = r.count('"caption":"') - 1
