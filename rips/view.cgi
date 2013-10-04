@@ -217,6 +217,11 @@ def filter_albums(thedirs, count, preview_size, after, found_after):
 		} )
 
 
+def sizeof_fmt(num):
+    for x in ['bytes','KB','MB','GB','TB']:
+        if num < 1024.0:
+            return "%3.1f %s" % (num, x)
+        num /= 1024.0
 ##################
 # SINGLE ALBUM
 def get_images_for_album(album, start, count, thumbs=False):
@@ -255,6 +260,7 @@ def get_images_for_album(album, start, count, thumbs=False):
 	result['start']   = start
 	result['count']   = dcount
 	result['album']   = album.replace('%20', ' ')
+	result['size']    = sizeof_fmt(path.getsize('./%s.zip' % album))
 	result['archive'] = './%s.zip' % album.replace(' ', '%20').replace('%20', '%2520')
 	return result
 

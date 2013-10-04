@@ -109,7 +109,7 @@ function loadAlbum(album, start, count, startOver) {
 			
 			// .ZIP link
 			$('<a />')
-				.html(album.archive.replace('./', ''))
+				.html(album.archive.replace('./', '')+" ("+album.size+")")
 				.attr('href', album.archive)
 				.attr('title', 'download a .zip archive containing these photos')
 				.addClass('download_box')
