@@ -75,6 +75,20 @@ class imagebam(basesite):
 			self.thread_count -= 1
 			return
 		filename = img[img.rfind('/')+1:]
+		if '?' in filename: filename = filename[:filename.find('?')]
+		if '#' in filename: filename = filename[:filename.find('#')]
+		if '&' in filename: filename = filename[:filename.find('&')]
+		if not '.' in filename:
+			m = self.web.get_meta(img)
+			ext = '.jpg'
+			if 'Content-Type' in m:
+				if '/gif' in m['Content-Type']:
+					ext = '.gif'
+				elif '/png' in m['Content-Type']:
+					ext = '.png'
+				elif '/jpeg' in m['Content-Type'] or '/jpg' in m['Content-Type']:
+					ext = '.jpg'
+			filename += ext
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
 		if os.path.exists(saveas):
 			self.image_count += 1
