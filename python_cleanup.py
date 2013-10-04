@@ -95,7 +95,7 @@ def get_files_to_remove():
 		total += filesize
 		if total > max_size: 
 			total -= filesize
-			remove_size += fielsize
+			remove_size += filesize
 			to_remove.append(filename)
 	return (total_size, remove_size, to_remove)
 
@@ -140,14 +140,14 @@ def remove_files(l, reason=''):
 	for f in l:
 		if os.path.isfile(f):
 			try:
-				log('removing %s (%d)' % (f.rjust(25), os.path.getsize(f)))
+				log('removing %s (%d)' % (f.rjust(50), os.path.getsize(f)))
 				os.remove(f)
 				removed += 1
 			except Exception, err:
 				log('failed to remove %s: %s' % (f, err))
 		elif os.path.isdir(f):
 			try:
-				log('removing %s (%d)' % (f.rjust(25), get_dir_size(f)))
+				log('removing %s     (%d)' % (f.rjust(46), get_dir_size(f)))
 				rmtree(f)
 				removed += 1
 			except Exception, err:
