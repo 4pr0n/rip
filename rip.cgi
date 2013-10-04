@@ -100,23 +100,22 @@ def main():
 def rip(url, cached, urls_only):
 	url = unquote(url.strip()).replace(' ', '%20')
 	
-	# Check blacklist
-	if path.exists('url_blacklist.txt'):
-		f = open('url_blacklist.txt')
-		lines = f.read().split('\n')
-		f.close()
-		for blacklisted_url in lines:
-			if blacklisted_url.strip() == '': continue
-			if blacklisted_url.strip().lower() in url.lower():
-				print_error("unspecified error occurred")
-				return
-	
 	try:
 		# Get domain-specific ripper for URL
 		ripper = get_ripper(url, urls_only)
 	except Exception, e:
 		print_error(str(e))
 		return
+
+	# Check URL against blacklist
+	if path.exists('url_blacklist.txt'):
+		for line in open('url_blacklist.txt', 'r'):
+			line = line.strip().lower()
+			if line == '': continue
+			if line in url.lower() or \
+			   ripper.working_dir.lower().endswith(line):
+				print_error('cannot rip: URL is blacklisted')
+				return
 
 	# Check if there's already a zip for the album
 	if ripper.existing_zip_path() != None:

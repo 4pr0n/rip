@@ -18,10 +18,11 @@ def main(): # Prints JSON response to query
 	keys = get_keys()
 	
 	# Gets keys or defaults
-	start   = int(keys.get('start',   0))  # Starting index (album/images)
-	count   = int(keys.get('count',   20)) # Number of images/thumbs to retrieve
-	preview = int(keys.get('preview', 10)) # Number of images to retrieve
-	after   =     keys.get('after',   '')  # Next album to retrieve
+	start   = int(keys.get('start',   0))   # Starting index (album/images)
+	count   = int(keys.get('count',   20))  # Number of images/thumbs to retrieve
+	preview = int(keys.get('preview', 10))  # Number of images to retrieve
+	after   =     keys.get('after',   '')   # Next album to retrieve
+	blacklist =   keys.get('blacklist', '') # Album to blacklist
 
 	# Get from list of all albums
 	if  'view_all' in keys: get_all_albums(count, preview, after)
@@ -39,9 +40,9 @@ def main(): # Prints JSON response to query
 	# Remove all reports or an album
 	elif 'clear_reports' in keys: clear_reports(keys['clear_reports'])
 	# Delete an album, add to blacklist
-	elif 'delete'        in keys: delete_album(keys['delete'])
+	elif 'delete'        in keys: delete_album(keys['delete'], blacklist)
 	# Delete all albums from a user
-	elif 'delete_user'   in keys: delete_albums_by_user(keys['delete_user'])
+	elif 'delete_user'   in keys: delete_albums_by_user(keys['delete_user'], blacklist)
 	# Permanently ban a user
 	elif 'ban_user'      in keys: ban_user(keys['ban_user'], reason=keys.get('reason', ''))
 
@@ -377,12 +378,11 @@ def clear_reports(album):
 	remove(reports)
 	print_ok('reports cleared')
 	
-def delete_album(album):
+def delete_album(album, blacklist=''):
 	if not is_admin():
 		print_error('you are not an admin: %s' % environ['REMOTE_ADDR'])
 		return
 	album = quote(album)
-	zipdel = albumdel = False
 	# Sanitization, check if album
 	if '..' in album or '/' in album or not path.isdir(album):
 		print_error('album is not valid: %s' % album)
@@ -392,36 +392,39 @@ def delete_album(album):
 		print_warning('album not found: %s' % album)
 		return
 	
+	blacklisted = zipdel = albumdel = False
+	# Add URL to blacklist
+	url = get_url_for_album(album)
+	if blacklist == 'true' and url != '':
+		blacklist_url(url)
+		blacklisted = True
+
 	# Delete zip
 	try:
 		remove('%s.zip' % album)
 		zipdel = True
 	except: pass
-
-	# Add URL to blacklist
-	url = get_url_for_album(album)
-	if url != '':
-		try:
-			f = open('../url_blacklist.txt', 'a')
-			f.write('%s\n' % url)
-			f.close()
-		except: pass
 	
 	# Delete album dir
 	try:
 		rmtree(album)
 		albumdel = True
 	except: pass
-	if albumdel and zipdel:
-		print_ok('album and zip were both deleted')
-	elif albumdel:
-		print_warning('album was deleted, zip was not found')
-	elif zipdel:
-		print_warning('zip was deleted, album was not found')
-	else:
-		print_error('neither album nor zip was deleted')
 
-def delete_albums_by_user(user):
+	# Respond accordingly
+	response = ''
+	if blacklisted:
+		response = ' and album was blacklisted'
+	if albumdel and zipdel:
+		print_ok('album and zip were both deleted%s' % response)
+	elif albumdel:
+		print_warning('album was deleted, zip was not found%s' % response)
+	elif zipdel:
+		print_warning('zip was deleted, album was not found%s' % response)
+	else:
+		print_error('neither album nor zip were deleted%s' % response)
+
+def delete_albums_by_user(user, blacklist=''):
 	if not is_admin():
 		print_error('you are not an admin: %s' % environ['REMOTE_ADDR'])
 		return
@@ -434,7 +437,15 @@ def delete_albums_by_user(user):
 		ip = f.read().replace('\n', '').strip()
 		f.close()
 		if ip != user: continue
-		delalbum = delzip = False
+
+		blacklisted = delalbum = delzip = False
+
+		# Add URL to blacklist
+		url = get_url_for_album(d)
+		if blacklist == 'true' and url != '':
+			blacklist_url(url)
+			blacklisted = True
+	
 		# Delete zip
 		try: 
 			remove('%s.zip' % d)
@@ -445,12 +456,16 @@ def delete_albums_by_user(user):
 			rmtree(d)
 			delalbum = True
 		except: pass
+
+		blresponse = ''
+		if blacklisted:
+			blresponse = ' + blacklist'
 		if delzip and delalbum:
-			deleted.append('%s/ and %s.zip' % (d, d))
+			deleted.append('%s/ and %s.zip%s' % (d, d, blresponse))
 		elif delzip:
-			deleted.append('%s.zip' % d)
+			deleted.append('%s.zip%s' % (d, blresponse))
 		elif delalbum:
-			deleted.append('%s/' % d)
+			deleted.append('%s/%s' % (d, blresponse))
 	print dumps( {
 		'deleted' : deleted,
 		'user'    : user
@@ -553,6 +568,26 @@ def is_admin(): # True if user's IP is in the admin list
 		if ip == user:
 			return True
 	return False
+
+def blacklist_url(url):
+	if not url.startswith('http://') and \
+	   not url.startswith('https://'):
+		url = 'http://%s' % line
+	# Use site's main 'rip.cgi' to get the ripper from the URL
+	from sys import path as syspath
+	syspath.append('..')
+	from rip import get_ripper
+	try:
+		ripper = get_ripper(url)
+		# Get directory name from URL
+		to_blacklist = path.basename(ripper.working_dir)
+	except Exception, e:
+		# Default to just the URL
+		to_blacklist = url.replace('http://', '').replace('https://', '')
+	# Add to blacklist
+	f = open('../url_blacklist.txt', 'a')
+	f.write('%s\n' % to_blacklist)
+	f.close()
 
 # Entry point. Print leading/trailing characters, execute main()
 if __name__ == '__main__':

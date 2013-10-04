@@ -28,6 +28,7 @@ h3 {
 .top { vertical-align: top; }
 .underline { text-decoration: underline; }
 .white { color: #fff; }
+.black { color: #999; }
 .red { color: #f11; }
 .red:hover { color: #f55; }
 .orange { color: #f50; }

@@ -720,7 +720,7 @@ function showReportsToAdmin(album) {
 	if (album.user) {
 		// Link to all albums ripped by user
 		$('<a />')
-			.html('all albums ripped by ' + album.user)
+			.html('view all albums ripped by ' + album.user)
 			.attr('href', '#user=' + album.user)
 			.attr('target', '_BLANK')
 			.addClass('white bold')
@@ -731,39 +731,62 @@ function showReportsToAdmin(album) {
 	}
 	
 	// Show 'delete album' link
-	var adel = $('<a />') // delete link
+	var $adel = $('<a />') // delete link
 		.html('delete album')
 		.addClass('red bold underline')
 		.attr('href', '')
 		.attr('album', album.album)
 		.click( function() {
-				deleteAlbum( $(this).attr('album') );
+				deleteAlbum( $(this).attr('album'), false );
 				return false;
 		});
-	var sdel = $('<span />') // delete status
+	var $adelbl = $('<a />')
+		.html('and blacklist')
+		.addClass('black bold underline')
+		.attr('href', '')
+		.attr('album', album.album)
+		.css('padding-left', '5px')
+		.click( function() {
+				deleteAlbum( $(this).attr('album'), true );
+				return false;
+		});
+	var $sdel = $('<span />') // delete status
 		.css('padding-left', '5px')
 		.attr('id', 'delete_status');
 	$('<div />')
 		.addClass('space')
-		.append(adel)
-		.append(sdel)
+		.append($adel)
+		.append($adelbl)
+		.append($sdel)
 		.appendTo( $('#report') );
 	
 	// Show 'delete all albums by user' link
 	if (album.user != null) {
-		$('<a />')
+		var $delall = $('<a />')
 			.html('delete all albums ripped by ' + album.user)
 			.attr('href', '')
 			.addClass('red bold underline')
 			.attr('user', album.user)
 			.click( function() {
-				deleteAllAlbums( $(this).attr('user') );
+				deleteAllAlbums( $(this).attr('user'), false );
 				return false;
-			})
-			.appendTo( 
-				$('<div />').addClass('space')
-					.appendTo( $('#report') )
-			);
+			});
+		var $delallbl = $('<a />')
+			.html('and blacklist all')
+			.attr('href', '')
+			.css('padding-left', '5px')
+			.addClass('black bold underline')
+			.attr('user', album.user)
+			.click( function() {
+				deleteAllAlbums( $(this).attr('user'), true );
+				return false;
+			});
+		
+		$('<div />')
+			.addClass('space')
+			.append($delall)
+			.append($delallbl)
+			.appendTo( $('#report') );
 
 		var aban = $('<a />')
 			.html('permanently ban ' + album.user)
@@ -849,7 +872,7 @@ function clearReports(album) {
 	return false;
 }
 
-function deleteAlbum(album) {
+function deleteAlbum(album, blacklist) {
 	$('#delete_status')
 		.empty()
 		.append(
@@ -859,7 +882,7 @@ function deleteAlbum(album) {
 				.css('padding-right', '5px')
 		);
 	
-	$.getJSON('view.cgi?delete=' + album)
+	$.getJSON('view.cgi?delete=' + album + '&blacklist=' + blacklist)
 		.fail( adminJsonFailHandler )
 		.done( function(json) { 
 			adminRequestHandler(json, $('#delete_status'))
@@ -867,7 +890,7 @@ function deleteAlbum(album) {
 	return false;
 }
 
-function deleteAllAlbums(user) {
+function deleteAllAlbums(user, blacklist) {
 	$('#delete_status')
 		.empty()
 		.append(
@@ -877,7 +900,7 @@ function deleteAllAlbums(user) {
 				.css('padding-right', '5px')
 		);
 	
-	$.getJSON('view.cgi?delete_user=' + user)
+	$.getJSON('view.cgi?delete_user=' + user + '&blacklist=' + blacklist)
 		.fail( adminJsonFailHandler )
 		.done( function(json) { 
 			if ( adminRequestHandler(json, $('#delete_status')) ) {
