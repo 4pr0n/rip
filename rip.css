@@ -201,11 +201,11 @@ input.textbox {
 	display: inline;
 	width: 98%;
 }
-input.textbox:hover {
+input.textbox:hover:enabled {
 	box-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6),
-	              0px  4px 10px rgba(150, 150, 150, 0.6),
-	             -4px  0px 10px rgba(150, 150, 150, 0.6),
-	              0px -4px 10px rgba(150, 150, 150, 0.6);
+	             0px  4px 10px rgba(150, 150, 150, 0.6),
+	            -4px  0px 10px rgba(150, 150, 150, 0.6),
+	             0px -4px 10px rgba(150, 150, 150, 0.6);
 }
 
 td.button {
@@ -225,7 +225,7 @@ input.button {
 	cursor: pointer;
 	box-shadow: 5px  5px  5px rgba(  0,   0,   0, 0.6);
 }
-input.button:hover {
+input.button:hover:enabled {
 	box-shadow:   4px  0px 10px rgba(150, 150, 150, 0.6),
 	              0px  4px 10px rgba(150, 150, 150, 0.6),
 	             -4px  0px 10px rgba(150, 150, 150, 0.6),
@@ -233,14 +233,17 @@ input.button:hover {
 }
 input.button:active {
 	background-color: #ccc;
-	/*background-color: #000;
-	color: #fff;*/
 }
 
 input:disabled {
-	background-color: #aaa;
-	color: transparent;
-	text-shadow: 0 0 5px rgba(0,0,0,0.5);
+	cursor: default;
+	color: #000;
+	-webkit-transition:text-shadow 0.6s ease-in-out;
+	   -moz-transition:text-shadow 0.6s ease-in-out;
+	     -o-transition:text-shadow 0.6s ease-in-out;
+	    -ms-transition:text-shadow 0.6s ease-in-out;
+	        transition:text-shadow 0.6s ease-in-out;
+	text-shadow: 0 0 5px rgba(0,0,0,0.9);
 }
 
 label.checkbox {
@@ -264,7 +267,6 @@ label.checkbox:hover {
 div.statusbar {
 	padding: 5px;
 	padding-top: 10px;
-	padding-bottom: 8px;
 	text-align: left;
 }
 div.error {
@@ -376,10 +378,12 @@ div.date {
 }
 table.bottom {
 	max-height: 10px;
-	width: auto;
+	width: 100%;
 }
 td.bottom {
 	white-space: nowrap;
+	padding-bottom: 5px;
+	margin: 0px;
 }
 td.donate {
 	text-align: right;
@@ -397,10 +401,10 @@ td.bottom:hover {
 }
 a.bottom {
 	text-decoration: none;
-	font-size: 0.8em;
+	font-size: 1.0em;
 	font-weight: bold;
-	margin-top: 0px;
-	padding: 10px;
+	padding: 15px;
+	padding-bottom: 8px;
 	padding-left: 20px;
 	padding-right: 20px;
 }

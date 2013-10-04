@@ -200,24 +200,38 @@ function setHash(url) { // Adds a site to the URL hash
 	}
 }
 
-function disableControls() {
+function disableRipControls() {
 	$(window).bind('beforeunload', function() {
 		return "Exiting during a rip may cause the archive to become corrupted. Are you sure you want to leave this page?";
 	});
-	$('#rip_text').prop('disabled', true);
-	$('#rip_button').prop('disabled', true);
+	$('#rip_text, #rip_button')
+		.stop()
+		.prop('disabled', true)
+		.animate(
+			{
+				'opacity': 0.3,
+			},
+			600
+		);
 }
-function enableControls() {
+function enableRipControls() {
 	$(window).unbind('beforeunload');
-	$('#rip_text').prop('disabled', false);
-	$('#rip_button').prop('disabled', false);
+	$('#rip_text, #rip_button')
+		.stop()
+		.prop('disabled', false)
+		.animate(
+			{
+				'opacity': 1.0,
+			},
+			600
+		);
 }
 
 function startRip() { // Start ripping album
 	if ($('#status_bar').attr('exceeded')) {
 		return; // User has exceeded max number of rips, short-circuit
 	}
-	disableControls();
+	disableRipControls();
 	setHash( $('#rip_text').val() );
 	var $statbar = $('#status_bar')
 		.slideUp(function() {
@@ -270,7 +284,7 @@ function ripFailHandler(x, s, e) {
 				)
 		});
 	setProgress(0);
-	enableControls();
+	enableRipControls();
 }
 
 function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'check')
@@ -282,7 +296,7 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 		$statbar.empty()
 			.append(err);
 		setProgress(0);
-		enableControls();
+		enableRipControls();
 		return;
 	}
 	else if (json.zip && $statbar.attr('has_download_link') === 'false') {
@@ -343,7 +357,7 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 						{ queue: false, duration: 750 }
 				)
 			});
-		enableControls();
+		enableRipControls();
 	}
 	else if (json.log || json.log == '') {
 		var log = json.log.replace(/\n/g, '');
@@ -460,6 +474,15 @@ function setProgress(perc) {
 
 // Start ripping album
 function startVid() {
+	$('#vid_text, #vid_button')
+		.stop()
+		.prop('disabled', true)
+		.animate(
+			{
+				'opacity': 0.3,
+			},
+			600
+		);
 	$('#vid_status')
 		.css('text-align', 'center')
 		.empty()
@@ -534,6 +557,15 @@ function startVid() {
 				)
 				.fadeIn();
 		}
+		$('#vid_text, #vid_button')
+			.stop()
+			.prop('disabled', false)
+			.animate(
+				{
+					'opacity': 1.0,
+				},
+				600
+			);
 	});
 }
 
