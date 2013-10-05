@@ -47,9 +47,9 @@ class reddit(imgur):
 				if not 'imgur.com' in url: continue
 				if '#' in url: url = url[:url.find('#')]
 				if '?' in url: url = url[:url.find('?')]
-				while url[url.find('/a/')+3:].count('/') > 0:
-					url = url[:url.rfind('/')]
 				if 'imgur.com/a/' in url:
+					while url[url.find('/a/')+3:].count('/') > 0:
+						url = url[:url.rfind('/')]
 					aid = url[url.rfind('/')+1:]
 					if not aid in already_downloaded:
 						already_downloaded.append(aid)
