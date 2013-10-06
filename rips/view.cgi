@@ -3,20 +3,23 @@
 import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
-from os       import listdir, path, sep, walk, utime, stat, environ, remove
+from os       import listdir, path, walk, utime, stat, environ, remove, chdir
 from json     import dumps
 from random   import randrange
 from datetime import datetime
-from time     import strftime
+from time     import time
 from urllib   import quote, unquote
 from shutil   import rmtree
-
+sep = '/'
 ##################
 # MAIN
 
 def main(): # Prints JSON response to query
 	keys = get_keys()
 	
+	if path.exists('rips'):
+		chdir('rips')
+
 	# Gets keys or defaults
 	start   = int(keys.get('start',   0))   # Starting index (album/images)
 	count   = int(keys.get('count',   20))  # Number of images/thumbs to retrieve
@@ -214,6 +217,11 @@ def filter_albums(thedirs, count, preview_size, after, found_after):
 		} )
 
 
+def sizeof_fmt(num):
+    for x in ['bytes','KB','MB','GB','TB']:
+        if num < 1024.0:
+            return "%3.1f %s" % (num, x)
+        num /= 1024.0
 ##################
 # SINGLE ALBUM
 def get_images_for_album(album, start, count, thumbs=False):
@@ -252,6 +260,7 @@ def get_images_for_album(album, start, count, thumbs=False):
 	result['start']   = start
 	result['count']   = dcount
 	result['album']   = album.replace('%20', ' ')
+	result['size']    = sizeof_fmt(path.getsize('./%s.zip' % album))
 	result['archive'] = './%s.zip' % album.replace(' ', '%20').replace('%20', '%2520')
 	return result
 
@@ -489,7 +498,7 @@ def ban_user(user, reason=""):
 		print_warning('user is already banned')
 		return
 	reason = reason.replace('\n', '').replace('\r', '')
-	lines.insert(lines.index('allow from all'), '# added by admin %s at %s (reason: %s)' % (environ['REMOTE_ADDR'], strftime('%s'), reason))
+	lines.insert(lines.index('allow from all'), '# added by admin %s at %s (reason: %s)' % (environ['REMOTE_ADDR'], int(time()), reason))
 	lines.insert(lines.index('allow from all'), ' deny from %s' % user)
 	lines.insert(lines.index('allow from all'), '')
 	try:
@@ -549,7 +558,7 @@ def update_album(album): # Mark album as recently-viewed
 def update_file_modified(f): # Sets system 'modified time' to current time
 	st = stat(f)
 	atime = int(st.st_atime)
-	mtime = int(strftime('%s'))
+	mtime = int(time())
 	try:
 		utime(f, (atime, mtime))
 	except Exception, e:
@@ -559,9 +568,12 @@ def update_file_modified(f): # Sets system 'modified time' to current time
 def is_admin(): # True if user's IP is in the admin list
 	if not 'REMOTE_ADDR' in environ: environ['REMOTE_ADDR'] = '127.0.0.1'
 	user = environ['REMOTE_ADDR']
-	f = open('../admin_ip.txt', 'r')
-	ips = f.read().split('\n')
-	f.close()
+	try:
+		f = open('../admin_ip.txt', 'r')
+		ips = f.read().split('\n')
+		f.close()
+	except:
+		ips = ['127.0.0.1']
 	for ip in ips:
 		ip = ip.strip()
 		if len(ip) < 7: continue
