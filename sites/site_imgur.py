@@ -275,4 +275,40 @@ class imgur(basesite):
 			return temp
 		else:
 			return url
+	
+	'''
+		Receives an imgur link that is not an album.
+		http://i.imgur.com/abcde.jpg
+		http://i.imgur.com/abcdeh.jpg
+		http://imgur.com/abcde.jpg
+		http://imgur.com/abcdeh.jpg
+		http://imgur.com/abcde
+		http://imgur.com/abcdeh
+	'''
+	def get_highest_res_and_ext(self, url):
+		if not '.' in url[-5:-3]:
+			# Need to find extension
+			iid = url[url.find('imgur.com/')+len('imgur.com/'):]
+			if '/' in iid: iid = iid[:iid.find('/')]
+			if '?' in iid: iid = iid[:iid.find('?')]
+			if '#' in iid: iid = iid[:iid.find('#')]
+
+			self.debug('[imgur] loading http://api.imgur.com/2/image/%s.json' % iid)
+			ir = self.web.get('http://api.imgur.com/2/image/%s.json' % iid)
+			try:
+				ijs = loads(ir)
+				if 'image' in ijs and 'links' in ijs['image'] and 'original' in ijs['image']['links']:
+					self.debug('[imgur] response from imgurs api: %s' % ijs['image']['links']['original'])
+					return ijs['image']['links']['original']
+			except Exception, e:
+				self.debug('could not parse imgur response %s\n%s' % (str(e), ir))
+
+			r = self.web.get(url)
+			imgs = self.web.between(r, '<img src="//', '"')
+			if len(imgs) == 0:
+				# Image not found
+				raise Exception('image not found')
+			url = 'http://%s' % imgs[0]
 		
+		# URL now contains extension
+		return self.get_highest_res(url)

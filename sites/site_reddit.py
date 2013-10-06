@@ -40,9 +40,11 @@ class reddit(imgur):
 			if not 'children' in json['data']: break
 			children = json['data']['children']
 			total += len(children)
+			self.debug('[reddit] # of posts loaded: %d' % len(children))
 			for child in children:
 				url = child['data']['url']
 				postid = child['data']['id'] + '-' # to separate postid from index
+				self.debug('[reddit] postid: %s, url: %s' % (postid, url))
 				index += 1
 				if not 'imgur.com' in url: continue
 				if '#' in url: url = url[:url.find('#')]
@@ -53,27 +55,24 @@ class reddit(imgur):
 					aid = url[url.rfind('/')+1:]
 					if not aid in already_downloaded:
 						already_downloaded.append(aid)
+						self.debug('[album] download album @ %s' % url)
 						self.download_album_json(url, postid=postid)
 					else:
 						self.log('already downloaded %s' % url)
 				else:
-					if not 'i.imgur.com' in url and not (url[-4] == '.' or url[-5] == '.'):
-						# Need to get direct link to image
-						iid = url[url.find('imgur.com/')+len('imgur.com/'):]
-						if '/' in iid: iid = iid[:iid.find('/')]
-						if '?' in iid: iid = iid[:iid.find('?')]
-						if '#' in iid: iid = iid[:iid.find('#')]
-						ir = self.web.get('http://api.imgur.com/2/image/%s' % iid)
-						try: ijs = loads(ir)
-						except: continue
-						if not 'image' in ijs or not 'links' in ijs['image'] or not 'original' in ijs['image']['links']: continue
-						url = ijs['image']['links']['original']
+					try:
+						url = self.get_highest_res_and_ext(url)
+						self.debug('[image] got highest res + ext: %s' % url)
+					except Exception, e:
+						self.log('could not donwload %s: %s' % (url, str(e)))
+						continue
 					fname = url[url.rfind('/')+1:]
 					if '?' in fname: fname = fname[:fname.find('?')]
 					if '#' in fname: fname = fname[:fname.find('#')]
 					if not fname in already_downloaded:
 						already_downloaded.append(fname)
 						saveas = '%s%03d_%s' % (postid, index, fname)
+						self.debug('[image] download %s to %s' % (url, saveas))
 						self.download_image(url, index, total=total, saveas=saveas)
 					else:
 						self.log('already downloaded %s' % url)
