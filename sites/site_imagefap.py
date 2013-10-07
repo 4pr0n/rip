@@ -13,20 +13,24 @@ class imagefap(basesite):
 	def sanitize_url(self, url):
 		if not 'imagefap.com/' in url: 
 			raise Exception('')
-		if not 'imagefap.com/pictures/' in url:
-			raise Exception("required '/pictures/' not found")
-		if '?' in url: url = url[:url.find('?')]
-		if not url.endswith('/'): url += '/'
-		gids = self.web.between(url, '/pictures/', '/')
-		if len(gids) == 0:
-			raise Exception("required gallery ID /pictures/X/ not found")
-		gid = gids[0]
-		return '%s?gid=%s&view=2' % (url, gid)
+		gid = self.get_gid(url)
+		if gid == '':
+			raise Exception('?gid= and /pictures/ not found in URL')
+		return 'http://www.imagefap.com/gallery.php?gid=%s&view=2' % gid
+
+	""" Extract gallery id from URL. Return empty string if not found """
+	def get_gid(self, url):
+		gid = ''
+		for before in ['?gid=', '/pictures/']:
+			if before in url:
+				gid = url[url.rfind(before)+len(before):]
+		for c in ['/', '?', '#', '&']:
+			if c in gid: gid = gid[:gid.find(c)]
+		return gid
 
 	""" Discover directory path based on URL """
 	def get_dir(self, url):
-		gid = self.web.between(url, '/pictures/', '/')[0]
-		return 'imagefap_%s' % gid
+		return 'imagefap_%s' % self.get_gid(url)
 
 	def download(self):
 		self.init_dir()
