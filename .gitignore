@@ -18,3 +18,7 @@ log.cleanup
 sites/site_ehentai.py
 sites/site_mediafire.py
 sites/site_vk.py
+graphs/.*
+*.log
+graphs/logs/*
+misc/
