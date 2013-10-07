@@ -68,6 +68,32 @@ function loadAlbum(album, start, count, startOver) {
 					.append($('<div />').html('this album (' + window.location.hash.replace('#','') + ') is no longer available'))
 					.css('padding-bottom', '30px')
 					.show();
+				if (album.guess != null && album.guess != '') {
+					$('#thumbs_area').append(
+						$('<div />')
+							.html('the album may have originated from:')
+							.append( 
+								$('<div />')
+									.css('margin-top', '10px')
+									.append(
+										$('<a />')
+											.addClass('download_box')
+											.attr('href', album.guess)
+											.attr('target', '_BLANK' + String(Math.random()))
+											.attr('rel', 'noreferrer')
+											.html(album.guess)
+									)
+									.append(
+										$('<a />')
+											.css('margin-left', '10px')
+											.addClass('download_box')
+											.attr('href', '../#' + album.guess)
+											.html('re-rip')
+									)
+										
+							)
+					);
+				}
 				$('#next').html('');
 				$('#albums_table').attr('loading', 'true');
 				// TODO Reverse-encode the album name into a URL. Provide link to URL & Album ripper
@@ -122,7 +148,7 @@ function loadAlbum(album, start, count, startOver) {
 				.attr('href', album.url)
 				.attr('title', 'link to external site where these images were grabbed')
 				.addClass('bold')
-				.attr('target', '_BLANK')
+				.attr('target', '_BLANK' + String(Math.random()))
 				.attr('rel', 'noreferrer')
 				.appendTo( $('#album_url').html('') );
 			
@@ -133,7 +159,7 @@ function loadAlbum(album, start, count, startOver) {
 				.attr('title', 'easy to copy and paste into imgur')
 				.addClass('download_box')
 				.attr('href', 'urls_raw.cgi?album=' + album.album)
-				.attr('target', '_BLANK')
+				.attr('target', '_BLANK' + String(Math.random()))
 				.appendTo( $('#get_urls') );
 			
 			// Append thumbnails to table in rows
@@ -722,7 +748,7 @@ function showReportsToAdmin(album) {
 		$('<a />')
 			.html('view all albums ripped by ' + album.user)
 			.attr('href', '#user=' + album.user)
-			.attr('target', '_BLANK')
+			.attr('target', '_BLANK' + String(Math.random()))
 			.addClass('white bold')
 			.appendTo (
 					$('<div />').addClass('space')

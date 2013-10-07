@@ -17,7 +17,7 @@ sep = '/'
 def main(): # Prints JSON response to query
 	keys = get_keys()
 	
-	if path.exists('rips'):
+	if path.exists('rips') and path.exists(path.join('rips', 'view.cgi')):
 		chdir('rips')
 
 	# Gets keys or defaults
@@ -222,6 +222,84 @@ def sizeof_fmt(num):
         if num < 1024.0:
             return "%3.1f %s" % (num, x)
         num /= 1024.0
+
+# Attempts to guess URL from album name
+def guess_url(album):
+	fields = album.split('_')
+	if album.startswith('kodiefiles_'): return '' # No way to find the date
+	if album.startswith('photobucket_'): return '' # Unable to determine server, subdir, etc.
+	# Simple one-to-one correspondence
+	if album.startswith('500px_'): return 'http://500px.com/%s' % '_'.join(fields[1:])
+	if album.startswith('cghub_'): return 'http://%s.cghub.com/images/' % '_'.join(fields[1:])
+	if album.startswith('nfsfw_'): return 'http://nfsfw.com/gallery/v/%s' % '_'.join(fields[1:])
+	if album.startswith('4chan_'): return 'http://boards.4chan.org/%s/res/%s' % (fields[1], fields[2])
+	if album.startswith('setsdb_'): return 'http://setsdb.org/%s/' % '_'.join(fields[1:])
+	if album.startswith('imgbox_'): return 'http://imgbox.com/g/%s' % '_'.join(fields[1:])
+	if album.startswith('reddit_'): return 'http://www.reddit.com/user/%s' % '_'.join(fields[1:])
+	if album.startswith('soupio_'): return 'http://redditsluts.soup.io/tag/%s' % '_'.join(fields[1:])
+	if album.startswith('anonib_'): return 'http://www.anonib.com/%s/res/%s.html' % (fields[1], fields[2])
+	if album.startswith('twitter_'): return 'http://twitter.com/%s' % '_'.join(fields[1:])
+	if album.startswith('fuskator_'): return 'http://fuskator.com/full/%s/' % '_'.join(fields[1:])
+	if album.startswith('gonewild_'): return 'http://www.reddit.com/user/%s' % '_'.join(fields[1:])
+	if album.startswith('imagebam_'): return 'http://www.imagebam.com/gallery/%s' % '_'.join(fields[1:])
+	if album.startswith('imagearn_'): return 'http://imagearn.com/gallery.php?id=%s' % fields[-1]
+	if album.startswith('imagefap_'): return 'http://www.imagefap.com/gallery.php?gid=%s' % fields[-1]
+	if album.startswith('xhamster_'): return 'http://xhamster.com/photos/gallery/%s/asdf.html' % fields[-1]
+	if album.startswith('instagram_'): return 'http://instagram.com/%s' % '_'.join(fields[1:])
+	if album.startswith('shareimage_'): return 'www.share-image.com/%s-asdf' % '_'.join(fields[1:])
+	if album.startswith('buttoucher_'): return 'http://butttoucher.com/users/%s' % '_'.join(fields[1:])
+	if album.startswith('getgonewild_'): return 'http://www.getgonewild.com/profile/%s' % '_'.join(fields[1:])
+	if album.startswith('gallerydump_'): return 'http://www.gallery-dump.com/index.php?gid=%s' % fields[-1]
+	# Semi-complicated
+	if album.startswith('deviantart_'): 
+		if len(fields) == 2:
+			return 'http://%s.deviantart.com/gallery/' % fields[1]
+		else:
+			return 'http://%s.deviantart.com/gallery/%s' % (fields[1], fields[2])
+	if album.startswith('chansluts_'):
+		fields.insert(-1, 'res')
+		return 'http://www.chansluts.com/%s.php' % '/'.join(fields[1:])
+	if album.startswith('flickr_'):
+		if len(fields) > 2:
+			return 'http://www.flickr.com/photos/%s/sets/%s/' % (fields[1], fields[2])
+		else:
+			return 'http://www.flickr.com/photos/%s/' % fields[1]
+			
+	# Complicated
+	if album.startswith('minus_'):
+		if len(fields) > 2:
+			if fields[1] == 'guest':
+				fields[1] = ''
+			else:
+				fields[1] += '.'
+			return 'http://%sminus.com/%s' % (fields[1], fields[2])
+	if album.startswith('tumblr_'):
+		if len(fields) > 2: # Uses tags
+			return 'http://%s.tumblr.com/tagged/%s' % (fields[1], '_'.join(fields[2:]))
+		else: # No tags
+			return 'http://%s.tumblr.com/' % fields[-1]
+	# More complicated
+	if album.startswith('teenplanet_'):
+		if 'Latino' in fields and 'M4N' in fields:
+			fields.remove('Latino')
+			fields.remove('M4N')
+			fields.insert(1, 'Latino_M4N')
+		elif 'AF' in fields and 'Pix' in fields:
+			fields.remove('AF')
+			fields.remove('Pix')
+			fields.insert(1, 'AF_Pix')
+		return 'http://photos.teenplanet.org/atomicfrog/%s/%s' % (fields[1], '_'.join(fields[2:]))
+	if album.startswith('imgur_'):
+		if len(fields) == 2: # Album or user
+			if len(fields[1]) == 5: # probably an album
+				return 'http://imgur.com/a/%s' % fields[1]
+			else: # probably a user
+				return 'http://%s.imgur.com/' % fields[1]
+		elif fields[1] == 'r': # Subreddit
+			return 'http://imgur.com/%s' % '/'.join(fields[1:])
+	return ''
+	
+	
 ##################
 # SINGLE ALBUM
 def get_images_for_album(album, start, count, thumbs=False):
@@ -230,6 +308,7 @@ def get_images_for_album(album, start, count, thumbs=False):
 			'images'  : [],
 			'count'   : 0,
 			'album'   : '[not found]',
+			'guess'   : guess_url(album),
 			'archive' : './'
 		}
 	result = {}
