@@ -644,21 +644,26 @@ def update_file_modified(f): # Sets system 'modified time' to current time
 		return False
 	return True
 
+def get_cookies():
+	if not 'HTTP_COOKIE' in environ: return {}
+	cookies = {}
+	txt = environ['HTTP_COOKIE']
+	for line in txt.split(';'):
+		if not '=' in line: continue
+		pairs = line.strip().split('=')
+		cookies[pairs[0]] = pairs[1]
+	return cookies
+
 def is_admin(): # True if user's IP is in the admin list
-	if not 'REMOTE_ADDR' in environ: environ['REMOTE_ADDR'] = '127.0.0.1'
-	user = environ['REMOTE_ADDR']
-	try:
-		f = open('../admin_ip.txt', 'r')
-		ips = f.read().split('\n')
-		f.close()
-	except:
-		ips = ['127.0.0.1']
-	for ip in ips:
-		ip = ip.strip()
-		if len(ip) < 7: continue
-		if ip == user:
-			return True
-	return False
+	secretfile = path.join('..', 'admin_password.txt')
+	if not path.exists(secretfile):
+		return False
+	cookies = get_cookies()
+	if not 'rip_admin_password' in cookies: return False
+	f = open(secretfile, 'r')
+	password = f.read().strip()
+	f.close()
+	return cookies['rip_admin_password'] == password
 
 def blacklist_url(url):
 	if not url.startswith('http://') and \

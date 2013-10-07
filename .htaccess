@@ -2,6 +2,7 @@
 RedirectMatch 404 ^.*\.py$
 RedirectMatch 404 ^.*url_blacklist\.txt$
 RedirectMatch 404 ^.*admin_ip\.txt$
+RedirectMatch 404 ^.*admin_password\.txt$
 
 ## USER IP BANNING
 <Limit GET POST>
