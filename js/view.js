@@ -62,19 +62,24 @@ function loadAlbum(album, start, count, startOver) {
 			if (album.images.length == 0) {
 				// Album not found
 				$('#status_area').hide();
+				$('#thumbs_table').hide()
 				$('#thumbs_area')
-					.css('text-align', 'center')
+					.css({
+						'text-align': 'center',
+						'padding': '30px',
+						'padding-top': '20px'
+					})
 					.append($('<h1 />').html('album not found'))
 					.append($('<div />').html('this album (' + window.location.hash.replace('#','') + ') is no longer available'))
-					.css('padding-bottom', '30px')
-					.show();
+					.slideDown();
 				if (album.guess != null && album.guess != '') {
 					$('#thumbs_area').append(
 						$('<div />')
 							.html('the album may have originated from:')
+							.css('padding-top', '10px')
 							.append( 
 								$('<div />')
-									.css('margin-top', '10px')
+									.css('margin-top', '20px')
 									.append(
 										$('<a />')
 											.addClass('download_box')
