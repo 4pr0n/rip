@@ -357,7 +357,7 @@ div.date {
 }
 
 .download_arrow {
-	background-image: url(download.png);
+	background-image: url(../images/download.png);
 	background-repeat: no-repeat;
 	background-size: 90% auto;
 	background-position: center center;
@@ -418,14 +418,14 @@ a.bottom:hover {
 }
 
 div.donate_button input {
-	background: transparent url(donate.png);
+	background: transparent url(../images/donate.png);
 	cursor: pointer;
 	width:  92px;
 	height: 26px;
 	border: none;
 }
 div.donate_button input:hover {
-	background: transparent url(donate_color.png);
+	background: transparent url(../images/donate_color.png);
 }
 
 div.warning {

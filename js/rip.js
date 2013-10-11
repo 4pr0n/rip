@@ -237,7 +237,7 @@ function startRip() { // Start ripping album
 		.slideUp(function() {
 			$statbar.empty()
 				.attr('has_download_link', 'false')
-				.append( $('<img />').attr('src', 'spinner_dark.gif') )
+				.append( $('<img />').attr('src', './images/spinner_dark.gif') )
 				.append( $('<span />').html(' loading...') )
 				.slideDown();
 			var query = getQueryString(true);
@@ -383,7 +383,7 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 			$statbar.empty();
 			$('<div />')
 				.append( $('<img />')
-						.attr('src', 'spinner_dark.gif')
+						.attr('src', './images/spinner_dark.gif')
 						.css('padding-right', '10px')
 						.css('padding-left', '10px')
 				)
@@ -486,7 +486,7 @@ function startVid() {
 	$('#vid_status')
 		.css('text-align', 'center')
 		.empty()
-		.append( $('<img />') .attr('src', 'spinner_dark.gif') )
+		.append( $('<img />') .attr('src', './images/spinner_dark.gif') )
 		.append( $('<span />').html(' loading...') );
 	
 	var query = 'vid.cgi?url=' + encodeURIComponent($('#vid_text').val());

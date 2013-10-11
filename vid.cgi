@@ -73,6 +73,7 @@ def get_url(siteurl):
 	if 'seenive.com'      in siteurl: return get_site_seenive(siteurl)
 	if 'cliphunter.com'   in siteurl: return get_site_cliphunter(siteurl)
 	if 'spankwire.com'    in siteurl: return get_site_spankwire(siteurl)
+	if 'kinkylicious.com' in siteurl: return get_site_kinkylicious(siteurl)
 
 	site_key = None
 	for key in sites.keys():
@@ -377,6 +378,23 @@ def get_site_spankwire(siteurl):
 	if vid == None:
 		raise Exception('could not find flashvars.quality_XXXp at %s' % siteurl)
 	return unquote(vid)
+
+def get_site_kinkylicious(siteurl):
+	vid = None
+	if '/video/' in siteurl:
+		vid = siteurl[siteurl.find('/video/')+len('/video/'):]
+		if '/' in vid: vid = vid[:vid.find('/')]
+		if '?' in vid: vid = vid[:vid.find('?')]
+		if '#' in vid: vid = vid[:vid.find('#')]
+	else:
+		r = web.get(siteurl)
+		if 'var video_id = "' in r:
+			vid = web.between(r, 'var video_id = "', '"')[0]
+		elif "so.addVariable('videoid','" in r:
+			vid = web.between(r, "so.addVariable('videoid','", "'")[0]
+	if vid == None:
+		raise Exception('unable to determine video id at %s' % siteurl)
+	return 'http://kinkylicious.com/vdata/%s.flv' % vid
 
 
 def is_supported(url):
