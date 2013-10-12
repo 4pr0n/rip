@@ -380,3 +380,15 @@ div.warning {
 	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.6);
 	margin-bottom: 30px;
 }
+
+#noscript {
+	font-size: 2.0em;
+	position: fixed;
+	top: 20%;
+	left: 10%;
+	background-color: #b33;
+	color: #eee;
+	padding: 30px;
+	padding-top: 0px;
+	border-radius: 20px;
+}

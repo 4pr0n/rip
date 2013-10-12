@@ -305,7 +305,7 @@ function loadAllAlbums(after, startOver) {
 					.append( $('<td />')
 						.addClass('all_album_title')
 						.attr('colspan', ALBUM_PREVIEW_IMAGE_BREAKS)
-						.html(album.album + ' (' + album.total + ' images)')
+						.html(truncate(album.album, 15) + ' (' + album.total + ' images)')
 					)
 					.appendTo($imgtable);
 				
@@ -1031,6 +1031,15 @@ $.fn.imagesLoaded = function(callback, fireOne) {
 				this.src = this.src;
 			}
 		});
+}
+
+///////////////////
+// MISC
+function truncate(text, split_size) { // Truncates text
+	if (text.length > (split_size * 2) + 3) {
+		text = text.substr(0, split_size) + "..." + text.substr(text.length-split_size);
+	}
+	return text;
 }
 
 $(document).ready( function() {

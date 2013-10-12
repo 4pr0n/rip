@@ -100,6 +100,10 @@ def main():
 def rip(url, cached, urls_only):
 	url = unquote(url.strip()).replace(' ', '%20')
 	
+	if not is_supported(url):
+		print_error('site is not supported; will not be supported')
+		return
+
 	try:
 		# Get domain-specific ripper for URL
 		ripper = get_ripper(url, urls_only)
@@ -145,12 +149,6 @@ def rip(url, cached, urls_only):
 				response['image_count'] = image_count
 			print dumps( response )
 			return
-
-	'''
-	if ripper.is_downloading():
-		print_error("album rip is in progress. check back later")
-		return
-	'''
 	
 	# Rip it
 	try:
@@ -215,6 +213,11 @@ def rip(url, cached, urls_only):
 """
 def check(url, urls_only):
 	url = unquote(url).replace(' ', '%20')
+
+	if not is_supported(url):
+		print_error('site is not supported; will not be supported')
+		return
+
 	try:
 		ripper = get_ripper(url, urls_only)
 	except Exception, e:
@@ -405,6 +408,14 @@ def albums_by_ip(ip):
 	print dumps( {
 		'albums' : albums
 		} )
+
+def is_supported(url):
+	if not path.exists('unsupported.txt'): return True
+	for line in open('unsupported.txt', 'r'):
+		line = line.strip()
+		if line.lower() in url.lower():
+			return False
+	return True
 
 """ Entry point. Print leading/trailing characters, executes main() """
 if __name__ == '__main__':

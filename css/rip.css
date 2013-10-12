@@ -443,3 +443,15 @@ div.warning {
 	padding: 20px;
 	padding-bottom: 10px;
 }
+
+#noscript {
+	font-size: 2.0em;
+	position: fixed;
+	top: 20%;
+	left: 10%;
+	background-color: #b33;
+	color: #eee;
+	padding: 30px;
+	padding-top: 0px;
+	border-radius: 20px;
+}

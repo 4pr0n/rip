@@ -47,6 +47,7 @@ class basesite(object):
 		self.base_dir = RIP_DIRECTORY
 		if not os.path.exists(self.base_dir):
 			os.mkdir(self.base_dir)
+		self.original_url = url
 		self.url = self.sanitize_url(url)
 		# Directory to store images in
 		self.working_dir  = '%s%s%s' % (self.base_dir, os.sep, self.get_dir(self.url))
@@ -88,7 +89,7 @@ class basesite(object):
 	def log(self, text, overwrite=False):
 		if self.first_log:
 			self.first_log = False
-			self.log('http://rip.rarchives.com - file log for URL %s' % self.url, overwrite=True)
+			self.log('http://rip.rarchives.com - file log for URL %s' % self.original_url, overwrite=False)
 		if self.debugging:
 			sys.stderr.write('%s\n' % text)
 		text = text.replace('"', '\\"')
@@ -156,7 +157,7 @@ class basesite(object):
 		elif ('image'        not in m['Content-Type'] and \
 		      'video'        not in m['Content-Type'] and \
 		      'octet-stream' not in m['Content-Type']):
-			text = 'no "image"/"video"/"octet-stream" in Content-Type (found "%s") for URL %s' % (m['Content-Type'], url)
+			text = 'no image/video/octet-stream in Content-Type (found "%s") for URL %s' % (m['Content-Type'], url)
 		else:
 			if self.web.download(url, saveas):
 				self.image_count += 1
@@ -342,4 +343,9 @@ class basesite(object):
 	def debug(self, text):
 		if not self.debugging: return
 		sys.stderr.write('%s\n' % text)
+	
+	def strip_url(url):
+		for c in ['?', '#', '&']:
+			if c in url: url = url[:url.find(c)]
+		return url
 
