@@ -55,11 +55,8 @@ class gifyo(basesite):
 					continue
 				current_pics += 1
 				already_got.append(link)
-				if self.urls_only:
-					self.add_url(current_pics, link, total=total_pics)
-				else:
-					self.download_image(link, current_pics, total=total_pics)
-					if self.hit_image_limit(): break
+				self.download_image(link, current_pics, total=total_pics)
+				if self.hit_image_limit(): break
 			sleep(1)
 			page += 1
 		self.wait_for_threads()

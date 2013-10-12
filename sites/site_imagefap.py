@@ -39,9 +39,6 @@ class imagefap(basesite):
 		links = self.web.between(r, 'x.fap.to/images/thumb/', '"')
 		for (index, link) in enumerate(links):
 			link = 'http://fap.to/images/full/%s' % link
-			if self.urls_only:
-				self.add_url(index + 1, link, total=len(links))
-			else:
-				self.download_image(link, index + 1, total=len(links))
-				if self.hit_image_limit(): break
+			self.download_image(link, index + 1, total=len(links))
+			if self.hit_image_limit(): break
 		self.wait_for_threads()

@@ -87,22 +87,10 @@ class five00px(basesite):
 			self.debug('unable to find image at' % url)
 			self.thread_count -= 1
 			return
-		if self.urls_only:
-			self.add_url(index, img)
-			self.thread_count -= 1
-			return
 		urlid = url[url.rfind('/')+1:]
 		extension = img[img.rfind('.')+1:]
 		saveas = '%s%s%03d_%s.%s' % (self.working_dir, sep, index, urlid, extension)
-		if path.exists(saveas):
-			self.image_count += 1
-			self.log('file exists: %s' % saveas)
-		elif self.web.download(img, saveas):
-			self.image_count += 1
-			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), img))
-			self.create_thumb(saveas)
-		else:
-			self.log('download failed (%d/%d) - %s' % (index, total, img))
+		self.save_image(img, saveas, index, total)
 		sleep(1)
 		self.thread_count -= 1
 

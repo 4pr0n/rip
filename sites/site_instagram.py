@@ -69,11 +69,8 @@ class instagram(basesite):
 					if not media_type in item: continue
 					index += 1
 					media_url = item[media_type]['standard_resolution']['url']
-					if self.urls_only:
-						self.add_url(index, media_url)
-					else:
-						self.download_image(media_url, index)
-						sleep(0.5)
+					self.download_image(media_url, index)
+					sleep(0.5)
 					break
 				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break

@@ -29,12 +29,8 @@ class shareimage(basesite):
 			# Convert thumbnail URL to full-size image URL
 			full = thumb.replace('pics.share-image.com', 'pictures.share-image.com')
 			full = full.replace('/thumb/', '/big/')
-			if self.urls_only:
-				# User only wants URLs to direct images, not the downloaded images
-				self.add_url(index, full, total=total)
-			else:
-				# Download the image (threaded)
-				self.download_image(full, index + 1, total=len(thumbs))
+			# Download the image (threaded)
+			self.download_image(full, index + 1, total=len(thumbs))
 			if self.hit_image_limit(): break # Stop if we hit the maximum number of images
 		self.wait_for_threads()            # Wait for existing threads to finish
 

@@ -370,6 +370,8 @@ def get_url_for_album(album):
 	if len(lines) == 0: return ''
 	url = lines[0]
 	if not ' ' in url: return ''
+	if ' @ ' in url:
+		url = url[:url.rfind(' @ ')]
 	return url[url.rfind(' ')+1:]
 
 

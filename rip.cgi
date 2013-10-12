@@ -69,19 +69,13 @@ def main():
 			'url'   in keys:
 		
 		cached    = True # Default to cached
-		urls_only = False
 		if 'cached' in keys and keys['cached'] == 'false':
 			cached = False
-		if 'urls_only' in keys and keys['urls_only'] == 'true':
-			urls_only = True
-		rip(keys['url'], cached, urls_only)
+		rip(keys['url'], cached)
 		
 	elif 'check' in keys and \
 			 'url'   in keys:
-		urls_only = False
-		if 'urls_only' in keys and keys['urls_only'] == 'true':
-			urls_only = True
-		check(keys['url'], urls_only)
+		check(keys['url'])
 		
 	elif 'recent' in keys:
 		lines = 10
@@ -97,7 +91,7 @@ def main():
 		print_error('invalid request')
 
 """ Gets ripper, checks for existing rip, rips and zips as needed. """
-def rip(url, cached, urls_only):
+def rip(url, cached):
 	url = unquote(url.strip()).replace(' ', '%20')
 	
 	if not is_supported(url):
@@ -106,7 +100,7 @@ def rip(url, cached, urls_only):
 
 	try:
 		# Get domain-specific ripper for URL
-		ripper = get_ripper(url, urls_only)
+		ripper = get_ripper(url)
 	except Exception, e:
 		print_error(str(e))
 		return
@@ -190,12 +184,11 @@ def rip(url, cached, urls_only):
 	except: pass
 
 	# Mark album as completed
-	if not urls_only:
-		f = open('%s%scomplete.txt' % (ripper.working_dir, sep), 'w')
-		f.write('\n')
-		f.close()
-		response['album'] = ripper.working_dir.replace(' ', '%20').replace('%20', '%2520')
-		response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
+	f = open('%s%scomplete.txt' % (ripper.working_dir, sep), 'w')
+	f.write('\n')
+	f.close()
+	response['album'] = ripper.working_dir.replace(' ', '%20').replace('%20', '%2520')
+	response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
 	
 	response['zip']  = ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520')
 	response['size'] = ripper.get_size(ripper.existing_zip_path())
@@ -211,7 +204,7 @@ def rip(url, cached, urls_only):
 	Checks status of rip. Returns zip/size if finished, otherwise
 	returns the last log line from the rip.
 """
-def check(url, urls_only):
+def check(url):
 	url = unquote(url).replace(' ', '%20')
 
 	if not is_supported(url):
@@ -219,7 +212,7 @@ def check(url, urls_only):
 		return
 
 	try:
-		ripper = get_ripper(url, urls_only)
+		ripper = get_ripper(url)
 	except Exception, e:
 		print_error(str(e))
 		return
@@ -251,7 +244,7 @@ def check(url, urls_only):
 			} )
 
 """ Returns an appropriate ripper for a URL, or throws exception """
-def get_ripper(url, urls_only):
+def get_ripper(url):
 	sites = [        \
 			deviantart,  \
 			flickr,      \
@@ -293,7 +286,7 @@ def get_ripper(url, urls_only):
 			seenive]
 	for site in sites:
 		try:
-			ripper = site(url, urls_only)
+			ripper = site(url)
 			return ripper
 		except Exception, e:
 			# Rippers that aren't made for the URL throw blank Exception
@@ -338,7 +331,7 @@ def recent(lines):
 	result = []
 	for rec in recents:
 		d = {}
-		try: ripper = get_ripper(rec, False)
+		try: ripper = get_ripper(rec)
 		except: continue
 		d['url'] = rec
 		d['view_url'] = ripper.working_dir.replace('rips/', 'rips/#')
@@ -353,16 +346,16 @@ def tail(f, lines=1, _buffer=4098):
 	lines_found = []
 	block_counter = -1
 	while len(lines_found) < lines:
-			try:
-					f.seek(block_counter * _buffer, SEEK_END)
-			except IOError:  # either file is too small, or too many lines requested
-					f.seek(0)
-					lines_found = f.readlines()
-					break
+		try:
+			f.seek(block_counter * _buffer, SEEK_END)
+		except IOError, e:  # either file is too small, or too many lines requested
+			f.seek(0)
 			lines_found = f.readlines()
-			if len(lines_found) > lines:
-					break
-			block_counter -= 1
+			break
+		lines_found = f.readlines()
+		if len(lines_found) > lines:
+			break
+		block_counter -= 1
 	result = [word.strip() for word in lines_found[-lines:]]
 	result.reverse()
 	return result

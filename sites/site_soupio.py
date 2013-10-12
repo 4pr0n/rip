@@ -37,10 +37,7 @@ class soupio(basesite):
 				else:
 					continue
 				index += 1
-				if self.urls_only:
-					self.add_url(index, url, total=total)
-				else:
-					self.download_image(url, index, total=total)
+				self.download_image(url, index, total=total)
 				if self.hit_image_limit(): break
 			if "SOUP.Endless.next_url = '" in r:
 				next_page = self.web.between(r, "SOUP.Endless.next_url = '", "'")[0]

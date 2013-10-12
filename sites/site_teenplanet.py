@@ -61,20 +61,8 @@ class teenplanet(basesite):
 			return
 		img = 'http://photos.teenplanet.org%s' % self.web.between(r, '<img id="thepic" src="', '"')[0]
 		img = img.replace(' ', '%20')
-		if self.urls_only:
-			self.add_url(index, img, total=total)
-			self.thread_count -= 1
-			return
 		filename = img[img.rfind('/')+1:]
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
-		if os.path.exists(saveas):
-			self.image_count += 1
-			self.log('file exists: %s' % saveas)
-		elif self.web.download(img, saveas):
-			self.image_count += 1
-			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), img))
-			self.create_thumb(saveas)
-		else:
-			self.log('download failed (%d/%d) - %s' % (index, total, img))
+		self.save_image(img, saveas, index, total)
 		self.thread_count -= 1
 

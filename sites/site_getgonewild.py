@@ -32,16 +32,14 @@ class getgonewild(basesite):
 		for link in links:
 			link = link.replace('\\\\', '\\')
 			link = link.replace('\\/', '/')
-			self.debug('found link: %s' % link)
+			if link.startswith('//'): link = 'http:%s' % link
+			self.debug('download: found link %s' % link)
 			if '?' in link: link = link[:link.find('?')]
 			while link.endswith('/'): link = link[:-1]
 			index += 1
 			# Direct link to image
 			if link[link.rfind('.')+1:].lower() in ['jpg', 'jpeg', 'gif', 'png']:
-				if self.urls_only:
-					self.add_url(index, link, total=len(links))
-				else:
-					self.download_image(link, index, total=len(links)) 
+				self.download_image(link, index, total=len(links)) 
 			# Imgur album
 			elif 'imgur.com/a/' in link:
 				while self.thread_count > self.max_threads: sleep(0.1)
@@ -57,7 +55,7 @@ class getgonewild(basesite):
 				t = Thread(target=self.download_imgur_image, args=args)
 				t.start()
 			else:
-				self.debug('not sure how to handle this link: %s' % link)
+				self.debug('download: not sure how to handle this link: %s' % link)
 			if self.hit_image_limit(): break
 		self.wait_for_threads()
 	
@@ -70,7 +68,7 @@ class getgonewild(basesite):
 			link = 'http://%s' % '/'.join(dirs[0:3])
 		r = self.web.get('%s/noscript' % link)
 		alb_index = 0
-		images = self.web.between(r, 'img src="http://i.', '"')
+		images = self.web.between(r, 'img src="//i.', '"')
 		if len(images) == 0:
 			self.log('failed (%d/%d): album not found - %s' % (index, total, link))
 		else: 
@@ -78,17 +76,13 @@ class getgonewild(basesite):
 				alb_index += 1
 				image = 'http://i.%s' % image
 				image = self.get_highest_res(image)
-				if self.urls_only:
-					self.add_url(index, image, total=total)
-					self.thread_count -= 1
-					return
 				filename = image[image.rfind('/')+1:]
 				if '?' in filename: filename = filename[:filename.find('?')]
 				if '#' in filename: filename = filename[:filename.find('#')]
 				if ':' in filename: filename = filename[:filename.find(':')]
 				filename = '%s/%03d_%03d_%s' % (self.working_dir, index, alb_index, filename)
-				self.retry_download(image, filename)
-				self.log('downloaded (%d/%d) #%d (%s) - %s' % (index, total, alb_index, self.get_size(filename), image))
+				self.debug('download_imgur_album: downloading %s' % image)
+				self.save_image(image, filename, index, total)
 		self.thread_count -= 1
 	
 	""" Returns highest-res image by checking if imgur has higher res """
@@ -106,23 +100,23 @@ class getgonewild(basesite):
 			return url
 
 	def download_imgur_image(self, link, index, total):
+		self.debug('download_imgur_image: getting %s' % link)
 		r = self.web.get(link)
 		links = self.web.between(r, '<meta name="twitter:image" value="', '"')
 		if len(links) == 0:
 			links = self.web.between(r, '<link rel="image_src" href="', '"')
 		if len(links) > 0:
 			image = links[0]
-			if self.urls_only:
-				self.add_url(index, link, total=total)
-				self.thread_count -= 1
-				return
+			if image.startswith('//'): image = 'http:%s' % image
 			filename = image[image.rfind('/')+1:]
 			if '?' in filename: filename = filename[:filename.find('?')]
 			if '#' in filename: filename = filename[:filename.find('#')]
 			if ':' in filename: filename = filename[:filename.find(':')]
 			filename = '%s/%03d_%s' % (self.working_dir, index, filename)
-			self.retry_download(image, filename)
-			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(filename), image))
+			self.debug('download_imgur_image: downloading %s' % image)
+			self.save_image(image, filename, index, total)
+		else:
+			self.log('failed (%d/%d): image not found - %s' % (index, total, link))
 		self.thread_count -= 1
 
 	def retry_download(self, url, saveas):

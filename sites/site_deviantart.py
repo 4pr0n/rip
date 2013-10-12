@@ -156,21 +156,9 @@ class deviantart(basesite):
 				time.sleep(3)
 				self.download_image_thread(url, index, total, retries=retries-1)
 			return
-		if self.urls_only:
-			self.add_url(index, img, total=total)
-			self.thread_count -= 1
-			return
 		filename = img[img.rfind('/')+1:]
 		if '?' in filename: filename = filename[:filename.find('?')]
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
-		if os.path.exists(saveas):
-			self.image_count += 1
-			self.log('file exists: %s' % saveas)
-		elif self.web.download(img, saveas):
-			self.image_count += 1
-			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), img))
-			self.create_thumb(saveas)
-		else:
-			self.log('download failed (%d/%d) - %s' % (index, total, img))
+		self.save_image(img, saveas, index, total)
 		self.thread_count -= 1
 

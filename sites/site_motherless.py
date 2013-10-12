@@ -44,8 +44,10 @@ class motherless(basesite):
 			if self.hit_image_limit(): break
 			page += 1
 			if '?page=%d' % page in r:
+				self.debug('loading %s?page=%d' % (self.url, page))
 				r = self.web.getter('%s?page=%d' % (self.url, page))
-			else: break
+			else: 
+				break
 		#self.download_videos()
 		self.wait_for_threads()
 	
@@ -58,33 +60,13 @@ class motherless(basesite):
 	
 	def download_image_thread(self, url, index, total):
 		r = self.web.get(url)
-		text = 'could not find image at %s' % url
 		chunks = self.web.between(r, '<link rel="image_src"', '>')
 		if len(chunks) > 0:
 			urls = self.web.between(chunks[0], 'href="', '"')
 			if len(urls) > 0:
 				image = urls[0]
-				if self.urls_only:
-					if total.isdigit():
-						self.add_url(index, image, total=int(total))
-					else:
-						self.add_url(index, image)
-					self.thread_count -= 1
-					return
 				saveas = '%s/%03d_%s%s' % (self.working_dir, index, url[url.rfind('/')+1:], image[image.rfind('.'):])
-				if self.web.download(image, saveas) and path.getsize(saveas) > 0:
-					self.image_count += 1
-					text = 'downloaded (%d' % index
-					if total != '?': text += '/%s' % total
-					text += ') (%s) - %s' % (self.get_size(saveas), image)
-					self.create_thumb(saveas)
-				else:
-					if path.exists(saveas):
-						remove(saveas)
-					text = 'download failed (%d' % index
-					if total != '?': text += '/%s' % total
-					text += ') - %s' % url
-		self.log(text)
+				self.save_image(image, saveas, index, total)
 		self.thread_count -= 1
 
 	def download_videos(self):

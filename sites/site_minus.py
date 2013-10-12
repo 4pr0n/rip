@@ -94,7 +94,7 @@ class minus(basesite):
 		if not '"items": [' in r:
 			self.debug('no "items" in r at %s' % url)
 			self.wait_for_threads()
-			raise Exception('could not find items in minus album - %s' % url)
+			raise Exception('could not find items in minus album')
 		json = self.web.between(r, '"items": [', '};')[0]
 		chunks = self.web.between(json, '{', '}')
 		for index, chunk in enumerate(chunks):
@@ -108,11 +108,8 @@ class minus(basesite):
 			else:
 				ext = '.jpg'
 			link = 'http://i.minus.com/i%s%s' % (image, ext)
-			if self.urls_only:
-				self.add_url(index + 1, link, total=len(chunks))
-			else:
-				self.download_image(link, index + 1, total=len(chunks))
-				if self.hit_image_limit(): break
+			self.download_image(link, index + 1, total=len(chunks))
+			if self.hit_image_limit(): break
 		self.wait_for_threads()
 	
 

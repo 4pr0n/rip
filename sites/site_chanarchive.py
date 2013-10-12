@@ -28,8 +28,6 @@ class chanarchive(basesite):
 		
 		if path.exists('%s/post.txt' % self.working_dir):
 			remove('%s/post.txt' % self.working_dir)
-		if not self.urls_only:
-			self.log_post('http://rip.rarchives.com - text log from %s\n' % self.url)
 		
 		posts = self.web.between(r, '<div class="postContainer', '</blockquote>')
 		for index, post in enumerate(posts):
@@ -38,13 +36,10 @@ class chanarchive(basesite):
 				imgid = self.web.between(post, ',"tim":', ',')[0]
 				imgext = self.web.between(post, ',"ext":"', '"')[0]
 				link = 'http://images.4chan.org/%s/src/%s%s' % (board, imgid, imgext)
-				if self.urls_only:
-					self.add_url(index + 1, link, total=len(posts))
-				else:
-					self.download_image(link, index + 1, total=len(posts))
-					if self.hit_image_limit(): break
+				self.download_image(link, index + 1, total=len(posts))
+				if self.hit_image_limit(): break
 			
-			if ',"com":"' in post and not self.urls_only:
+			if ',"com":"' in post:
 				# Has comment
 				comment = self.web.between(post, ',"com":"', '","')[0]
 				comment = comment.replace('\\"', '"')

@@ -52,11 +52,8 @@ class fourchan(basesite):
 		for index, post in enumerate(json['posts']):
 			if 'tim' in post and 'ext' in post:
 				link = 'http://images.4chan.org/%s/src/%s%s' % (board, post['tim'], post['ext'])
-				if self.urls_only:
-					self.add_url(index + 1, link, total=len(json['posts']))
-				else:
-					self.download_image(link, index + 1, total=len(json['posts']), saveas='%s%s' % (post['tim'], post['ext']))
-					if self.hit_image_limit(): break
+				self.download_image(link, index + 1, total=len(json['posts']), saveas='%s%s' % (post['tim'], post['ext']))
+				if self.hit_image_limit(): break
 		
 		# Save thread
 		f = open('%s/thread.html' % self.working_dir, 'w')
@@ -65,8 +62,8 @@ class fourchan(basesite):
 		
 		self.wait_for_threads()
 	
+	''' Safely encode unicode strings '''
 	def safe(self, text):
-		''' Safely encode unicode strings '''
 		result = ''
 		if type(text) == unicode:
 			result = normalize('NFKD', text).encode('ascii', 'ignore')
@@ -74,6 +71,7 @@ class fourchan(basesite):
 			result = text
 		return result
 	
+	''' Convert JSON to 4chan-like HTML '''
 	def json_to_text(self, json):
 		out  = '<!doctype html>'
 		out += '<html><head>'
@@ -131,6 +129,7 @@ class fourchan(basesite):
 		out += '</div></body></html>'
 		return out
 	
+	''' Convert JSON to post info '''
 	def post_info(self, post):
 		# Anchor
 		header = '<a name="p%d"></a>' % post['no']
@@ -145,6 +144,7 @@ class fourchan(basesite):
 		header += '</td></tr></table>'
 		return header
 	
+	''' Convert JSON to file info '''
 	def file_info(self, post):
 		if not 'tim' in post: return ''
 		out = '<div class="fileInfo">'
@@ -153,6 +153,7 @@ class fourchan(basesite):
 		out += '</div>'
 		return out
 
+	''' Convert JSON to comment/reply '''
 	def text_reply(self, post):
 		if not 'com' in post: return ''
 		out = '<div class="com">'

@@ -35,11 +35,8 @@ class xhamster(basesite):
 			links = self.web.between(chunks[0], "' src='", "'")
 			for index, link in enumerate(links):
 				link = link.replace('_160.', '_1000.').replace('http://p2.', 'http://up.')
-				if self.urls_only:
-					self.add_url(index + 1, link, total=len(links))
-				else:
-					self.download_image(link, index + 1, total=len(links)) 
-					if self.hit_image_limit(): break
+				self.download_image(link, index + 1, total=len(links)) 
+				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
 			page += 1
 			next_page = self.url.replace('.html', '-%d.html' % page)

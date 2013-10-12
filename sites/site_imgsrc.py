@@ -55,11 +55,8 @@ class imgsrc(basesite):
 			img_total += len(links)
 			for link in links:
 				img_index += 1
-				if self.urls_only:
-					self.add_url(img_index, link, total=img_total)
-				else:
-					self.download_image(link, img_index, total=img_total)
-					if self.hit_image_limit(): break
+				self.download_image(link, img_index, total=img_total)
+				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
 			if '>next ' not in r: break
 			current += skip_amount

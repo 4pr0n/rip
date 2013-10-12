@@ -55,11 +55,8 @@ class instagram(basesite):
 						self.debug('meta shows vid is not legit')
 				
 				index += 1
-				if self.urls_only:
-					self.add_url(index, img, total=total)
-				else:
-					self.download_image(img, index, total=total) 
-					if self.hit_image_limit(): break
+				self.download_image(img, index, total=total) 
+				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
 			earliers = self.web.between(r, ' [ <a href="/n/', '"')
 			if len(earliers) != 2: break

@@ -39,20 +39,7 @@ class pbase(basesite):
 			self.debug('could not find image at %s' % url)
 		else:
 			image = self.web.between(r, '<IMG class="display" src="', '"')[0]
-			if self.urls_only:
-				self.add_url(index, image, total=total)
-			else:
-				filename = image[image.rfind('/')+1:]
-				save_as = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
-				if os.path.exists(save_as):
-					self.image_count += 1
-					self.log('file exists: %s' % save_as)
-				elif self.web.download(image, save_as):
-					self.image_count += 1
-					self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(save_as), image))
-					self.create_thumb(saveas)
-				else:
-					self.log('download failed (%d/%d) - %s' % (index, total, image))
-		
+			filename = image[image.rfind('/')+1:]
+			save_as = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
+			self.save_image(image, save_as, index, total)
 		self.thread_count -= 1
-

@@ -36,13 +36,10 @@ class seenive(basesite):
 			total += len(links)
 			for link in links:
 				index += 1
-				if self.urls_only:
-					self.add_url(index, img, total=total)
-				else:
-					saveas = link[link.rfind('/')+1:]
-					saveas = saveas[:saveas.find('_')] + '.mp4'
-					saveas = '%03d_%s' % (index, saveas)
-					self.download_image(link, index, total=total, saveas=saveas)
+				saveas = link[link.rfind('/')+1:]
+				saveas = saveas[:saveas.find('_')] + '.mp4'
+				saveas = '%03d_%s' % (index, saveas)
+				self.download_image(link, index, total=total, saveas=saveas)
 				if self.hit_image_limit(): break
 			last_posts = self.web.between(r, 'postFeed.lastPostId = "', '"')
 			if len(last_posts) == 0:

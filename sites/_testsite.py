@@ -23,12 +23,10 @@ from basesite import basesite
 	 * self.hit_image_limit    - True if we hit the max number of images
 	 * self.get_size()         - gets size of a file (in bytes)
 	 * self.create_thumb()     - creates thumbnail of a file
-	 * self.add_url()          - adds url to log; only used when urls_only is True
 	
 	And helpful fields:
 	 * self.url          - URL of album to be downloaded - set by sanitize_url()
 	 * self.working_dir  - working directory for this album - set by get_dir()
-	 * self.urls_only    - True if user only wants URLs
 	 * self.max_threads  - maximum number of threads to run at one time
 	 * self.thread_count - current number of threads running
 """
@@ -91,12 +89,8 @@ class testsite(basesite):
 		
 		# Iterate over links
 		for index, link in enumerate(links):
-			if self.urls_only:
-				# User only wants URLs to direct images, not the downloaded images
-				self.add_url(index, img, total=total)
-			else:
-				# Download the image (threaded)
-				self.download_image(link, index + 1, total=len(links))
+			# Download the image (threaded)
+			self.download_image(link, index + 1, total=len(links))
 			# Stop if we hit the maximum number of images
 			if self.hit_image_limit(): break
 

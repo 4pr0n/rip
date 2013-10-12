@@ -70,10 +70,6 @@ class imagebam(basesite):
 			self.thread_count -= 1
 			return
 		img = imgs[0]
-		if self.urls_only:
-			self.add_url(index, img, total)
-			self.thread_count -= 1
-			return
 		filename = img[img.rfind('/')+1:]
 		if '?' in filename: filename = filename[:filename.find('?')]
 		if '#' in filename: filename = filename[:filename.find('#')]
@@ -90,14 +86,6 @@ class imagebam(basesite):
 					ext = '.jpg'
 			filename += ext
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
-		if os.path.exists(saveas):
-			self.image_count += 1
-			self.log('download (%d/%d) exists - %s' % (index, total, saveas))
-		elif self.web.download(img, saveas):
-			self.image_count += 1
-			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), img))
-			self.create_thumb(saveas)
-		else:
-			self.log('download (%d/%d) failed - %s' % (index, total, img))
+		self.save_image(img, saveas, index, total)
 		self.thread_count -= 1
 

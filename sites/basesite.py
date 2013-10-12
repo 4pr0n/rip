@@ -8,6 +8,7 @@ from zipfile   import ZipFile, ZIP_DEFLATED
 from Web       import Web
 from shutil    import rmtree
 from commands  import getstatusoutput
+from time      import strftime
 
 # Try to import Python Image Library
 try:
@@ -41,7 +42,7 @@ class basesite(object):
 		 * URL is invalid (not appropriate for site class),
 		 * Working directory could not be created.
 	"""
-	def __init__(self, url, urls_only=False, debugging=False):
+	def __init__(self, url, debugging=False):
 		self.debugging = debugging
 		self.web = Web(debugging=self.debugging) # Web object for downloading/parsing
 		self.base_dir = RIP_DIRECTORY
@@ -57,7 +58,6 @@ class basesite(object):
 		self.max_images   = MAX_IMAGES
 		self.logfile      = '%s%s%s' % (self.working_dir, os.sep, LOG_NAME)
 		self.first_log    = True
-		self.urls_only    = urls_only
 	
 	""" To be overridden """
 	def sanitize_url(self, url):
@@ -75,7 +75,10 @@ class basesite(object):
 	
 	""" Returns true if we hit the image limit, false otherwise """
 	def hit_image_limit(self):
-		return self.image_count >= self.max_images
+		if self.image_count >= self.max_images:
+			self.log('hit image limit: %d >= %d' % (self.image_count, self.max_images))
+			return True
+		return False
 	
 	""" To be overridden """
 	def download(self):
@@ -89,7 +92,7 @@ class basesite(object):
 	def log(self, text, overwrite=False):
 		if self.first_log:
 			self.first_log = False
-			self.log('http://rip.rarchives.com - file log for URL %s' % self.original_url, overwrite=False)
+			self.log('http://rip.rarchives.com - file log for URL %s @ %s' % (self.original_url, strftime('%Y-%m-%dT%H:%M:%S PDT')), overwrite=False)
 		if self.debugging:
 			sys.stderr.write('%s\n' % text)
 		text = text.replace('"', '\\"')
@@ -159,26 +162,39 @@ class basesite(object):
 		      'octet-stream' not in m['Content-Type']):
 			text = 'no image/video/octet-stream in Content-Type (found "%s") for URL %s' % (m['Content-Type'], url)
 		else:
+			indextotal = self.get_index_total(index, total)
 			if self.web.download(url, saveas):
 				self.image_count += 1
-				text = 'downloaded (%d' % index
-				if total != '?': text += '/%s' % total
-				text += ') (%s) - %s' % (self.get_size(saveas), url)
 				# Create thumbnail
-				self.create_thumb(saveas)
+				thumbnail = self.create_thumb(saveas)
+				text = 'downloaded %s (%s) - source: (%s) thumbnail: (%s)' % (indextotal, self.get_size(saveas), url, thumbnail)
 			else:
-				text = 'download failed (%d' % index
-				if total != '?': text += '/%s' % total
-				text += ') - %s' % url
+				text = 'download failed %s - %s' % (indextotal, url)
 		self.log(text)
 		self.thread_count -= 1
-	
+
+	""" Same-thread downlod/save (does not launch new thread) """
+	def save_image(self, url, saveas, index, total='?'):
+		indextotal = self.get_index_total(index, total)
+		if os.path.exists(saveas):
+			self.image_count += 1
+			self.log('file exists: %s' % saveas)
+		elif self.web.download(url, saveas):
+			self.image_count += 1
+			thumbnail = self.create_thumb(saveas)
+			self.log('downloaded %s (%s) - source: (%s) thumbnail: (%s)' % (indextotal, self.get_size(saveas), url, thumbnail))
+		else:
+			self.log('download failed %s - %s' % (indextotal, url))
+
+	""" 
+		Wait for threads to finish downloading.
+		Delete working dir if no images are downloaded
+	"""
 	def wait_for_threads(self):
 		while self.thread_count > 0:
 			time.sleep(0.1)
 		if os.path.exists(self.working_dir):
-			if not self.urls_only and len(os.listdir(self.working_dir)) <= 1 \
-					or self.urls_only and len(os.listdir(self.working_dir)) == 0:
+			if len(os.listdir(self.working_dir)) <= 1:
 				rmtree(self.working_dir) # Delete everything in working dir
 	
 	""" Returns human-readable filesize for file """
@@ -195,16 +211,11 @@ class basesite(object):
 			b /= 1024
 		return '0b'
 
-	""" Returns path to zip file if it exists, otherwise None. """
+	""" 
+		Returns path to zip file if it exists, otherwise None.
+		Does not return path if zipping is in progress.
+	"""
 	def existing_zip_path(self):
-		if self.urls_only:
-			txtfile = '%s.txt' % self.working_dir
-			f = txtfile.split('/')
-			f.insert(-1, 'txt')
-			txtfile = '/'.join(f)
-			if os.path.exists(txtfile):
-				return txtfile
-			return None
 		zipfile = '%s.zip' % (self.working_dir)
 		if os.path.exists(zipfile):
 			if not os.path.exists(self.working_dir):
@@ -222,71 +233,40 @@ class basesite(object):
 		Returns path to zip file
 	"""
 	def zip(self):
-		if self.urls_only:
-			# Just URLs, need to store in order & store to a .txt file
-			if not os.path.exists('%s/log.txt' % self.working_dir):
-				raise Exception('no log found')
-			if not os.path.exists('txt/'):
-				try: os.mkdir('txt')
-				except: pass
-			f = self.working_dir.split('/')
-			f.insert(-1, 'txt')
-			url_filename = '%s.txt' % '/'.join(f)
-			f = open('%s/log.txt' % self.working_dir, 'r')
-			lines = f.read().split('\n')[1:]
-			tuples = []
-			for line in lines:
-				if line.strip() == '' or ' - ' not in line: continue
-				if line.count('|') < 1: continue
-				line = line[line.find(' - ')+3:]
-				splits = line.split('|')
-				index  = splits[0]
-				url    = '|'.join(splits[1:])
-				tuples.append( (index, url) )
-			tuples = sorted(tuples, key=lambda tup: int(tup[0]))
-			f = open(url_filename, 'w')
-			for (index, url) in tuples:
-				f.write('%s\n' % url)
-			f.close()
-			rmtree(self.working_dir) # Delete everything in working dir
-			return url_filename
-		
 		self.log('zipping album...')
 		zip_filename = '%s.zip' % self.working_dir
 		z = ZipFile(zip_filename, "w", ZIP_DEFLATED)
 		for root, dirs, files in os.walk(self.working_dir):
-			# NOTE: ignore empty directories & thumbnails
-			if root.endswith('/thumbs'): continue
+			if root.endswith('/thumbs'): continue # Do not zip thumbnails
 			for fn in files:
-				#if 'log.txt' in fn: continue
-				if fn.endswith('zipping.txt'): continue
-				if fn.endswith('complete.txt'): continue
-				if fn.endswith('ip.txt'): continue
-				if fn.endswith('reports.txt'): continue
+				# Ignore files used by service:
+				if fn.endswith('zipping.txt'):  continue # Album is currently zipping
+				if fn.endswith('complete.txt'): continue # Album download completed
+				if fn.endswith('ip.txt'):       continue # IP address of ripper
+				if fn.endswith('reports.txt'):  continue # Number of reports, report messages
 				absfn = os.path.join(root, fn)
 				zfn = absfn[len(self.working_dir)+len(os.sep):] #XXX: relative path
 				z.write(absfn, zfn)
 		z.close()
-		#rmtree(self.working_dir) # Delete everything in working dir
 		return zip_filename
 
 	"""
-		Creates thumbnail based on file path
-		Creates /thumbs/ sub dir & stores thumbnail
+		Creates thumbnail based on file path.
+		Creates /thumbs/ sub dir & stores thumbnail.
+		Returns thumbnail path on success, empty string on failure.
 	"""
 	def create_thumb(self, inp):
 		if inp.lower().endswith('.mp4'):
-			self.create_video_thumb(inp)
-			return
+			return self.create_video_thumb(inp)
 		if Image == None:
 			sys.stderr.write('Python Image Library (PIL) not installed; unable to create thumbnail for %s\n' % inp)
 			sys.stderr.write('Go to http://www.pythonware.com/products/pil/ to install PIL\n')
 			sys.stderr.flush()
-			return
+			return ''
 		fields = inp.split(os.sep)
 		fields.insert(-1, 'thumbs')
 		saveas = os.sep.join(fields)
-		if os.path.exists(saveas): return
+		if os.path.exists(saveas): return ''
 		thumbpath = os.sep.join(fields[:-1])
 		if not os.path.exists(thumbpath):
 			try: os.mkdir(thumbpath)
@@ -297,8 +277,14 @@ class basesite(object):
 			im.thumbnail( (200,200), Image.ANTIALIAS)
 			im.save(saveas, 'JPEG')
 			del im
+			return saveas
 		except: pass
-	
+		return ''
+
+	""" 
+		Create thumbnail for video file, uses ffmpeg.
+		Returns path to thumbnail or empty string on failure.
+	"""
 	def create_video_thumb(self, inp):
 		fields = inp.split(os.sep)
 		fields.insert(-1, 'thumbs')
@@ -314,7 +300,7 @@ class basesite(object):
 		if not os.path.exists(ffmpeg):
 			ffmpeg = '/opt/local/bin/ffmpeg'
 			if not os.path.exists(ffmpeg):
-				return # Can't get images if we can't find ffmpeg
+				return '' # Can't get images if we can't find ffmpeg
 		cmd = ffmpeg
 		cmd += ' -i "'
 		cmd += inp
@@ -326,26 +312,27 @@ class basesite(object):
 		cmd += saveas
 		try:
 			(s, o) = getstatusoutput(cmd)
+			return saveas
 		except:
 			pass
-			
-	"""
-		Add url to list of URLs found. For "URLs Only" feature
-	"""
-	def add_url(self, index, url, total=0):
-		self.image_count += 1
-		string = '(%d' % index
-		if total > 0:
-			string += '/%d' % total
-		string += ')'
-		self.log('%s - %d|%s' % (string, index, url))
+		return ''
 
+	""" Print text to stderr, only if debugging is enabled """
 	def debug(self, text):
 		if not self.debugging: return
 		sys.stderr.write('%s\n' % text)
 	
+	""" Remove excess / unnecessary characters from URL """
 	def strip_url(url):
 		for c in ['?', '#', '&']:
 			if c in url: url = url[:url.find(c)]
 		return url
 
+	""" Return current index / total (in parenthesis), formatted properly """
+	def get_index_total(self, index, total):
+		countmsg = '(%s' % str(index)
+		if total == '?':
+			countmsg += ')'
+		else:
+			countmsg += '/%s)' % str(total)
+		return countmsg

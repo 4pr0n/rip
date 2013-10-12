@@ -78,21 +78,8 @@ class imagearn(basesite):
 			break
 		# Download image
 		image = images[0]
-		if self.urls_only:
-			self.add_url(index, image, total=total)
-			self.thread_count -= 1
-			return
 		extension = image[image.rfind('.'):]
 		saveas += extension
-		if self.web.download(image, saveas):
-			self.image_count += 1
-			text = 'downloaded (%d/%d)' % (index, total)
-			text += ' (%s)' % self.get_size(saveas)
-			text += ' - %s' % image
-			self.create_thumb(saveas)
-		else:
-			text = 'download (%d/%d) failed' % (index, total)
-			text += ' - %s' % image
-		self.log(text)
+		self.save_image(image, saveas, index, total)
 		self.thread_count -= 1
 	

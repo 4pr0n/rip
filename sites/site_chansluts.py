@@ -38,8 +38,6 @@ class chansluts(basesite):
 		
 		if path.exists('%s/post.txt' % self.working_dir):
 			remove('%s/post.txt' % self.working_dir)
-		if not self.urls_only:
-			self.log_post('http://rip.rarchives.com - text log from %s\n' % self.url)
 		
 		chunk = self.web.between(r, '<form id="delform"', '</form>')[0]
 		posts = self.web.between(r, 'daposts">', '</div> </div> </div>')
@@ -47,11 +45,8 @@ class chansluts(basesite):
 			imgs = self.web.between(post, 'href="', '"')
 			if len(imgs) > 0 and 'javascript:' not in imgs[0]:
 				link = 'http://www.chansluts.com%s' % imgs[0]
-				if self.urls_only:
-					self.add_url(index + 1, link, total=len(posts))
-				else:
-					self.download_image(link, index + 1, total=len(posts))
-					if self.hit_image_limit(): break
+				self.download_image(link, index + 1, total=len(posts))
+				if self.hit_image_limit(): break
 			
 			if 'class="comment">' in post:
 				comment = post[post.find('class="comment">')+len('class="comment">'):]

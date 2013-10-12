@@ -109,22 +109,10 @@ class flickr(basesite):
 			self.log('unable to find image @ %s' % url)
 		else:
 			img = 'http://farm%s' % imgs[0]
-			if self.urls_only:
-				self.add_url(index, img, total)
-				self.thread_count -= 1
-				return
 			ext = img[img.rfind('.'):]
 			saveas = '%s/%03d_%s_%s%s' % (self.working_dir, index, pid, title, ext)
 			if '?' in saveas: saveas = saveas[:saveas.find('?')]
-			if path.exists(saveas):
-				self.image_count += 1
-				self.log('%s already exists (%d/%s) (%s)' % (saveas[saveas.rfind('/')+1:], index, total, self.get_size(saveas)))
-			elif self.web.download(img, saveas):
-				self.image_count += 1
-				self.log('downloaded (%d/%s) (%s) - %s' % (index, total, self.get_size(saveas), img))
-				self.create_thumb(saveas)
-			else:
-				self.log('download failed (%d/%s) - %s' % (index, total, img))
+			self.save_image(img, saveas, index, total)
 		self.thread_count -= 1
 	
 	""" Parses non-filename-safe characters """

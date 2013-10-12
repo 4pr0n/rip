@@ -154,15 +154,12 @@ class imgur(basesite):
 			link = self.get_highest_res('http://i.%s' % link)
 			# Download every image
 			# Uses superclass threaded download method
-			if self.urls_only:
-				self.add_url(index + 1, link, total=len(links))
-			else:
-				fname = link[link.rfind('/')+1:]
-				if '?' in fname: fname = fname[:fname.find('?')]
-				if '#' in fname: fname = fname[:fname.find('#')]
-				saveas = '%s%03d_%s' % (postid, index + 1, fname)
-				self.download_image(link, index + 1, total=len(links), saveas=saveas)
-				if self.hit_image_limit(): break
+			fname = link[link.rfind('/')+1:]
+			if '?' in fname: fname = fname[:fname.find('?')]
+			if '#' in fname: fname = fname[:fname.find('#')]
+			saveas = '%s%03d_%s' % (postid, index + 1, fname)
+			self.download_image(link, index + 1, total=len(links), saveas=saveas)
+			if self.hit_image_limit(): break
 	
 	''' Escape text '''
 	def safe_text(self, text):
@@ -210,15 +207,12 @@ class imgur(basesite):
 			caption = self.safe_text(meta.get('caption', ''))
 			if title != '' or caption != '':
 				captions.append( (url, title, caption) )
-			if self.urls_only:
-				self.add_url(index + 1, url, total=total)
-			else:
-				fname = url[url.rfind('/')+1:]
-				if '?' in fname: fname = fname[:fname.find('?')]
-				if '#' in fname: fname = fname[:fname.find('#')]
-				saveas = '%s%03d_%s' % (postid, index + 1, fname)
-				self.download_image(url, index + 1, total=total, saveas=saveas)
-				if self.hit_image_limit(): break
+			fname = url[url.rfind('/')+1:]
+			if '?' in fname: fname = fname[:fname.find('?')]
+			if '#' in fname: fname = fname[:fname.find('#')]
+			saveas = '%s%03d_%s' % (postid, index + 1, fname)
+			self.download_image(url, index + 1, total=total, saveas=saveas)
+			if self.hit_image_limit(): break
 		if header != '' or captions != []:
 			f = open('%s/%scaptions.txt' % (self.working_dir, postid), 'w')
 			if header != '':
@@ -257,11 +251,8 @@ class imgur(basesite):
 				# Download every image
 				# Uses superclass threaded download method
 				index += 1
-				if self.urls_only:
-					self.add_url(index, link, total=total)
-				else:
-					self.download_image(link, index, total=total) 
-					if self.hit_image_limit(): break
+				self.download_image(link, index, total=total) 
+				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
 			page += 1
 	

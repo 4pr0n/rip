@@ -57,10 +57,6 @@ class imgbox(basesite):
 		img = self.web.between(r, 'onclick="rs()" src="', '"')[0]
 		img = img.replace('&amp;', '&')
 		
-		if self.urls_only:
-			self.add_url(index, img)
-			self.thread_count -= 1
-			return
 		urlid = url[url.rfind('/')+1:]
 		if '?' in urlid: urlid = urlid[:urlid.find('?')]
 		if '&' in urlid: urlid = urlid[:urlid.find('&')]
@@ -70,14 +66,6 @@ class imgbox(basesite):
 		if '&' in extension: extension = extension[:extension.find('&')]
 		if '#' in extension: extension = extension[:extension.find('#')]
 		saveas = '%s%s%03d_%s.%s' % (self.working_dir, sep, index, urlid, extension)
-		if path.exists(saveas):
-			self.image_count += 1
-			self.log('file exists: %s' % saveas)
-		elif self.web.download(img, saveas):
-			self.image_count += 1
-			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), img))
-			self.create_thumb(saveas)
-		else:
-			self.log('download failed (%d/%d) - %s' % (index, total, img))
+		self.save_image(img, saveas, index, total)
 		self.thread_count -= 1
 

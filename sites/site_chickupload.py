@@ -46,9 +46,11 @@ class chickupload(basesite):
 				if len(totals) > 0:
 					total = int(totals[0].replace(',', '').replace(' ', ''))
 			link_chunks = self.web.between(r, '<div id="gallery_index"', '</div>')
+			self.debug('link_chunks: %d' % len(link_chunks))
 			if len(link_chunks) == 0: break
 			for link in self.web.between(link_chunks[0], '<a href="', '"'):
 				link = 'http://chickupload.com%s' % link
+				self.debug('found link: %s' % link)
 				index += 1
 				self.download_image(link, index, total=total)
 				if self.hit_image_limit(): break
@@ -74,19 +76,7 @@ class chickupload(basesite):
 		pics = self.web.between(r, '<img src="/picture/', '"')
 		if len(pics) > 0:
 			pic = 'http://chickupload.com/picture/%s' % pics[0]
-			if self.urls_only:
-				self.add_url(index, pic, total=total)
-				self.thread_count -= 1
-				return
 			filename = pic[pic.rfind('/')+1:]
 			saveas = '%s%s%03d_%s' % (self.working_dir, sep, index, filename)
-			if path.exists(saveas):
-				self.image_count += 1
-				self.log('file exists: %s' % saveas)
-			elif self.web.download(pic, saveas):
-				self.image_count += 1
-				self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), pic))
-				self.create_thumb(saveas)
-			else:
-				self.log('download failed (%d/%d) - %s' % (index, total, pic))
+			self.save_image(pic, saveas, index, total)
 		self.thread_count -= 1

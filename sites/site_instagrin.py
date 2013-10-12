@@ -58,11 +58,8 @@ class instagram(basesite):
 				media_url = self.web.between(link, 'src="', '"')[0]
 				media_url = media_url.replace('_102.mp4', '_101.mp4')
 				media_url = media_url.replace('_6.jpg',   '_7.jpg')
-				if self.urls_only:
-					self.add_url(index, media_url, total=total)
-				else:
-					self.download_image(media_url, index, total=total)
-					sleep(0.2)
+				self.download_image(media_url, index, total=total)
+				sleep(0.2)
 				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
 			if not '<div class="next_url">' in r: break

@@ -41,21 +41,17 @@ class anonib(basesite):
 		# Rip images
 		links = self.web.between(r, '/img.php?path=', '"')
 		for index, link in enumerate(links):
-			if self.urls_only:
-				self.add_url(index + 1, link, total=len(links))
-			else:
-				self.download_image(link, index + 1, total=len(links))
-				if self.hit_image_limit(): break
+			self.download_image(link, index + 1, total=len(links))
+			if self.hit_image_limit(): break
 		
 		# Log the content of the posts to a text file
 		if path.exists('%s/post.txt' % self.working_dir):
 			remove('%s/post.txt' % self.working_dir)
-		if not self.urls_only:
-			posts = self.web.between(r, '<blockquote>', '</blockquote>')
-			if len(posts) > 0:
-				self.log_post('http://rip.rarchives.com - text log from %s\n' % self.url)
-				for post in posts:
-					self.log_post(post)
+		posts = self.web.between(r, '<blockquote>', '</blockquote>')
+		if len(posts) > 0:
+			self.log_post('http://rip.rarchives.com - text log from %s\n' % self.url)
+			for post in posts:
+				self.log_post(post)
 		self.wait_for_threads()
 	
 	""" Strips HTML from a single post text, appends to text file """

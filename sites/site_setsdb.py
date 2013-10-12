@@ -68,23 +68,9 @@ class setsdb(basesite):
 			temp = temp.replace('//', '/')
 			image = 'http://%s%s' % (temp, image)
 		
-		if self.urls_only:
-			self.add_url(index, image, total=total)
-			self.thread_count -= 1
-			return
-			
-		
 		filename = image[image.rfind('/')+1:]
 		if '?' in filename: filename = filename[:filename.find('?')]
 		saveas = '%s%s%03d_%s' % (self.working_dir, os.sep, index, filename)
-		if os.path.exists(saveas):
-			self.image_count += 1
-			self.log('file exists: %s' % saveas)
-		elif self.web.download(image, saveas):
-			self.image_count += 1
-			self.log('downloaded (%d/%d) (%s) - %s' % (index, total, self.get_size(saveas), image))
-			self.create_thumb(saveas)
-		else:
-			self.log('download failed (%d/%d) - %s' % (index, total, image))
+		self.save_image(image, saveas, index, total)
 		self.thread_count -= 1
 	
