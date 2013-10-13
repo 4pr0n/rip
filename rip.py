@@ -10,7 +10,7 @@ from sites.site_imagearn    import    imagearn
 from sites.site_imagebam    import    imagebam
 from sites.site_imagefap    import    imagefap
 from sites.site_imgur       import       imgur
-from sites.site_instagrin   import   instagram
+from sites.site_webstagram  import   instagram
 from sites.site_photobucket import photobucket
 from sites.site_tumblr      import      tumblr
 from sites.site_twitter     import     twitter
@@ -39,6 +39,8 @@ from sites.site_pbase       import       pbase
 from sites.site_8muses      import  eightmuses
 from sites.site_setsdb      import      setsdb
 from sites.site_nfsfw       import       nfsfw
+from sites.site_shareimage  import  shareimage
+from sites.site_seenive     import     seenive
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -78,7 +80,9 @@ sites = [        \
 		pbase,       \
 		eightmuses,  \
 		setsdb,      \
-		nfsfw]
+		nfsfw,       \
+		shareimage,  \
+		seenive]
 
 def main():
 	print '\nrarchives\' album ripper\n'
@@ -118,7 +122,7 @@ def usage():
 def get_ripper(url):
 	for site in sites:
 		try:
-			ripper = site(url, debugging=False, urls_only=False)
+			ripper = site(url, debugging=False)
 			return ripper
 		except Exception, e:
 			# Rippers that aren't made for the URL throw blank Exception
