@@ -832,22 +832,41 @@ function showReportsToAdmin(album) {
 			.append($delallbl)
 			.appendTo( $('#report') );
 
-		var aban = $('<a />')
+		// Temporary ban
+		var atban = $('<a />')
+			.html('temporarily ban ' + album.user)
+			.addClass('orange bold underline')
+			.attr('href', '')
+			.attr('user', album.user)
+			.click( function() {
+				banUser($(this).attr('user'), 'temporary');
+				return false;
+			});
+		var stban = $('<span />')
+			.attr('id', 'ban_status_temporary')
+			.css('padding-left', '5px');
+		$('<div />')
+			.addClass('space')
+			.append(atban)
+			.append(stban)
+			.appendTo( $('#report') );
+		// Permanent ban
+		var apban = $('<a />')
 			.html('permanently ban ' + album.user)
 			.addClass('red bold underline')
 			.attr('href', '')
 			.attr('user', album.user)
 			.click( function() {
-				banUser($(this).attr('user'));
+				banUser($(this).attr('user'), 'permanent');
 				return false;
 			});
-		var sban = $('<span />')
-			.attr('id', 'ban_status')
+		var spban = $('<span />')
+			.attr('id', 'ban_status_permanent')
 			.css('padding-left', '5px');
 		$('<div />')
 			.addClass('space')
-			.append(aban)
-			.append(sban)
+			.append(apban)
+			.append(spban)
 			.appendTo( $('#report') );
 	} else {
 		$('<div />')
@@ -966,7 +985,7 @@ function deleteAllAlbums(user, blacklist) {
 	return false;
 }
 
-function banUser(user) {
+function banUser(user, length) {
 	var reason = prompt("enter reason why user is being banned", "enter reason here");
 	if (reason == null || reason == '') {
 		return;
@@ -985,10 +1004,10 @@ function banUser(user) {
 				.css('border', 'none')
 				.css('padding-right', '5px')
 		);
-	$.getJSON('view.cgi?ban_user=' + user + '&reason=' + reason)
+	$.getJSON('view.cgi?ban_user=' + user + '&reason=' + reason + '&length=' + length)
 		.fail( adminJsonFailHandler )
 		.done( function(json) { 
-			adminRequestHandler(json, $('#ban_status'))
+			adminRequestHandler(json, $('#ban_status_' + length))
 		});
 	return false;
 }

@@ -47,7 +47,7 @@ def main(): # Prints JSON response to query
 	# Delete all albums from a user
 	elif 'delete_user'   in keys: delete_albums_by_user(keys['delete_user'], blacklist)
 	# Permanently ban a user
-	elif 'ban_user'      in keys: ban_user(keys['ban_user'], reason=keys.get('reason', ''))
+	elif 'ban_user'      in keys: ban_user(keys['ban_user'], reason=keys.get('reason', ''), length=keys.get('length', 'temporary'))
 
 	# Unexpected key(s)
 	else: print_error('unsupported method(s)')
@@ -561,7 +561,7 @@ def delete_albums_by_user(user, blacklist=''):
 		'user'    : user
 	} )
 
-def ban_user(user, reason=""):
+def ban_user(user, reason='', length='temporary'):
 	if not is_admin():
 		print_error('you (%s) are not an admin' % environ['REMOTE_ADDR'])
 		return
@@ -572,16 +572,33 @@ def ban_user(user, reason=""):
 	except:
 		print_error('unable to read from ../.htaccess file -- user not banned.')
 		return
-	if not 'allow from all' in lines:
-		print_error('unable to ban user; cannot find "allow from all" line in htaccess')
+
+	if length == 'permanent' and not 'allow from all' in lines:
+		print_error('unable to permanently ban user; cannot find "allow from all" line in htaccess')
 		return
+
 	if ' deny from %s' % user in lines:
-		print_warning('user is already banned')
+		print_warning('user is already permanently banned')
 		return
+	if length == 'temporary' and 'RewriteCond %%{REMOTE_HOST} ^%s$ [OR]' % user in lines:
+		print_warning('user is already temporarily banned')
+		return
+
 	reason = reason.replace('\n', '').replace('\r', '')
-	lines.insert(lines.index('allow from all'), '# added by admin %s at %s (reason: %s)' % (environ['REMOTE_ADDR'], int(time()), reason))
-	lines.insert(lines.index('allow from all'), ' deny from %s' % user)
-	lines.insert(lines.index('allow from all'), '')
+	# Temporary vs Permanent. See .htaccess file in *root* directory for more info.
+	if length == 'permanent':
+		lines.insert(lines.index('allow from all'), '# added by admin %s at %s (reason: %s)' % (environ['REMOTE_ADDR'], int(time()), reason))
+		lines.insert(lines.index('allow from all'), ' deny from %s' % user)
+		lines.insert(lines.index('allow from all'), '')
+	elif length == 'temporary':
+		lines.insert(lines.index('RewriteCond %{REMOTE_HOST} ^0.0.0.0$'), '# added by admin %s at %s (reason: %s)' % (environ['REMOTE_ADDR'], int(time()), reason))
+		lines.insert(lines.index('RewriteCond %{REMOTE_HOST} ^0.0.0.0$'), 'RewriteCond %%{REMOTE_HOST} ^%s$ [OR]' % user)
+		lines.insert(lines.index('RewriteCond %{REMOTE_HOST} ^0.0.0.0$'), '')
+	else:
+		print_error('unexpected length of ban: %s' % length)
+		return
+
+	# Write ban to file
 	try:
 		f = open('../.htaccess', 'w')
 		f.write('\n'.join(lines))
@@ -589,7 +606,17 @@ def ban_user(user, reason=""):
 	except Exception, e:
 		print_error('failed to ban %s: %s' % (user, str(e)))
 		return
-	print_ok('permanently banned %s' % user)
+	# Save ban to log
+	try:
+		f = open(path.join('..', 'banned.log'), 'a')
+		f.write('%s %d %s\n' % (user, int(time()), reason))
+		f.close()
+	except: pass
+
+	if length == 'permanent':
+		print_ok('permanently banned %s' % user)
+	elif length == 'temporary':
+		print_ok('temporarily banned %s' % user)
 
 
 ##################
