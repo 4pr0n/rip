@@ -366,6 +366,44 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 		{
 			return; // Already ripped, nothing to see here
 		}
+		// Check for thumbnails
+		if (log.indexOf('thumbnail: (') >= 0) {
+			var thumbnail = log.substr(log.indexOf('thumbnail: (') + 12);
+			thumbnail = thumbnail.substr(0, thumbnail.length - 1);
+			if ($statbar.data('lastThumb') !== thumbnail) {
+				$statbar.data('lastThumb', thumbnail);
+				var $img = $('<img />');
+				$img
+					.hide()
+					.appendTo($(document.body));
+				$img
+					.attr('src', thumbnail)
+					.imagesLoaded(function() {
+						$img
+							.css({
+								'width' : 'auto',
+								'height' : 'auto',
+								'position' : 'absolute',
+								'top'  : $statbar.position().top,
+								'left' : $statbar.position().left + ($statbar.width() / 2) - ($img.width() / 2),
+								'opacity' : '1.0',
+							})
+							.show()
+							.animate({
+								'width'   : '10px',
+								'height'  : '10px',
+								'top'     : $statbar.position().top,
+								'left'    : $statbar.position().left + ($statbar.width() / 2),
+								'opacity' : '0.0',
+							},
+							1000,
+							function() {
+								$img.remove()
+							});
+					});
+			}
+		}
+		
 		if (log.indexOf(' - ') != -1) {
 			log = log.substr(0, log.indexOf(' - '));
 		}
@@ -378,7 +416,6 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 			var denom = parseFloat(log.substr(k+1, j));
 			setProgress(num / denom);
 		}
-		
 		if (log !== '') {
 			$statbar.empty();
 			$('<div />')
@@ -675,7 +712,7 @@ function loadUserRips() {
 						{ queue: false, duration: 750 }
 				);
 
-			if (json.albums.length > MAX_USER_ALBUMS) {
+			if (json.albums.length > MAX_USER_ALBUMS && false) {
 				$('#rip_text').hide();
 				$('#rip_button').hide();
 				$('#rip_cached').hide();
@@ -706,6 +743,27 @@ function loadUserRips() {
 			startRip();
 		}
 	});
+}
+
+$.fn.imagesLoaded = function(callback, fireOne) {
+	var
+		args = arguments,
+		elems = this.filter('img'),
+		elemsLen = elems.length - 1;
+
+	elems
+		.bind('load', function(e) {
+			if (fireOne) {
+				!elemsLen-- && callback.call(elems, e);
+			} else {
+				callback.call(this, e);
+			}
+		}).each(function() {
+			// cached images don't fire load sometimes, so we reset src.
+			if (this.complete || this.complete === undefined){
+				this.src = this.src;
+			}
+		});
 }
 
 // Call initialization function after entire JS file is parsed
