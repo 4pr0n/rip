@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+MAX_ALBUMS_PER_USER = 20
+MAX_IMAGES_PER_CONTRIBUTOR = 1000
+
 import cgitb; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
@@ -92,7 +95,7 @@ def main():
 
 """ Gets ripper, checks for existing rip, rips and zips as needed. """
 def rip(url, cached):
-	url = unquote(url.strip()).replace(' ', '%20')
+	url = unquote(url.strip()).replace(' ', '%20').replace('https://', 'http://')
 
 	if not passes_pre_rip_check(url): return
 
@@ -142,6 +145,8 @@ def rip(url, cached):
 			print dumps( response )
 			return
 	
+	if is_contributor():
+		ripper.max_images = MAX_IMAGES_PER_CONTRIBUTOR
 	# Rip it
 	try:
 		ripper.download()
@@ -197,15 +202,40 @@ def rip(url, cached):
 	# Print it
 	print dumps(response)
 
+""" Checks if current user is a 'contributor' """
+def is_contributor():
+	if not path.exists('contributors.txt'): return False
+	cookies = get_cookies()
+	if not 'rip_contributor_password' in cookies: return False
+	f = open('contributors.txt', 'r')
+	contributors = f.read().split('\n')
+	f.close()
+	while '' in contributors: contributors.remove('')
+	return cookies['rip_contributor_password'] in contributors
+
+""" Returns dict of requester's cookies """
+def get_cookies():
+	if not 'HTTP_COOKIE' in environ: return {}
+	cookies = {}
+	txt = environ['HTTP_COOKIE']
+	for line in txt.split(';'):
+		if not '=' in line: continue
+		pairs = line.strip().split('=')
+		cookies[pairs[0]] = pairs[1]
+	return cookies
+
 """ Ensures url can be ripped by user """
 def passes_pre_rip_check(url):
+	# Check if site is in unsupported list
 	if not is_supported(url):
 		print_error('site is not supported; will not be supported')
 		return False
-	ip = environ.get('REMOTE_ADDR', '127.0.0.1')
-	if len(albums_by_ip(ip)) > 20:
-		print_error('users are only allowed to rip 20 albums at a time')
-		return False
+	# Check if user passed max albums allowed
+	if not is_contributor():
+		ip = environ.get('REMOTE_ADDR', '127.0.0.1')
+		if len(albums_by_ip(ip)) >= MAX_ALBUMS_PER_USER:
+			print_error('users are only allowed to rip %d albums at a time' % MAX_ALBUMS_PER_USER)
+			return False
 	return True
 
 """
@@ -215,7 +245,6 @@ def passes_pre_rip_check(url):
 def check(url):
 	url = unquote(url).replace(' ', '%20')
 
-	if not passes_pre_rip_check(url): return
 	try:
 		ripper = get_ripper(url)
 	except Exception, e:
@@ -416,7 +445,7 @@ def is_supported(url):
 """ Entry point. Print leading/trailing characters, executes main() """
 if __name__ == '__main__':
 	print "Content-Type: application/json"
-	print "Keep-Alive: timeout=300"
+	print "Keep-Alive: timeout=900"
 	print "Connection: Keep-Alive"
 	print ""
 	stdout.flush()

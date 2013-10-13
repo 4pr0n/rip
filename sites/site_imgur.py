@@ -98,12 +98,13 @@ class imgur(basesite):
 
 	def download(self):
 		self.init_dir()
-		self.max_images = 5000
 		self.debug('album type: %s' % self.album_type)
 		if  self.album_type == 'direct':
 			# Single album
+			self.max_images = 5000
 			self.download_album_json(self.url)
 		elif self.album_type == 'domain':
+			self.max_images = 5000
 			if self.url.endswith('/all'):
 				self.download_account_images(self.url)
 			else:
@@ -115,6 +116,7 @@ class imgur(basesite):
 			self.download_subreddit(self.url)
 		else:
 			# Account-level album
+			self.max_images = 5000
 			self.download_account(self.url)
 		self.wait_for_threads()
 	

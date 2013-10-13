@@ -300,6 +300,9 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 		enableRipControls();
 		return;
 	}
+	else if ($statbar.html().indexOf('error: ') >= 0) {
+		return;
+	}
 	else if (json.zip && $statbar.attr('has_download_link') === 'false') {
 		$statbar.attr('has_download_link', 'true')
 		var $result = $('<div />')

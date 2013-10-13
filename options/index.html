@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<head>
+		<style>
+			body {
+				margin: 40px;
+				background-color: #555;
+				color: #000;
+				font-family: Verdana, monospace;
+				font-size: 1.3em;
+				font-weight: bold;
+			}
+			input {
+				background-color: #ddd;
+				color: #000;
+				border-radius: 15px;
+				margin-right: 10px;
+				margin-bottom: 10px;
+				padding: 5px;
+				font-weight: bold;
+				font-size: 0.8em;
+				border: none;
+				padding-left: 10px;
+				padding-right: 10px;
+			}
+			input:hover {
+			}
+			input.button {
+				cursor: pointer;
+				color: #eee;
+				background-color: #000;
+			}
+			input.button:hover {
+				background-color: #111;
+			}
+			input.textbox {
+				font-weight: normal;
+			}
+			input.textbox:hover {
+				background-color: #fff;
+			}
+			div.page {
+				width: 70%;
+				margin-bottom: 30px;
+				color: #eee;
+				background-color: #444;
+				padding: 10px;
+				padding-left: 30px;
+				border-radius: 25px;
+				box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.6);
+			}
+			div.about {
+				font-size: 0.8em;
+				font-weight: normal;
+				margin-bottom: 10px;
+			}
+			h1,h2 {
+				text-shadow:  3px  3px 4px #000;
+			}
+			div.status {
+				padding-bottom: 10px;
+			}
+			span.cookie {
+				text-shadow:  3px  3px 4px #000, 3px -3px 4px #000, -3px 3px 4px #000, -3px -3px 4px #000;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="page">
+			<h1>rip.rarchives: additional options</h1>
+		</div>
+
+		<!-- Cache cookie -->
+		<div class="page">
+			<h2>cached</h2>
+			<div class="about">
+				by default, the ripper uses existing "cached" albums
+				<p>
+				disabling the cache will re-rip albums
+			</div>
+			<input 
+				class="button"
+				type="button"
+				onclick="setCookie('cache_enabled', 'true');"
+				value="enable cache"
+			/>
+			<input 
+				class="button"
+				type="button"
+				onclick="setCookie('cache_enabled', 'false');"
+				value="disable cache"
+			/>
+			<span id="cache_status"></span>
+		</div>
+
+		<!-- Contributor cookie -->
+		<div class="page">
+			<h2>contributor access</h2>
+			<div class="about">
+				enable contributor-level access to the site. features:
+				<p>
+				<ul>
+					<li> unlimited concurrent rips
+					<li> rips are capped at 1,000 images, not 500
+				</ul>
+			</div>
+			<input
+				class="button"
+				type="button"
+				onclick="setCookie('rip_contributor_password', getElementById('contributor_text').value); showCookie('rip_contributor_password', 'contributor_status');"
+				value="set contributor password"
+			/>
+			<input 
+				class="textbox"
+				type="text"
+				id="contributor_text"
+			/>
+			<br>
+			<div class="status" id="contributor_status"></div>
+		</div>
+
+		<!-- Admin cookie -->
+		<div class="page">
+			<h2>admin access</h2>
+			<div class="about">
+				enable admin-level access to the site. features:
+				<ul>
+					<li> filter reported albums
+					<li> view all albums ripped by a user
+					<li> delete album (option to blacklist)
+					<li> delete all albums by user (option to blacklist all)
+					<li> temporarily ban user
+					<li> permanently ban user
+				</ul>
+			</div>
+			<input
+				class="button"
+				type="button"
+				onclick="setCookie('rip_admin_password', getElementById('admin_text').value); showCookie('rip_admin_password', 'admin_status');"
+				value="set admin password"
+			/>
+			<input 
+				class="textbox"
+				type="text"
+				id="admin_text"
+			/>
+			<br>
+			<div class="status" id="admin_status"></div>
+		</div>
+
+		<script>
+			function setCookie(key, value) {
+				document.cookie = key + '=' + value + '; expires=Fri, 27 Dec 2999 00:00:00 UTC; path=/';
+				showCookie('cache_enabled', 'cache_status');
+			}
+			function getCookie(key) {
+				var cookies = document.cookie.split('; ');
+				for (var i in cookies) {
+					var pair = cookies[i].split('=');
+					if (pair[0] == key)
+						return pair[1];
+				}
+				return "";
+			}
+			function showCookie(key, elem) {
+				var txt = getCookie(key) || '&lt;not set&gt;';
+				document.getElementById(elem).innerHTML = key + ': <span class="cookie">' + txt + '</span>';
+			}
+			window.onload = function() {
+				showCookie('cache_enabled', 'cache_status');
+				showCookie('rip_admin_password', 'admin_status');
+				showCookie('rip_contributor_password', 'contributor_status');
+
+				var admintext = document.getElementById('admin_text');
+				admintext.value = getCookie('rip_admin_password');
+				if (admintext.value === '') admintext.value = 'type password here';
+
+				var context = document.getElementById('contributor_text');
+				context.value = getCookie('rip_contributor_password');
+				if (context.value === '') context.value = 'type password here';
+			}
+		</script>
+	</body>
+</html>
