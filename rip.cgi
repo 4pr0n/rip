@@ -85,7 +85,7 @@ def main():
 	elif 'byuser' in keys:
 		ip = keys['byuser']
 		if ip == 'me': ip = environ.get('REMOTE_ADDR', '127.0.0.1')
-		albums_by_ip(ip)
+		print dumps({ 'albums' : albums_by_ip(ip) })
 	
 	else:
 		print_error('invalid request')
@@ -93,10 +93,8 @@ def main():
 """ Gets ripper, checks for existing rip, rips and zips as needed. """
 def rip(url, cached):
 	url = unquote(url.strip()).replace(' ', '%20')
-	
-	if not is_supported(url):
-		print_error('site is not supported; will not be supported')
-		return
+
+	if not passes_pre_rip_check(url): return
 
 	try:
 		# Get domain-specific ripper for URL
@@ -199,6 +197,16 @@ def rip(url, cached):
 	# Print it
 	print dumps(response)
 
+""" Ensures url can be ripped by user """
+def passes_pre_rip_check(url):
+	if not is_supported(url):
+		print_error('site is not supported; will not be supported')
+		return False
+	ip = environ.get('REMOTE_ADDR', '127.0.0.1')
+	if len(albums_by_ip(ip)) > 20:
+		print_error('users are only allowed to rip 20 albums at a time')
+		return False
+	return True
 
 """
 	Checks status of rip. Returns zip/size if finished, otherwise
@@ -207,10 +215,7 @@ def rip(url, cached):
 def check(url):
 	url = unquote(url).replace(' ', '%20')
 
-	if not is_supported(url):
-		print_error('site is not supported; will not be supported')
-		return
-
+	if not passes_pre_rip_check(url): return
 	try:
 		ripper = get_ripper(url)
 	except Exception, e:
@@ -398,9 +403,7 @@ def albums_by_ip(ip):
 				jsonalbum['url']   = url
 					
 			albums.append(jsonalbum)
-	print dumps( {
-		'albums' : albums
-		} )
+	return albums
 
 def is_supported(url):
 	if not path.exists('unsupported.txt'): return True

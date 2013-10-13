@@ -140,9 +140,10 @@ function refreshRecent() { // Refresh list of "recent rips"
 					.appendTo($li);
 				$('<a />') // SOURCE LINK
 					.css('padding-left', '3px')
+					.css('font-size', '0.9em')
 					.attr('href', rec.url)
 					.attr('target', '_BLANK')
-					.html(truncate(url, 18))
+					.html(truncate(url, 20))
 					.appendTo($li);
 				$ul.append($li);
 			});
@@ -482,7 +483,9 @@ function setExample(site) {
 		'redditsluts' : 'http://redditsluts.soup.io/tag/Miss_Ginger_Biscuit',
 		'kodiefiles'  : 'http://www.kodiefiles.nl/2010/10/ff-eerder-gezien.html',
 		'gallerydump' : 'http://www.gallery-dump.com/index.php?gid=553056',
-		'fapdu'       : 'http://fapdu.com/cuties-4.view/'
+		'fapdu'       : 'http://fapdu.com/cuties-4.view/',
+		'seenive'     : 'http://seenive.com/u/911429150038953984',
+		'nfsfw'       : 'http://nfsfw.com/gallery/v/Emily%20Ratajkowski',
 	};
 	loadAlbum(dic[site].replace('http://', ''));
 	return false;
