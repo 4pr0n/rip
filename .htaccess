@@ -22,5 +22,5 @@ RewriteCond %{REMOTE_HOST} ^123.123.123.123$ [OR]
 
 RewriteCond %{REMOTE_HOST} ^0.0.0.0$
 # Do not redirect html/js files (needed by 'banned' page)
-RewriteCond %{REQUEST_URI} !(css/.*|js/.*|banned/index.html|banned/banned.cgi)$ [NC]
+RewriteCond %{REQUEST_URI} !(css/.*|banned/.*)$ [NC]
 RewriteRule .* /banned/index.html [R=302,L]
