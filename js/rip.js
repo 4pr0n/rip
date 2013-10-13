@@ -10,7 +10,7 @@ var SUPPORTED_VIDEO_SITES = [
 	'pornably.com', 'vporn.com', 'seenive.com', 'cliphunter.com',
 	'', 'spankwire.com', 'vk.com', '']
 
-function init() { // Executes when document has loaded
+function init() { // Executes when DOM is ready
 	// Safari is BAD. 
 	// I have to append a blank style element to get the darn thing to refresh
 	// More info: http://stackoverflow.com/questions/3485365
@@ -633,23 +633,36 @@ function over18() {
 	$('#maintable').hide();
 	$('#footer').hide();
 	var $tos = $('<div />')
-		.append( $('<h1 />').html('Warning: This site contains explicit content') )
+		.append( $('<h1 />').html('Warning: This site may contain explicit content') )
 		.addClass('warning')
 		.attr('id', 'maindiv')
-		.css('margin', '20px');
+		.css('margin', '20px')
+		.css('padding-top', '5px');
 		
 	$('<div />')
 		.html(
-			'This website contains adult content and is intended for persons over the age of 18.' +
+			'This website may contain adult content which is not appropriate for persons over the age of 18.' +
 			'<p>' +
 			'By entering this site, you agree to the following terms of use:')
 		.appendTo($tos);
 	
 	$('<ul />') // LIST OF TOS
 		.append( $('<li />').html('I am over eighteen years old') )
-		.append( $('<li />').html('I will not use this site to download illegal material, or to acquire illegal material in any way.') )
-		.append( $('<li />').html('I will report illegal content to the site administrator immediately via reddit or email') )
-		.append( $('<li />').html('I will not hog the resources of this site, and will not rip more than 20 albums per day.') )
+		.append( $('<li />').html('I will not use this site to acquire illegal material in any way. This includes:') )
+		.append( $('<li />').html('<b>"Jailbait"</b> or any sexual content depicting persons under the age of 18 (including non-nude)').css('margin-left', '20px') )
+		.append( $('<li />').html('<b>Beastiality</b>').css('margin-left', '20px') )
+		.append( $('<li />').html('<b>Incest</b> (even implied)').css('margin-left', '20px') )
+		.append( $('<li />').html('<b>Copyrighted content</b>').css('margin-left', '20px') )
+		.append( $('<li />').html('<b>Gore/violent imagery</b> intended to shock or disturb').css('margin-left', '20px') )
+		.append( $('<li />').html('I will report illegal content found on the site immediately') )
+		.append( $('<li />').html('Each album has a <b class="red">report</b> button').css('margin-left', '20px') )
+		.append( $('<li />').html('I will not rip more than 20 albums per day.') )
+		.append( $('<li />').html('I am aware that the albums I rip are visible to others.') )
+		.appendTo($tos);
+
+	$('<div />')
+		.html('<b>Failure to follow the above rules will result in a ban</b>')
+		.css('margin-bottom', '20px')
 		.appendTo($tos);
 
 	$('<input />') // AGREE
@@ -683,8 +696,7 @@ function i_agree() {
 function loadUserRips() {
 	$.getJSON('rip.cgi?byuser=me', function(json) {
 		if (json.albums && json.albums.length > 0) {
-			var $userrips = $('#user_rips_td')
-				.css('margin-top', '30px');
+			var $userrips = $('#user_rips_td').empty();
 			var $ol = $('<ol />');
 			$.each(json.albums, function(i, rip) {
 				$('<li />')
@@ -767,5 +779,4 @@ $.fn.imagesLoaded = function(callback, fireOne) {
 }
 
 // Call initialization function after entire JS file is parsed
-$(window).load(init);
-
+$(document).ready(init);

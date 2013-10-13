@@ -29,6 +29,7 @@ input::selection {
 .pre       { white-space: pre; }
 .pointer   { cursor: pointer; }
 .hidden    { visibility: hidden; }
+.red       { color :#ff0000; }
 
 
 /* ID-specific traits */

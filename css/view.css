@@ -21,6 +21,15 @@ h3 {
 	padding-top: 10px;
 }
 
+ul {
+	font-size: 1.0em;
+	padding-left: 30px;
+}
+li {
+	padding-top: 5px;
+	list-style: circle;
+}
+
 .bold { font-weight: bold; }
 .center { text-align: center; }
 .right { text-align: right; }
@@ -356,14 +365,14 @@ td.donate:hover {
 	background-color: #444;
 }
 div.donate_button input {
-	background: transparent url(../donate.png);
+	background: transparent url(../images/donate.png);
 	cursor: pointer;
 	width:  92px;
 	height: 26px;
 	border: none;
 }
 div.donate_button input:hover {
-	background: transparent url(../donate_color.png);
+	background: transparent url(../images/donate_color.png);
 }
 
 h1 {
