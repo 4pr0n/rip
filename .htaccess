@@ -1,12 +1,26 @@
-# Hide certain files/types
+## Hide certain files/types
 RedirectMatch 404 ^.*\.py$
 RedirectMatch 404 ^.*url_blacklist\.txt$
 RedirectMatch 404 ^.*admin_ip\.txt$
 RedirectMatch 404 ^.*admin_password\.txt$
 
-## USER IP BANNING
+## Permanent IP banning
 <Limit GET POST>
  order allow,deny
-  deny from 254.254.252.251
+# added by admin 1.2.3.4 at 1381637406 (reason: looked at me funny)
+ deny from 4.3.2.1
+
 allow from all
 </Limit>
+
+## Temporary IP banning (redirects to 'banned' page)
+RewriteEngine On
+RewriteBase /
+
+# added by admin 1.2.3.4 at 1381637406 (reason: looked at me funny)
+RewriteCond %{REMOTE_HOST} ^123.123.123.123$ [OR]
+
+RewriteCond %{REMOTE_HOST} ^0.0.0.0$
+# Do not redirect html/js files (needed by 'banned' page)
+RewriteCond %{REQUEST_URI} !(css/.*|js/.*|banned/index.html|banned/banned.cgi)$ [NC]
+RewriteRule .* /banned/index.html [R=302,L]
