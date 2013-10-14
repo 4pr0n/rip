@@ -6,13 +6,30 @@ from threading import Thread
 from os        import path
 from json      import loads, dumps
 
-BATCH_COUNT = 200 # Number of tweets per request (max)
-SLEEP_TIME = 2.5
-MAX_REQUESTS_PER_RIP = 15
+USER_BATCH_COUNT   = 200 # Number of tweets per request (user)
+SEARCH_BATCH_COUNT = 100 # Number of tweets per request (search)
+SLEEP_TIME         = 2.5 # Time to sleep between twitter requests
 
-# Key must contain base64-encoding of UTF-8-encoded 'consumer_key:consumer_secret'
-# See https://dev.twitter.com/docs/auth/application-only-auth
+# Twitter API allows 300 requests / hour to timeline
+# Site can do at maximum 7,200 twitter requests per day
+# Each rip-user can rip ~20 twitter accounts in 1 day, can hit that in minutes
+# 1 user making out API for 1 hour: 15 requests per rip
+# That's too much power and people will totally abuse it, so let's give other people a chance
+# 3 users can max out API in 1 hour: 5 requests per rip
+MAX_REQUESTS_PER_RIP = 5 # Looks at the past MAX_REQUESTS_PER_RIP * USER_BATCH_COUNT tweets
+# That's 5 * 200 = 1,000 tweets back. Per rip. Good enough!
+
+# Alternate Solution: Use /search API
+# + 100 images per request (guaranteed, not just empty tweets)
+# + Usually only needs to make 1 request, exponentially smaller than user timeline requests
+# - Can only retrieve tweets for the past 7 days. Effectively useless, even on popular tweeters
+USE_SEARCH = False
+
+# API key must contain base64-encoding of UTF-8-encoded 'consumer_key:consumer_secret'
+# On linux: echo -n '<consumer_key>:<consumer_secret>' | base64
+# Or on the web: http://www.base64encode.org/
 TWITTER_API_PATH = 'sites/twitter_api.key'
+# See https://dev.twitter.com/docs/auth/application-only-auth
 
 """
 	Downloads twitter albums
@@ -37,27 +54,13 @@ class twitter(basesite):
 	def get_dir(self, url):
 		return 'twitter_%s' % self.get_user(url)
 
-	""" Returns URL request string for user from URL """
-	def get_request(self, url, max_id='0'):
-		user = self.get_user(url)
-		req  = 'https://api.twitter.com/1.1/statuses/user_timeline.json'
-		req += '?screen_name=%s' % user
-		req += '&include_entities=true'
-		req += '&exclude_replies=true'
-		req += '&trim_user=true'
-		req += '&include_rts=false'
-		req += '&count=%d' % BATCH_COUNT
-		if max_id != '0':
-			req += '&max_id=%s' % max_id
-		self.debug('request: %s' % req)
-		return req
-
-	def check_rate_limit(self, headers):
-		url = 'https://api.twitter.com/1.1/application/rate_limit_status.json?resources=statuses'
+	''' Checks if twitter API app is currently ratelimited, throws exception if so '''
+	def check_rate_limit(self, resource, api, headers):
+		url = 'https://api.twitter.com/1.1/application/rate_limit_status.json?resources=%s' % resource
 		r = self.web.getter(url, headers=headers)
 		print r
 		json = loads(r)
-		stats = json['resources']['statuses']['/statuses/user_timeline']
+		stats = json['resources'][resource][api]
 		remaining = stats['remaining']
 		if remaining < 20:
 			# Not enough requests remaining to rip!
@@ -83,12 +86,77 @@ class twitter(basesite):
 			self.wait_for_threads()
 			raise Exception('twitter API token not found')
 		headers = { 'Authorization' : 'Bearer %s' % token }
-		self.check_rate_limit(headers)
+		if USE_SEARCH:
+			self.check_rate_limit('search', '/search/tweets', headers)
+			self.download_search(token, headers)
+		else:
+			self.check_rate_limit('statuses', '/statuses/user_timeline', headers)
+			self.download_user(token, headers)
 
+	################
+	# SEARCH
+	'''
+		Rip content using search.
+		* Way less request rate :)
+		* Only gets past week of tweets :(
+	'''
+	def download_search(self, token, headers):
 		index = 0
-		page  = 1
-		turl = self.get_request(self.url)
+		page = 1
+		turl = self.get_search_request(self.url)
 		while page < MAX_REQUESTS_PER_RIP:
+			r = self.web.getter(turl, headers=headers)
+			try:
+				json = loads(r)
+			except Exception, e:
+				self.wait_for_threads()
+				raise Exception('invalid response from twitter: %s' % r)
+
+			if 'errors' in json:
+				self.wait_for_threads()
+				raise Exception('twitter: %s' % json['errors']['message'])
+			elif not 'statuses' in json or len(json['statuses']) == 0:
+				self.debug('no "statuses" (or empty statuses) in json')
+				break # Empty response, time to go
+
+			for tweet in json['statuses']:
+				max_id = str(int(tweet.get('id_str', "1")) - 1)
+				self.debug('max_id=%s' % max_id)
+				index = self.get_media(tweet, index)
+				if self.hit_image_limit(): break
+			if self.hit_image_limit(): break
+			if max_id == '0': break
+			turl = self.get_search_request(self.url, max_id=max_id)
+			page += 1
+			self.log('loading tweets page %d - %s' % (page, turl))
+		self.wait_for_threads()
+
+	""" Returns URL request string for search API from given URL """
+	def get_search_request(self, url, max_id='0'):
+		user = self.get_user(url)
+		req  = 'https://api.twitter.com/1.1/search/tweets.json'
+		req += '?q=pic.twitter.com+OR+filter:images+from:%s' % user
+		req += '&include_entities=true'
+		req += '&result_type=recent'
+		req += '&count=%d' % SEARCH_BATCH_COUNT
+		if max_id != '0':
+			req += '&max_id=%s' % max_id
+		self.debug('request: %s' % req)
+		return req
+
+
+	####################
+	# USER
+	'''
+		Rip content by iterating over timeline
+		* Lots of requests; has to look at *every* tweet - even tweets w/o media :(
+		* Gets tweets from weeks/months ago :)
+	'''
+	def download_user(self, token, headers):
+		index = 0
+		page = 1
+		turl = self.get_user_request(self.url)
+		while page < MAX_REQUESTS_PER_RIP + 1:
 			# Make request
 			r = self.web.getter(turl, headers=headers)
 
@@ -113,12 +181,29 @@ class twitter(basesite):
 			if self.hit_image_limit(): break
 
 			if max_id == '0': break
-			turl = self.get_request(self.url, max_id=max_id)
+			turl = self.get_user_request(self.url, max_id=max_id)
 			page += 1
 			self.log('loading tweets page %d - %s' % (page, turl))
 			sleep(SLEEP_TIME)
 		self.wait_for_threads()
 	
+	""" Returns URL request string for user API from given URL """
+	def get_user_request(self, url, max_id='0'):
+		user = self.get_user(url)
+		req  = 'https://api.twitter.com/1.1/statuses/user_timeline.json'
+		req += '?screen_name=%s' % user
+		req += '&include_entities=true'
+		req += '&exclude_replies=true'
+		req += '&trim_user=true'
+		req += '&include_rts=false'
+		req += '&count=%d' % USER_BATCH_COUNT
+		if max_id != '0':
+			req += '&max_id=%s' % max_id
+		self.debug('request: %s' % req)
+		return req
+
+	#####################
+	# HELPER METHODS
 	""" Retrieve all 'media' URLs from tweet """
 	def get_media(self, json, index):
 		try:
@@ -173,8 +258,8 @@ class twitter(basesite):
 					if '<meta name="%s" value="' % name in r:
 						imgs = self.web.between(r, '<meta name="%s" value="' % name, '"')
 						break
-					if '<meta name="%s" content="' % name in r:
-						imgs = self.web.between(r, '<meta name="%s" content="' % name, '"')
+					if '<meta property="%s" content="' % name in r:
+						imgs = self.web.between(r, '<meta property="%s" content="' % name, '"')
 						break
 			if len(imgs) > 0:
 				img = imgs[0]
@@ -189,6 +274,7 @@ class twitter(basesite):
 			self.debug('exception in handle_url: %s' % str(e))
 		self.thread_count -= 1
 
+	''' Retrieve access token from twitter using API credentials in file '''
 	def get_access_token(self):
 		global TWITTER_API_PATH
 		if not path.exists(TWITTER_API_PATH):
