@@ -20,7 +20,8 @@ from sites.site_imagearn    import    imagearn
 from sites.site_imagebam    import    imagebam
 from sites.site_imagefap    import    imagefap
 from sites.site_imgur       import       imgur
-from sites.site_webstagram  import   instagram
+#from sites.site_webstagram  import   instagram
+from sites.site_statigram   import   instagram
 from sites.site_photobucket import photobucket
 from sites.site_tumblr      import      tumblr
 from sites.site_twitter     import     twitter
