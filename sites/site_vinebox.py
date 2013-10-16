@@ -2,6 +2,7 @@
 
 from basesite import basesite
 from json import loads
+from time import sleep
 
 class vinebox(basesite):
 
@@ -43,9 +44,9 @@ class vinebox(basesite):
 				try:
 					jresult = loads(sresult)
 					index += 1
-					sleep(0.5)
 					self.download_image(jresult['video'], index, total=total)
 				except: continue
 			if len(json['results']) == 0 or json['status'] != 'ok': break
 			page += 1
+			sleep(1)
 		self.wait_for_threads()

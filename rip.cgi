@@ -52,6 +52,7 @@ from sites.site_setsdb      import      setsdb
 from sites.site_nfsfw       import       nfsfw
 from sites.site_shareimage  import  shareimage
 from sites.site_seenive     import     seenive
+from sites.site_vinebox     import     vinebox
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -318,7 +319,8 @@ def get_ripper(url):
 			setsdb,      \
 			nfsfw,       \
 			shareimage,  \
-			seenive]
+			seenive,     \
+			vinebox]
 	for site in sites:
 		try:
 			ripper = site(url)

@@ -421,6 +421,7 @@ function ripRequestHandler(json) { // Handles rip requests (both 'start' and 'ch
 			setProgress(num / denom);
 		}
 		if (log !== '') {
+			log = truncate(log, 18);
 			$statbar.empty();
 			$('<div />')
 				.append( $('<img />')
