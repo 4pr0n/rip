@@ -336,3 +336,9 @@ class basesite(object):
 		else:
 			countmsg += '/%s)' % str(total)
 		return countmsg
+
+	""" (Correctly) waits for threads to finish before throwing exception """
+	def exception(self, e):
+		self.wait_for_threads()
+		raise Exception(e)
+
