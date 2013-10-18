@@ -42,6 +42,7 @@ from sites.site_nfsfw       import       nfsfw
 from sites.site_shareimage  import  shareimage
 from sites.site_seenive     import     seenive
 from sites.site_vinebox     import     vinebox
+from sites.site_imgchili    import    imgchili
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -84,7 +85,8 @@ sites = [        \
 		nfsfw,       \
 		shareimage,  \
 		seenive,     \
-		vinebox]
+		vinebox,     \
+		imgchili]
 
 def main():
 	print '\nrarchives\' album ripper\n'
