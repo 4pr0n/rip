@@ -697,7 +697,7 @@ def is_admin(): # True if user's IP is in the admin list
 def blacklist_url(url):
 	if not url.startswith('http://') and \
 	   not url.startswith('https://'):
-		url = 'http://%s' % line
+		url = 'http://%s' % url
 	# Use site's main 'rip.cgi' to get the ripper from the URL
 	from sys import path as syspath
 	syspath.append('..')
