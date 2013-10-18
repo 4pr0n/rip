@@ -6,7 +6,7 @@ import sys
 from threading import Thread
 from zipfile   import ZipFile, ZIP_DEFLATED
 from Web       import Web
-from shutil    import rmtree
+from shutil    import rmtree, copy2
 from commands  import getstatusoutput
 from time      import strftime
 
@@ -21,6 +21,8 @@ LOG_NAME      = 'log.txt'
 RIP_DIRECTORY = 'rips' # Directory to store rips in
 MAX_THREADS   = 3
 MAX_IMAGES    = 500
+MAX_THUMB_DIM = 4000
+MAX_THUMB_SIZE= 5 * 1024 * 1024
 
 """
 	Abstract Python 'interface' for a site ripper.
@@ -262,7 +264,7 @@ class basesite(object):
 			sys.stderr.write('Python Image Library (PIL) not installed; unable to create thumbnail for %s\n' % inp)
 			sys.stderr.write('Go to http://www.pythonware.com/products/pil/ to install PIL\n')
 			sys.stderr.flush()
-			return ''
+			return 'rips/nothumb.png'
 		fields = inp.split(os.sep)
 		fields.insert(-1, 'thumbs')
 		saveas = os.sep.join(fields)
@@ -273,13 +275,22 @@ class basesite(object):
 			except: pass
 		try:
 			im = Image.open(inp)
+			(width, height) = im.size
+			if width > MAX_THUMB_DIM or height > MAX_THUMB_DIM:
+				# Image too large to create thumbnail
+				self.log('unable to create thumbnail, %dx%d > %d' % (width, height, MAX_THUMB_DIM))
+				return 'rips/nothumb.png'
+			if os.path.getsize(inp) > MAX_THUMB_SIZE:
+				self.log('unable to create thumbnail, %db > %db' % (os.path.getsize(inp), MAX_THUMB_SIZE))
+				return 'rips/nothumb.png'
 			if im.mode != 'RGB': im = im.convert('RGB')
 			im.thumbnail( (200,200), Image.ANTIALIAS)
 			im.save(saveas, 'JPEG')
-			del im
 			return saveas
-		except: pass
-		return ''
+		except Exception, e:
+			self.log('failed to create thumb: %s' % str(e))
+			pass
+		return 'rips/nothumb.png'
 
 	""" 
 		Create thumbnail for video file, uses ffmpeg.
