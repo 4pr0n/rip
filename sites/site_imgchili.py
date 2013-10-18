@@ -6,9 +6,10 @@ from basesite import basesite
 class imgchili(basesite):
 	
 	def sanitize_url(self, url):
-		if not 'imgchili.com/' in url:
+		if not 'imgchili.com/' in url and \
+		   not 'imgchili.net/' in url:
 			raise Exception('')
-		if not '.com/album/' in url:
+		if not '/album/' in url:
 			raise Exception('required /album/ not found in URL')
 		if '#' in url: url = url[:url.find('#')]
 		if '?' in url: url = url[:url.find('?')]
