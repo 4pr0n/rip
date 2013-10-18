@@ -300,14 +300,39 @@ function loadAllAlbums(after, startOver) {
 					});
 				
 				// Show title and number of images
-				var title = $('<tr />')
-					.css('vertical-align', 'top')
-					.append( $('<td />')
-						.addClass('all_album_title')
-						.attr('colspan', ALBUM_PREVIEW_IMAGE_BREAKS)
-						.html(truncate(album.album, 12) + ' (' + album.total + ' images)')
-					)
-					.appendTo($imgtable);
+				var $title = $('<tr />')
+					.css('vertical-align', 'top');
+				var $titletd = $('<td />')
+					.addClass('all_album_title')
+					.attr('colspan', ALBUM_PREVIEW_IMAGE_BREAKS);
+				var $titlezip = $('<a />')
+					.addClass('download_box download_arrow')
+					.html('&nbsp;&nbsp;')
+					.attr('album', album.album)
+					.attr('href', album.album + '.zip')
+					.mouseenter( function() {
+						$('#' + $(this).attr('album'))
+							.removeAttr('show_album')
+							.removeClass('clickable');
+					})
+					.mouseleave( function() {
+						$('#' + $(this).attr('album'))
+							.attr('show_album', 'true')
+							.addClass('clickable');
+					});
+				var $titletext = $('<span />')
+					.html(truncate(album.album, 12) + ' (' + album.total + ' images)');
+				if (album_index % 2 == 0) {
+					$titletd
+						.append($titlezip)
+						.append($titletext);
+				} else {
+					$titletd
+						.append($titletext)
+						.append($titlezip);
+				}
+				$title.append($titletd);
+				$imgtable.append($title);
 				
 				if (album.reports) {
 					// Display number of reports on album

@@ -138,6 +138,19 @@ div.subheader {
 	            5px  5px  5px rgba( 10,  10,  10, 0.3);
 
 }
+.download_arrow {
+	background-image: url(../images/download.png);
+	background-repeat: no-repeat;
+	background-size: 90% auto;
+	background-position: center center;
+	max-width: 10px;
+	max-height: 10px;
+	padding: 0px;
+	padding-left: 5px;
+	padding-right: 5px;
+	margin-left: 5px;
+	margin-right: 5px;
+}
 
 a.box {
 	font-weight: bold;
