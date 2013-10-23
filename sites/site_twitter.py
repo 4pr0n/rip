@@ -58,7 +58,6 @@ class twitter(basesite):
 	def check_rate_limit(self, resource, api, headers):
 		url = 'https://api.twitter.com/1.1/application/rate_limit_status.json?resources=%s' % resource
 		r = self.web.getter(url, headers=headers)
-		print r
 		json = loads(r)
 		stats = json['resources'][resource][api]
 		remaining = stats['remaining']
