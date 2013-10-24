@@ -40,6 +40,8 @@ class imgur(basesite):
 			sub = url[url.find('imgur.com/r/')+len('imgur.com/r/'):]
 			if sub.strip() == '':
 				raise Exception("Not a valid imgur subreddit")
+			if '+' in sub:
+				raise Exception("Only one subreddit per rip")
 			while sub.endswith('/'): sub = sub[:-1]
 			splits = sub.split('/')
 			if len(splits) == 1:
