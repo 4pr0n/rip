@@ -39,29 +39,35 @@ class flickr(basesite):
 
 	def download(self):
 		self.init_dir()
+
+		# Sign into flickr
+		self.debug('logging in...')
+		if not self.signin():
+			self.log('unable to signin to yahoo/flickr')
+
+		# Get the page source
 		r = self.web.get(self.url)
-		if 'You must be signed in' in r:
-			if not self.signin():
-				self.wait_for_threads()
-				raise Exception('unable to signin to yahoo')
-			r = self.web.get(self.url)
-			
+
+		# Discover how many images are in the set (total)
 		total = '?'
 		if '<div class="vsNumbers">' in r:
 			count = self.web.between(r, '<div class="vsNumbers">', 'photos')[0].strip()
 			while ' '  in count: count = count.replace(' ',  '')
 			while '\n' in count: count = count.replace('\n', '')
-			if count.isdigit(): total = int(count)
+			if count.isdigit():
+				total = int(count)
 		if 'class="Results">(' in r:
 			count = self.web.between(r, 'class="Results">(', ' ')[0]
 			count = count.replace(' ', '').replace('\n', '').replace(',', '')
-			if count.isdigit(): total = int(count)
+			if count.isdigit():
+				total = int(count)
 		if '<div class="stat statcount"' in r:
 			chunk = self.web.between(r, '<div class="stat statcount"', '</div>')[0]
 			if '<h1>' in chunk:
 				count = self.web.between(chunk, '<h1>', '</h1>')[0].strip()
-				if count.isdigit(): total = int(count)
-			
+				if count.isdigit():
+					total = int(count)
+
 		index = 0
 		while True:
 			# Get images
@@ -69,21 +75,25 @@ class flickr(basesite):
 			for link in links:
 				if link == '{{photo_url}}': continue
 				link = 'http://www.flickr.com%s' % link
-				# Download every image
-				# Uses superclass threaded download method
+				# 'link' is the page containing the photo.
+				# Launch a new thread to retrieve/download the image
 				index += 1
 				self.download_image(link, index, total=total) 
 				if self.hit_image_limit(): break
 			if self.hit_image_limit(): break
+
+			# Check for a 'next' page
 			if 'data-track="next" href="' in r:
 				nextpage = self.web.between(r, 'data-track="next" href="', '"')[0]
 				if not 'flickr.com' in nextpage:
 					nextpage = 'http://flickr.com%s' % nextpage
 				r = self.web.get(nextpage)
 			else:
+				# No more pages, we're done
 				break
 		self.wait_for_threads()
-	
+
+	# Kicks off a new thread to download the image from a page
 	def download_image(self, url, index, total='?', subdir=''):
 		while self.thread_count >= self.max_threads:
 			time.sleep(0.1)
@@ -91,12 +101,22 @@ class flickr(basesite):
 		args = (url, index, total)
 		t = Thread(target=self.download_image_thread, args=args)
 		t.start()
-		
+
+	# Runs in own thread, gets source for a page and downloads highest-res image
 	def download_image_thread(self, url, index, total):
+		# Get photo-id
 		pid = url[:url.rfind('/in/')]
 		pid = pid[pid.rfind('/')+1:]
-		larger = url.replace('/in/', '/sizes/o/in/')
+		# Use 'K' for largest possible resolution
+		larger = url.replace('/in/', '/sizes/k/in/')
+		# Flickr will redirect to next-highest resolution (?)
+		# TODO Confirm if this is the case!
+		larger = self.web.unshorten(larger) # Gets redirected URL
+
+		# Get page source
 		r = self.web.get(larger)
+
+		# Find the damn image
 		titles = self.web.between(r, 'title="', '"')
 		if len(titles) > 0:
 			title = titles[0]
@@ -104,14 +124,18 @@ class flickr(basesite):
 			title = self.fix_filename(title)
 		else:
 			title = 'unknown'
+
 		imgs = self.web.between(r, '<img src="http://farm', '"')
 		if len(imgs) == 0:
 			self.log('unable to find image @ %s' % url)
 		else:
+			# We found the image
 			img = 'http://farm%s' % imgs[0]
 			ext = img[img.rfind('.'):]
+			# Construct save path
 			saveas = '%s/%03d_%s_%s%s' % (self.working_dir, index, pid, title, ext)
 			if '?' in saveas: saveas = saveas[:saveas.find('?')]
+			# Download it
 			self.save_image(img, saveas, index, total)
 		self.thread_count -= 1
 	
@@ -126,6 +150,7 @@ class flickr(basesite):
 				result += '-'
 		return result
 
+	""" Signs into yahoo """
 	def signin(self):
 		global YAHOO_CREDENTIAL_PATH
 		if not path.exists(YAHOO_CREDENTIAL_PATH):
