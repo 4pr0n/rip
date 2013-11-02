@@ -124,7 +124,10 @@ class DB:
 			curexec = cur.execute(query)
 		else:
 			curexec = cur.execute(query, values)
-		return curexec.fetchone()[0]
+		result = curexec.fetchone()
+		if result == None:
+			raise Exception('query did not return anything')
+		return result[0]
 
 	def execute(self, statement, values=None):
 		cur = self.conn.cursor()
@@ -134,3 +137,34 @@ class DB:
 			result = cur.execute(statement, values)
 		return result
 	
+	def delete_album(self, album, blacklist=False):
+		from shutil import rmtree
+		from os import path, remove
+		# Delete directory
+		if path.exists(album):
+			rmtree(album)
+		# Delete zip
+		zipfile = '%s.zip' % album
+		if path.exists(zipfile):
+			remove(zipfile)
+
+		albumid = self.select_one('id', 'albums', 'path = "%s"' % album)
+		q_images = '''
+			delete from images
+				where album = ?
+		'''
+		q_album = '''
+			delete from albums
+				where id = ?
+		'''
+		cur = self.conn.cursor()
+		cur.execute(q_images, [albumid])
+		cur.execute(q_album, [albumid])
+		if blacklist:
+			try:
+				cur.execute('insert into blacklist values (?)', [album])
+			except Exception, e:
+				# Failed to blacklist (already blacklisted?)
+				pass
+		cur.close()
+		self.commit()

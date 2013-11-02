@@ -436,7 +436,6 @@ class basesite(object):
 				thumb,   # thumbnail path
 				filetype # image/video/etc
 			]
-		print 'inserting into images: %s' % str(values)
 		self.db.insert('images', values)
 		self.db.commit()
 
@@ -452,8 +451,8 @@ class basesite(object):
 			return 'html'
 		raise Exception('unknown file type: %s (in %s)' % (ext, filename))
 
-	def get_dimensions(image):
-		if image.lower()[-3:] in ['.mp4', '.flv']:
+	def get_dimensions(self, image):
+		if image.lower()[-4:] in ['.mp4', '.flv']:
 			ffmpeg = '/usr/bin/ffmpeg'
 			if not path.exists(ffmpeg):
 				ffmpeg = '/opt/local/bin/ffmpeg'
@@ -481,12 +480,14 @@ class basesite(object):
 
 if __name__ == '__main__':
 	# Test the base site functionality
+	url = 'http://imgur.com/a/RdXNa'
 	import site_imgur
-	bs = site_imgur.imgur('http://imgur.com/a/RdXNa', debugging=True)
+	bs = site_imgur.imgur(url, debugging=True)
+	# Download & zip
 	bs.download()
 	bs.zip()
 	# Dump the whole database
-	curexec = bs.db.execute('select * from albums')
+	curexec = bs.db.execute('select * from albums where source = "%s"' % url)
 	for tup in curexec:
 		for field in tup:
 			print field,
@@ -498,3 +499,6 @@ if __name__ == '__main__':
 			for field in image:
 				print field,
 			print ''
+	# Delete album from filesystem and database
+	bs.db.delete_album('rips/imgur_RdXNa', blacklist=True)
+
