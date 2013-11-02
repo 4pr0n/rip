@@ -1,14 +1,15 @@
 #!/usr/bin/python
 
-import os   # fs: exists, mkdir, listdir, rmdir
-import time # Sleep
-import sys
+from os   import path, mkdir, listdir, sep, walk
+from time import sleep, gmtime, mktime
+from sys  import stderr
 from threading import Thread
 from zipfile   import ZipFile, ZIP_DEFLATED
 from Web       import Web
 from shutil    import rmtree, copy2
 from commands  import getstatusoutput
 from time      import strftime
+from DB        import DB
 
 # Try to import Python Image Library
 try:
@@ -44,22 +45,26 @@ class basesite(object):
 		 * URL is invalid (not appropriate for site class),
 		 * Working directory could not be created.
 	"""
-	def __init__(self, url, debugging=False):
+	def __init__(self, url, debugging=False, ip='127.0.0.1'):
 		self.debugging = debugging
 		self.web = Web(debugging=self.debugging) # Web object for downloading/parsing
 		self.base_dir = RIP_DIRECTORY
-		if not os.path.exists(self.base_dir):
-			os.mkdir(self.base_dir)
+		if not path.exists(self.base_dir):
+			mkdir(self.base_dir)
 		self.original_url = url
 		self.url = self.sanitize_url(url)
 		# Directory to store images in
-		self.working_dir  = '%s%s%s' % (self.base_dir, os.sep, self.get_dir(self.url))
+		self.working_dir  = '%s%s%s' % (self.base_dir, sep, self.get_dir(self.url))
 		self.max_threads  = MAX_THREADS
 		self.thread_count = 0
 		self.image_count  = 0
 		self.max_images   = MAX_IMAGES
-		self.logfile      = '%s%s%s' % (self.working_dir, os.sep, LOG_NAME)
+		self.logfile      = '%s%s%s' % (self.working_dir, sep, LOG_NAME)
 		self.first_log    = True
+		self.albumid      = None # Album ID in database
+		self.ip           = ip
+		self.db = DB()
+		self.images_to_add = []
 	
 	""" To be overridden """
 	def sanitize_url(self, url):
@@ -71,9 +76,15 @@ class basesite(object):
 	
 	""" Creates working dir if zip does not exist """
 	def init_dir(self):
-		if not os.path.exists(self.working_dir) and \
+		if not path.exists(self.working_dir) and \
 		       self.existing_zip_path() == None:
-			os.mkdir(self.working_dir)
+			mkdir(self.working_dir)
+		try:
+			self.add_album_to_db()
+		except Exception, e:
+			# Album already exists!
+			self.debug('got error on %s: %s' % (self.working_dir, str(e)))
+			self.albumid = int(self.db.select_one('id', 'albums', 'path = "%s"' % self.working_dir))
 	
 	""" Returns true if we hit the image limit, false otherwise """
 	def hit_image_limit(self):
@@ -88,7 +99,7 @@ class basesite(object):
 
 	""" Checks if album is already being downloaded """
 	def is_downloading(self):
-		return os.path.exists(self.logfile)
+		return path.exists(self.logfile)
 	
 	""" Appends line to log file """
 	def log(self, text, overwrite=False):
@@ -96,7 +107,7 @@ class basesite(object):
 			self.first_log = False
 			self.log('http://rip.rarchives.com - file log for URL %s @ %s' % (self.original_url, strftime('%Y-%m-%dT%H:%M:%S PDT')), overwrite=False)
 		if self.debugging:
-			sys.stderr.write('%s\n' % text)
+			stderr.write('%s\n' % text)
 		text = text.replace('"', '\\"')
 		if overwrite:
 			f = open(self.logfile, 'w')
@@ -108,7 +119,7 @@ class basesite(object):
 	
 	""" Gets last line(s) from log """
 	def get_log(self, tail_lines=1):
-		if not os.path.exists(self.logfile):
+		if not path.exists(self.logfile):
 			return ''
 		f = open(self.logfile, 'r')
 		r = f.read().strip()
@@ -137,18 +148,18 @@ class basesite(object):
 		# Setup subdirectory saves
 		if subdir != '': subdir = '/%s' % subdir
 		savedir = '%s%s' % (self.working_dir, subdir)
-		if not os.path.exists(savedir): os.mkdir(savedir)
+		if not path.exists(savedir): mkdir(savedir)
 		
 		if unique_saveas:
 			saveas = '%s/%s' % (savedir, saveas)
 		else:
 			saveas = '%s/%03d_%s' % (savedir, index, saveas)
-		if os.path.exists(saveas):
+		if path.exists(saveas):
 			self.log('file exists: %s' % saveas)
 			self.image_count += 1
 		else:
 			while self.thread_count > self.max_threads:
-				time.sleep(0.1)
+				sleep(0.1)
 			self.thread_count += 1
 			args = (url, saveas, index, total)
 			t = Thread(target=self.download_image_thread, args=args)
@@ -169,6 +180,7 @@ class basesite(object):
 				self.image_count += 1
 				# Create thumbnail
 				thumbnail = self.create_thumb(saveas)
+				self.images_to_add.append( (index, saveas, url, thumbnail) )
 				text = 'downloaded %s (%s) - source: (%s) thumbnail: (%s)' % (indextotal, self.get_size(saveas), url, thumbnail)
 			else:
 				text = 'download failed %s - %s' % (indextotal, url)
@@ -178,12 +190,13 @@ class basesite(object):
 	""" Same-thread downlod/save (does not launch new thread) """
 	def save_image(self, url, saveas, index, total='?'):
 		indextotal = self.get_index_total(index, total)
-		if os.path.exists(saveas):
+		if path.exists(saveas):
 			self.image_count += 1
 			self.log('file exists: %s' % saveas)
 		elif self.web.download(url, saveas):
 			self.image_count += 1
 			thumbnail = self.create_thumb(saveas)
+			self.images_to_add.append( (index, saveas, url, thumbnail) )
 			self.log('downloaded %s (%s) - source: (%s) thumbnail: (%s)' % (indextotal, self.get_size(saveas), url, thumbnail))
 		else:
 			self.log('download failed %s - %s' % (indextotal, url))
@@ -194,15 +207,18 @@ class basesite(object):
 	"""
 	def wait_for_threads(self):
 		while self.thread_count > 0:
-			time.sleep(0.1)
-		if os.path.exists(self.working_dir):
-			if len(os.listdir(self.working_dir)) <= 1:
+			sleep(0.1)
+		if path.exists(self.working_dir):
+			if len(listdir(self.working_dir)) <= 1:
 				rmtree(self.working_dir) # Delete everything in working dir
+				return
+		for (index, saveas, url, thumbnail) in self.images_to_add:
+			self.add_image_to_db(index, saveas, url, thumbnail)
 	
 	""" Returns human-readable filesize for file """
 	def get_size(self, filename):
 		try:
-			bytes = os.path.getsize(filename)
+			bytes = path.getsize(filename)
 		except:
 			return '?b'
 		b = 1024 * 1024 * 1024
@@ -219,12 +235,12 @@ class basesite(object):
 	"""
 	def existing_zip_path(self):
 		zipfile = '%s.zip' % (self.working_dir)
-		if os.path.exists(zipfile):
-			if not os.path.exists(self.working_dir):
+		if path.exists(zipfile):
+			if not path.exists(self.working_dir):
 				# No direcotry; only zip exists
 				return zipfile
 			else:
-				if not os.path.exists('%s%szipping.txt' % (self.working_dir, os.sep)):
+				if not path.exists('%s%szipping.txt' % (self.working_dir, sep)):
 					# 'zipping' file/flag does not exist
 					return zipfile
 		return None
@@ -235,21 +251,40 @@ class basesite(object):
 		Returns path to zip file
 	"""
 	def zip(self):
+		do_not_zip  = ['zipping.txt', 'complete.txt', 'ip.txt', 'reports.txt']
+		not_an_image = ['log.txt']
 		self.log('zipping album...')
 		zip_filename = '%s.zip' % self.working_dir
 		z = ZipFile(zip_filename, "w", ZIP_DEFLATED)
-		for root, dirs, files in os.walk(self.working_dir):
+		image_count = 0
+		total_size  = 0
+		for root, dirs, files in walk(self.working_dir):
 			if root.endswith('/thumbs'): continue # Do not zip thumbnails
 			for fn in files:
 				# Ignore files used by service:
-				if fn.endswith('zipping.txt'):  continue # Album is currently zipping
-				if fn.endswith('complete.txt'): continue # Album download completed
-				if fn.endswith('ip.txt'):       continue # IP address of ripper
-				if fn.endswith('reports.txt'):  continue # Number of reports, report messages
-				absfn = os.path.join(root, fn)
-				zfn = absfn[len(self.working_dir)+len(os.sep):] #XXX: relative path
+				if fn in do_not_zip: continue
+				absfn = path.join(root, fn)
+				total_size  += path.getsize(absfn)
+				if fn not in not_an_image:
+					image_count += 1
+				zfn = absfn[len(self.working_dir)+len(sep):] #XXX: relative path
 				z.write(absfn, zfn)
 		z.close()
+		zipsize = path.getsize(zip_filename)
+		# Update album with totals
+		now = int(mktime(gmtime()))
+		query = '''
+			update albums
+				set
+					count    = ?,
+					filesize = ?,
+					zipsize  = ?,
+					accessed = ?
+				where
+					id = ?
+			'''
+		self.db.execute(query, [image_count, total_size, zipsize, now, self.albumid])
+		self.db.commit()
 		return zip_filename
 
 	"""
@@ -261,17 +296,17 @@ class basesite(object):
 		if inp.lower().endswith('.mp4'):
 			return self.create_video_thumb(inp)
 		if Image == None:
-			sys.stderr.write('Python Image Library (PIL) not installed; unable to create thumbnail for %s\n' % inp)
-			sys.stderr.write('Go to http://www.pythonware.com/products/pil/ to install PIL\n')
-			sys.stderr.flush()
+			stderr.write('Python Image Library (PIL) not installed; unable to create thumbnail for %s\n' % inp)
+			stderr.write('Go to http://www.pythonware.com/products/pil/ to install PIL\n')
+			stderr.flush()
 			return 'rips/nothumb.png'
-		fields = inp.split(os.sep)
+		fields = inp.split(sep)
 		fields.insert(-1, 'thumbs')
-		saveas = os.sep.join(fields)
-		if os.path.exists(saveas): return ''
-		thumbpath = os.sep.join(fields[:-1])
-		if not os.path.exists(thumbpath):
-			try: os.mkdir(thumbpath)
+		saveas = sep.join(fields)
+		if path.exists(saveas): return ''
+		thumbpath = sep.join(fields[:-1])
+		if not path.exists(thumbpath):
+			try: mkdir(thumbpath)
 			except: pass
 		try:
 			im = Image.open(inp)
@@ -280,8 +315,8 @@ class basesite(object):
 				# Image too large to create thumbnail
 				self.log('unable to create thumbnail, %dx%d > %d' % (width, height, MAX_THUMB_DIM))
 				return 'rips/nothumb.png'
-			if os.path.getsize(inp) > MAX_THUMB_SIZE:
-				self.log('unable to create thumbnail, %db > %db' % (os.path.getsize(inp), MAX_THUMB_SIZE))
+			if path.getsize(inp) > MAX_THUMB_SIZE:
+				self.log('unable to create thumbnail, %db > %db' % (path.getsize(inp), MAX_THUMB_SIZE))
 				return 'rips/nothumb.png'
 			if im.mode != 'RGB': im = im.convert('RGB')
 			im.thumbnail( (200,200), Image.ANTIALIAS)
@@ -297,20 +332,20 @@ class basesite(object):
 		Returns path to thumbnail or empty string on failure.
 	"""
 	def create_video_thumb(self, inp):
-		fields = inp.split(os.sep)
+		fields = inp.split(sep)
 		fields.insert(-1, 'thumbs')
-		saveas = os.sep.join(fields)
+		saveas = sep.join(fields)
 		saveas = saveas[:saveas.rfind('.')] + '.png'
-		thumbpath = os.sep.join(fields[:-1])
-		if not os.path.exists(thumbpath):
-			try: os.mkdir(thumbpath)
+		thumbpath = sep.join(fields[:-1])
+		if not path.exists(thumbpath):
+			try: mkdir(thumbpath)
 			except: pass
 		overlay = 'play_overlay.png'
 
 		ffmpeg = '/usr/bin/ffmpeg'
-		if not os.path.exists(ffmpeg):
+		if not path.exists(ffmpeg):
 			ffmpeg = '/opt/local/bin/ffmpeg'
-			if not os.path.exists(ffmpeg):
+			if not path.exists(ffmpeg):
 				return '' # Can't get images if we can't find ffmpeg
 		cmd = ffmpeg
 		cmd += ' -i "'
@@ -331,7 +366,7 @@ class basesite(object):
 	""" Print text to stderr, only if debugging is enabled """
 	def debug(self, text):
 		if not self.debugging: return
-		sys.stderr.write('%s\n' % text)
+		stderr.write('%s\n' % text)
 	
 	""" Remove excess / unnecessary characters from URL """
 	def strip_url(url):
@@ -353,3 +388,113 @@ class basesite(object):
 		self.wait_for_threads()
 		raise Exception(e)
 
+	"""
+		Adds album to database, saves album ID
+	"""
+	def add_album_to_db(self):
+		now = int(mktime(gmtime()))
+		values = [
+				None, # album id
+				self.working_dir, # path
+				0,   # image count
+				0,   # size
+				0,   # zipsize
+				self.ip, # user
+				0,   # views
+				self.original_url, # source
+				0,   # reports
+				now, # created
+				now, # accessed
+				0,   # deleted
+				self.logfile # log
+			]
+		self.albumid = self.db.insert('albums', values)
+		self.db.commit()
+
+	def add_image_to_db(self, index, image, url, thumb):
+		try:
+			filetype = self.get_media_type(image)
+		except Exception, e:
+			self.debug('failed to get file (%s) to DB: %s' % (image, str(e)))
+
+		width = height = 0
+		try:
+			(width, height) = self.get_dimensions(image)
+		except Exception, e:
+			# Failed to get dimensions, don't fail completely.
+			pass
+
+		values = [
+				None,    # image id
+				self.albumid, # album id
+				index,   # number in album
+				image,   # image path
+				url,     # source
+				width,   # dimensions
+				height,
+				path.getsize(image), # image filesize
+				thumb,   # thumbnail path
+				filetype # image/video/etc
+			]
+		print 'inserting into images: %s' % str(values)
+		self.db.insert('images', values)
+		self.db.commit()
+
+	def get_media_type(self, filename):
+		ext = filename.lower()[-4:]
+		if ext in ['.mp4', '.flv']:
+			return 'video'
+		elif ext in ['.jpg', 'jpeg', '.gif', '.png']:
+			return 'image'
+		elif ext in ['.txt']:
+			return 'text'
+		elif ext in ['html']:
+			return 'html'
+		raise Exception('unknown file type: %s (in %s)' % (ext, filename))
+
+	def get_dimensions(image):
+		if image.lower()[-3:] in ['.mp4', '.flv']:
+			ffmpeg = '/usr/bin/ffmpeg'
+			if not path.exists(ffmpeg):
+				ffmpeg = '/opt/local/bin/ffmpeg'
+				if not path.exists(ffmpeg):
+					raise Exception('ffmpeg not found; unable to get video dimensions')
+			(status, output) = getstatusoutput('%s -i "%s"' % (ffmpeg, image))
+			for line in output.split('\n'):
+				if 'Stream' in line and 'Video:' in line:
+					line = line[line.find('Video:')+6:]
+					fields = line.split(', ')
+					dims = fields[2]
+					if not 'x' in dims: raise Exception('invalid video dimensions')
+					(width, height) = dims.split('x')
+					if ' ' in height: height = height[:height.find(' ')]
+					try:
+						width  = int(width)
+						height = int(height)
+					except:
+						raise Exception('invalid video dimensions: %sx%s' % (width, height))
+					return (width, height)
+			raise Exception('unable to get video dimensions')
+		else:
+			im = Image.open(image)
+			return im.size
+
+if __name__ == '__main__':
+	# Test the base site functionality
+	import site_imgur
+	bs = site_imgur.imgur('http://imgur.com/a/RdXNa', debugging=True)
+	bs.download()
+	bs.zip()
+	# Dump the whole database
+	curexec = bs.db.execute('select * from albums')
+	for tup in curexec:
+		for field in tup:
+			print field,
+		print ''
+		print 'executing: select * from images where album = %d order by path asc' % tup[0]
+		iexec = bs.db.execute('select * from images where album = %d order by path asc' % tup[0])
+		for image in iexec:
+			print '\t',
+			for field in image:
+				print field,
+			print ''

@@ -22,3 +22,4 @@ graphs/.*
 *.log
 graphs/logs/*
 misc/
+db.db
