@@ -10,7 +10,14 @@ from datetime import datetime
 from time     import time
 from urllib   import quote, unquote
 from shutil   import rmtree
-sep = '/'
+# Need to load modules found in parent directories
+from sys import path as syspath
+syspath.append('..')
+from sites.DB import DB
+
+sep = '/' # File separator
+
+
 ##################
 # MAIN
 
@@ -26,6 +33,8 @@ def main(): # Prints JSON response to query
 	preview = int(keys.get('preview', 10))  # Number of images to retrieve
 	after   =     keys.get('after',   '')   # Next album to retrieve
 	blacklist =   keys.get('blacklist', '') # Album to blacklist
+	sorting  = keys.get('sort', 'accessed') # Sort order
+	ordering = keys.get('order', 'asc')     # Ascending/descending
 
 	# Get from list of all albums
 	if  'view_all' in keys: get_all_albums(count, preview, after)
@@ -56,7 +65,43 @@ def main(): # Prints JSON response to query
 ###################
 # ALBUMS
 
-def get_all_albums(count, preview_size, after):
+def get_all_albums(count, preview_size, after, sorting='accessed', ordering='asc'):
+	db = DB()
+
+	# Input sanitization, setup sort order
+	if not sorting in ['accessed', 'id', 'count', 'views', 'reports', 'created']:
+		sorting = 'accessed'
+	if not orering in ['asc', 'desc']:
+		ordering = 'desc'
+	order = 'order by %s %s' % (sorting, ordering)
+
+	# Construct 'where' clause
+	if ordering == 'asc':
+		where = '%s > ?' % sorting
+	else:
+		where = '%s < ?' % sorting
+	try:
+		db.select_one('id', 'albums', '%s = ?' % sorting, [after])
+	except:
+		# "after" wasn't found in DB, start from the beginning
+		where = ''
+
+	cur = db.conn.cursor()
+	query = '''
+		select path, count, zipsize, ip, views, created
+			from albums
+			%s
+			limit %d
+	''' % (sorting, after, order, preview_size)
+	if where != '':
+		curexec = cur.execute(query, [sorting])
+	else:
+		curexec = cur.execute(query)
+
+
+
+	'''
+	Old method, need2delete, kept4historical
 	found_after = False # User-specified 'after' was found in list of directories
 	# Get directories and timestamps
 	thedirs = []
@@ -74,6 +119,7 @@ def get_all_albums(count, preview_size, after):
 	
 	# Filter results
 	filter_albums(thedirs, count, preview_size, after, found_after)
+	'''
 
 
 def get_albums_for_user(user, count, preview_size, after):
@@ -699,8 +745,6 @@ def blacklist_url(url):
 	   not url.startswith('https://'):
 		url = 'http://%s' % url
 	# Use site's main 'rip.cgi' to get the ripper from the URL
-	from sys import path as syspath
-	syspath.append('..')
 	from rip import get_ripper
 	try:
 		ripper = get_ripper(url)
