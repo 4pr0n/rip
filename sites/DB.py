@@ -8,7 +8,7 @@ SCHEMA = {
 		'count    integer, \n\t' +
 		'filesize integer, \n\t' +
 		'zipsize  integer, \n\t' +
-		'user     text,    \n\t' +
+		'ip       text,    \n\t' +
 		'views    integer, \n\t' +
 		'source   text,    \n\t' +
 		'reports  integer, \n\t' +
@@ -125,6 +125,7 @@ class DB:
 		else:
 			curexec = cur.execute(query, values)
 		result = curexec.fetchone()
+		cur.close()
 		if result == None:
 			raise Exception('query did not return anything')
 		return result[0]
