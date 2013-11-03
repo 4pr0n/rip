@@ -71,7 +71,7 @@ def get_all_albums(count, preview_size, after, sorting='accessed', ordering='asc
 	# Input sanitization, setup sort order
 	if not sorting in ['accessed', 'id', 'count', 'views', 'reports', 'created']:
 		sorting = 'accessed'
-	if not orering in ['asc', 'desc']:
+	if not ordering in ['asc', 'desc']:
 		ordering = 'desc'
 	order = 'order by %s %s' % (sorting, ordering)
 
@@ -91,8 +91,9 @@ def get_all_albums(count, preview_size, after, sorting='accessed', ordering='asc
 		select path, count, zipsize, ip, views, created
 			from albums
 			%s
+			%s
 			limit %d
-	''' % (sorting, after, order, preview_size)
+	''' % (where, order, preview_size)
 	if where != '':
 		curexec = cur.execute(query, [sorting])
 	else:

@@ -56,17 +56,17 @@ SCHEMA = {
 		'reason text \n\t',
 }
 
-from os import getcwd
-DB_FILE = 'db.db'
-if not getcwd().endswith('rip'):
-	DB_FILE = '../db.db'
+from os import getcwd, path, utime
 
 try:
 	import sqlite3
 except ImportError:
 	import sqlite as sqlite3
 
-from time import sleep
+from time import sleep, mktime, gmtime, time as timetime
+DB_FILE = 'db.db'
+if not getcwd().endswith('rip'):
+	DB_FILE = '../db.db'
 
 class DB:
 	def __init__(self):
@@ -113,7 +113,7 @@ class DB:
 		cur.close()
 		return result[0][0]
 
-	def select_one(self, what, table, where, values=None):
+	def select_first(self, what, table, where, values=None):
 		cur = self.conn.cursor()
 		query = '''
 			select %s
@@ -128,7 +128,10 @@ class DB:
 		cur.close()
 		if result == None:
 			raise Exception('query did not return anything')
-		return result[0]
+		return result
+	
+	def select_one(self, what, table, where, values=None):
+		return self.select_first(what, table, where, values)[0]
 
 	def execute(self, statement, values=None):
 		cur = self.conn.cursor()
@@ -138,18 +141,24 @@ class DB:
 			result = cur.execute(statement, values)
 		return result
 	
-	def delete_album(self, album, blacklist=False):
-		from shutil import rmtree
-		from os import path, remove
-		# Delete directory
-		if path.exists(album):
-			rmtree(album)
-		# Delete zip
-		zipfile = '%s.zip' % album
-		if path.exists(zipfile):
-			remove(zipfile)
+	def delete_album(self, album, blacklist=False, delete_files=True):
+		if delete_files:
+			from shutil import rmtree
+			from os import path, remove
+			albumpath = path.join('rips', album)
+			# Delete directory
+			if path.exists(albumpath):
+				rmtree(albumpath)
+			# Delete zip
+			zipfile = '%s.zip' % albumpath
+			if path.exists(zipfile):
+				remove(zipfile)
 
-		albumid = self.select_one('id', 'albums', 'path = "%s"' % album)
+		try:
+			albumid = self.select_one('id', 'albums', 'path = "%s"' % album)
+		except:
+			# Album doesn't exist in DB
+			return
 		q_images = '''
 			delete from images
 				where album = ?
@@ -169,3 +178,35 @@ class DB:
 				pass
 		cur.close()
 		self.commit()
+
+	def update_album(self, album):
+		# update album / zip modified times
+		for f in [album, '%s.zip' % album]:
+			try:
+				utime(f, ( int(timetime()), int(timetime())))
+			except: pass
+		# Update database accessed time
+		query = '''
+			update albums
+				set accessed = %d
+			where path = ?
+		''' % int(mktime(gmtime()))
+		cur = self.conn.cursor()
+		curexec = cur.execute(query, [album])
+		cur.close()
+		self.commit()
+	
+	def add_recent(self, url, path, ip):
+		values = [
+			url,
+			path,
+			int(mktime(gmtime())),
+			ip
+		]
+		self.insert('recent', values)
+	
+	def get_album_info(self, album):
+		query = '''
+			select count
+		'''
+

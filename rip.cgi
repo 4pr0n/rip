@@ -121,33 +121,37 @@ def rip(url, cached):
 				return
 
 	# Check if there's already a zip for the album
-	if ripper.existing_zip_path() != None:
-		if not cached:
-			# If user specified the uncached version, remove the zip
-			remove(ripper.existing_zip_path())
-			if path.exists(ripper.working_dir):
-				rmtree(ripper.working_dir)
-		else:
-			# Mark the file as recently-accessed (top of FIFO queue)
-			update_file_modified(ripper.existing_zip_path())
-			add_recent(url)
-			response = {}
-			response['zip']   = ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520')
-			response['size']  = ripper.get_size(ripper.existing_zip_path())
-			if path.exists(ripper.working_dir):
-				update_file_modified(ripper.working_dir)
-				image_count = 0
-				for root, subdirs, files in walk(ripper.working_dir):
-					if 'thumbs' in root: continue
-					for f in files:
-						if f.endswith('.txt'): continue
-						image_count += 1
-							
-				response['album'] = ripper.working_dir.replace('rips/', '').replace('%20', '%2520')
-				response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
-				response['image_count'] = image_count
-			print dumps( response )
+	if cached:
+		# Using cached version
+		try:
+			(zipsize, source, count) = ripper.db.select_first('zipsize, source, count', 'albums', 'path = ?', [ripper.working_dir])
+			# Album already exists in DB
+			ripper.db.update_album(ripper.working_dir)
+			print dumps ( {
+					'album' : ripper.working_dir.replace('rips/', '').replace('%20', '%2520'),
+					'zip'   : ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520'),
+					'size'  : ripper.bytes_to_hr(zipsize),
+					'image_count' : count,
+					'url'   : './%s' % ripper.working_dir.replace('rips/', 'rips/#')
+				} )
 			return
+		except: pass # Album did not exist in DB
+		if path.exists(ripper.working_dir) and ripper.existing_zip_path() != None:
+			# ...But the album and zip exist.
+			ripper.add_existing_album_to_db() 
+			(zipsize, source, count) = ripper.db.select_first('zipsize, source, count', 'albums', 'path = ?', [ripper.working_dir])
+			# Album already exists in DB
+			ripper.db.update_album(ripper.working_dir)
+			print dumps ( {
+					'album' : ripper.working_dir.replace('rips/', '').replace('%20', '%2520'),
+					'zip'   : ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520'),
+					'size'  : ripper.bytes_to_hr(zipsize),
+					'image_count' : count,
+					'url'   : './%s' % ripper.working_dir.replace('rips/', 'rips/#')
+				} )
+			return
+	elif not cached: # User wants to delete existing verison and re-rip
+		ripper.db.delete_album(ripper.working_dir)
 	
 	if is_contributor():
 		ripper.max_images = MAX_IMAGES_PER_CONTRIBUTOR

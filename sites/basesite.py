@@ -105,7 +105,7 @@ class basesite(object):
 	def log(self, text, overwrite=False):
 		if self.first_log:
 			self.first_log = False
-			self.log('http://rip.rarchives.com - file log for URL %s @ %s' % (self.original_url, strftime('%Y-%m-%dT%H:%M:%S PDT')), overwrite=False)
+			self.log('http://rip.rarchives.com - file log for URL %s @ %s' % (self.original_url, strftime('%Y-%m-%dT%H:%M:%S GMT'), gmtime()), overwrite=False)
 		if self.debugging:
 			stderr.write('%s\n' % text)
 		text = text.replace('"', '\\"')
@@ -213,7 +213,7 @@ class basesite(object):
 				rmtree(self.working_dir) # Delete everything in working dir
 				return
 		for (index, saveas, url, thumbnail) in self.images_to_add:
-			self.add_image_to_db(index, saveas, url, thumbnail)
+			self.add_image_to_db(index + 1, saveas, url, thumbnail)
 	
 	""" Returns human-readable filesize for file """
 	def get_size(self, filename):
@@ -221,6 +221,9 @@ class basesite(object):
 			bytes = path.getsize(filename)
 		except:
 			return '?b'
+		return self.bytes_to_hr(bytes)
+	
+	def bytes_to_hr(self, bytes):
 		b = 1024 * 1024 * 1024
 		a = ['g','m','k','']
 		for i in a:
@@ -478,11 +481,55 @@ class basesite(object):
 			im = Image.open(image)
 			return im.size
 
+	''' Adds album that already exists on filesystem to database '''
+	def add_existing_album_to_db(self):
+		self.add_album_to_db()
+		zipfile = '%s.zip' % self.working_dir
+		if not path.exists(zipfile):
+			self.zip()
+		zipsize = path.getsize('%s.zip' % self.working_dir)
+		image_count = 0
+		do_not_zip  = ['zipping.txt', 'complete.txt', 'ip.txt', 'reports.txt']
+		not_an_image = ['log.txt']
+		images = []
+		thumbs = []
+		for root, subdirs, files in walk(self.working_dir):
+			for fn in files:
+				if root.endswith('/thumbs'):
+					thumbs.append(path.join(root, fn))
+					continue
+				elif fn in do_not_zip or fn in not_an_image: continue
+				images.append(path.join(root, fn))
+		images.sort()
+		thumbs.sort()
+		total_size = 0
+		for i in xrange(0, len(images)):
+			self.add_image_to_db(i, images[i], '', thumbs[i])
+			total_size += path.getsize(images[i])
+		now = int(mktime(gmtime()))
+		query = '''
+			update albums
+				set
+					count    = ?,
+					filesize = ?,
+					zipsize  = ?,
+					accessed = ?
+				where
+					id = ?
+			'''
+		self.db.execute(query, [len(images), total_size, zipsize, now, self.albumid])
+		self.db.commit()
+
 if __name__ == '__main__':
 	# Test the base site functionality
 	url = 'http://imgur.com/a/RdXNa'
 	import site_imgur
 	bs = site_imgur.imgur(url, debugging=True)
+	bs.debug('deleting')
+	bs.db.delete_album(bs.working_dir, blacklist=False, delete_files=False)
+	#bs.debug('adding')
+	#bs.add_existing_album_to_db()
+	'''
 	# Download & zip
 	bs.download()
 	bs.zip()
@@ -501,4 +548,5 @@ if __name__ == '__main__':
 			print ''
 	# Delete album from filesystem and database
 	bs.db.delete_album('rips/imgur_RdXNa', blacklist=True)
+	'''
 
