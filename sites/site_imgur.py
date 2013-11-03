@@ -275,7 +275,8 @@ class imgur(basesite):
 			return url
 		temp = url.replace('h.', '.')
 		m = self.web.get_meta(temp)
-		if 'Content-Type' in m and 'image' in m['Content-Type'].lower():
+		if 'Content-Type' in m and 'image' in m['Content-Type'].lower() and \
+		   'Content-Length' in m and m['Content-Length'] != '503':
 			return temp
 		else:
 			return url
