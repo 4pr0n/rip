@@ -54,6 +54,7 @@ from sites.site_shareimage  import  shareimage
 from sites.site_seenive     import     seenive
 from sites.site_vinebox     import     vinebox
 from sites.site_imgchili    import    imgchili
+from sites.site_fapproved   import   fapproved
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -322,7 +323,8 @@ def get_ripper(url):
 			shareimage,  \
 			seenive,     \
 			vinebox,     \
-			imgchili]
+			imgchili,    \
+			fapproved]
 	for site in sites:
 		try:
 			ripper = site(url)
