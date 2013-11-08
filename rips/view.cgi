@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import cgitb; cgitb.enable() # for debugging
+import cgitb#; cgitb.enable() # for debugging
 import cgi # for getting query keys/values
 
 from os       import listdir, path, walk, utime, stat, environ, remove, chdir
@@ -76,30 +76,68 @@ def get_all_albums(count, preview_size, after, sorting='accessed', ordering='asc
 	order = 'order by %s %s' % (sorting, ordering)
 
 	# Construct 'where' clause
-	if ordering == 'asc':
-		where = '%s > ?' % sorting
-	else:
-		where = '%s < ?' % sorting
-	try:
-		db.select_one('id', 'albums', '%s = ?' % sorting, [after])
-	except:
-		# "after" wasn't found in DB, start from the beginning
+	values = []
+	if after == '' or db.count('*', 'albums', '%s = ?' % sorting, [after]) == 0:
 		where = ''
+	else:
+		if ordering == 'asc':
+			where = '%s > ?' % sorting
+			values.append(sorting)
+		else:
+			where = '%s < ?' % sorting
+			values.append(sorting)
 
 	cur = db.conn.cursor()
 	query = '''
-		select path, count, zipsize, ip, views, created
+		select id, album, count, zipsize, ip, views, created
 			from albums
 			%s
 			%s
 			limit %d
-	''' % (where, order, preview_size)
-	if where != '':
-		curexec = cur.execute(query, [sorting])
-	else:
+	''' % (where, order, count)
+	curexec = cur.execute(query, values)
+	results = curexec.fetchall()
+	albums = []
+	for (albumid, album, image_count, zipsize, ip, views, created) in results:
+		# Get images from album
+		query = '''
+			select path, width, height, size, thumb, type
+				from images
+				where album = %d
+				limit %d
+		''' % (albumid, preview_size)
 		curexec = cur.execute(query)
-
-
+		image_tuples = curexec.fetchall()
+		images = []
+		for (imagepath, width, height, imagesize, thumb, imagetype) in image_tuples:
+			images.append( {
+				'image'  : imagepath,
+				'thumb'  : thumb,
+				'type'   : imagetype,
+				'width'  : width,
+				'height' : height
+			} )
+		# Add album and images to response
+		albums.append( {
+			'album'   : album,
+			'images'  : images,
+			'total'   : count,
+			'time'    : created,
+			'size'    : sizeof_fmt(zipsize),
+			'archive' : '/%s.zip' % album.replace(' ', '%20').replace('%20', '%2520')
+		})
+	query = ''' select count(id) from albums'''
+	curexec = cur.execute(query)
+	total_albums = curexec.fetchone()[0]
+	cur.close()
+	response = {
+		'albums' : albums,
+		'count'  : count,
+		'index'  : '?',
+		'total'  : total_albums,
+		'after'  : '?'
+	}
+	print dumps( response )
 
 	'''
 	Old method, need2delete, kept4historical

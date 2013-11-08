@@ -14,6 +14,8 @@ from time   import strftime
 from urllib import unquote
 from json   import dumps
 
+from sites.DB import DB # database
+
 from sites.site_deviantart  import  deviantart 
 from sites.site_flickr      import      flickr
 from sites.site_imagearn    import    imagearn
@@ -116,7 +118,7 @@ def rip(url, cached):
 			line = line.strip().lower()
 			if line == '': continue
 			if line in url.lower() or \
-			   ripper.working_dir.lower().endswith(line):
+			   ripper.album_name.lower().endswith(line):
 				print_error('cannot rip: URL is blacklisted')
 				return
 
@@ -124,9 +126,10 @@ def rip(url, cached):
 	if cached:
 		# Using cached version
 		try:
-			(zipsize, source, count) = ripper.db.select_first('zipsize, source, count', 'albums', 'path = ?', [ripper.working_dir])
+			# See if album exists in DB, return it if it does (else error)
+			(zipsize, source, count) = ripper.db.select_first('zipsize, source, count', 'albums', 'album = ?', [ripper.album_name])
 			# Album already exists in DB
-			ripper.db.update_album(ripper.working_dir)
+			ripper.db.update_album(ripper.album_name)
 			print dumps ( {
 					'album' : ripper.working_dir.replace('rips/', '').replace('%20', '%2520'),
 					'zip'   : ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520'),
@@ -135,13 +138,12 @@ def rip(url, cached):
 					'url'   : './%s' % ripper.working_dir.replace('rips/', 'rips/#')
 				} )
 			return
-		except: pass # Album did not exist in DB
+		except: pass
 		if path.exists(ripper.working_dir) and ripper.existing_zip_path() != None:
 			# ...But the album and zip exist.
-			ripper.add_existing_album_to_db() 
-			(zipsize, source, count) = ripper.db.select_first('zipsize, source, count', 'albums', 'path = ?', [ripper.working_dir])
-			# Album already exists in DB
-			ripper.db.update_album(ripper.working_dir)
+			ripper.add_existing_album_to_db() # Add it to the DB
+			(zipsize, source, count) = ripper.db.select_first('zipsize, source, count', 'albums', 'album = ?', [ripper.album_name])
+			ripper.db.update_album(ripper.album_name)
 			print dumps ( {
 					'album' : ripper.working_dir.replace('rips/', '').replace('%20', '%2520'),
 					'zip'   : ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520'),
@@ -151,7 +153,7 @@ def rip(url, cached):
 				} )
 			return
 	elif not cached: # User wants to delete existing verison and re-rip
-		ripper.db.delete_album(ripper.working_dir)
+		ripper.db.delete_album(ripper.album_name)
 	
 	if is_contributor():
 		ripper.max_images = MAX_IMAGES_PER_CONTRIBUTOR
@@ -168,21 +170,6 @@ def rip(url, cached):
 		print_error('unable to download album (empty? 404?)')
 		return
 	
-	# Save IP of ripper
-	f = open('%s%sip.txt' % (ripper.working_dir, sep), 'w')
-	f.write(environ.get('REMOTE_ADDR', '127.0.0.1'))
-	f.close()
-	
-	response = {}
-	response['image_count'] = ripper.image_count
-	if ripper.hit_image_limit():
-		response['limit'] = ripper.max_images
-	
-	# Create zip flag
-	f = open('%s%szipping.txt' % (ripper.working_dir, sep), 'w')
-	f.write('\n')
-	f.close()
-
 	# Zip it
 	try:
 		ripper.zip()
@@ -190,22 +177,18 @@ def rip(url, cached):
 		print_error('zip failed: %s' % str(e))
 		return
 	
-	# Delete zip flag
-	try: remove('%s%szipping.txt' % (ripper.working_dir, sep))
-	except: pass
-
-	# Mark album as completed
-	f = open('%s%scomplete.txt' % (ripper.working_dir, sep), 'w')
-	f.write('\n')
-	f.close()
-	response['album'] = ripper.working_dir.replace(' ', '%20').replace('%20', '%2520')
-	response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
-	
-	response['zip']  = ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520')
-	response['size'] = ripper.get_size(ripper.existing_zip_path())
-	
 	# Add to recently-downloaded list
-	add_recent(url)
+	ripper.add_recent(environ.get('REMOTE_ADDR', '127.0.0.1'))
+
+	response = {
+			'image_count' : ripper.image_count,
+			'album' : ripper.working_dir.replace(' ', '%20').replace('%20', '%2520'),
+			'url'   : './%s' % ripper.working_dir.replace('rips/', 'rips/#'),
+			'zip'   : ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520'),
+			'size'  : ripper.get_size(ripper.existing_zip_path())
+		}
+	if ripper.hit_image_limit():
+		response['limit'] = ripper.max_images
 	
 	# Print it
 	print dumps(response)
@@ -239,11 +222,13 @@ def passes_pre_rip_check(url):
 		print_error('site is not supported; will not be supported')
 		return False
 	# Check if user passed max albums allowed
+	'''
 	if not is_contributor():
 		ip = environ.get('REMOTE_ADDR', '127.0.0.1')
 		if len(albums_by_ip(ip)) >= MAX_ALBUMS_PER_USER:
 			print_error('users are only allowed to rip %d albums at a time' % MAX_ALBUMS_PER_USER)
 			return False
+	'''
 	return True
 
 """
@@ -260,24 +245,16 @@ def check(url):
 		return
 
 	# Check if there's already a zip for the album
-	if ripper.existing_zip_path() != None:
-		response = {}
-		response['zip']  = ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520')
-		response['size'] = ripper.get_size(ripper.existing_zip_path())
-		# Return link to zip
-		if path.exists(ripper.working_dir):
-			update_file_modified(ripper.working_dir)
-			image_count = 0
-			for root, subdirs, files in walk(ripper.working_dir):
-				if 'thumbs' in root: continue
-				for f in files:
-					if f.endswith('.txt'): continue
-					image_count += 1
-						
-			response['album'] = ripper.working_dir.replace('rips/', '').replace('%20', '%2520')
-			response['url']   = './%s' % ripper.working_dir.replace('rips/', 'rips/#')
-			response['image_count'] = image_count
-		print dumps( response )
+	if path.exists(ripper.working_dir) and ripper.existing_zip_path() != None:
+		(zipsize, source, count) = ripper.db.select_first('zipsize, source, count', 'albums', 'album = ?', [ripper.album_name])
+		ripper.db.update_album(ripper.album_name)
+		print dumps ( {
+				'album' : ripper.working_dir.replace('rips/', '').replace('%20', '%2520'),
+				'zip'   : ripper.existing_zip_path().replace(' ', '%20').replace('%20', '%2520'),
+				'size'  : ripper.bytes_to_hr(zipsize),
+				'image_count' : count,
+				'url'   : './%s' % ripper.working_dir.replace('rips/', 'rips/#')
+			} )
 	else:
 		# Print last log line ("status")
 		lines = ripper.get_log(tail_lines=1)
@@ -331,7 +308,7 @@ def get_ripper(url):
 			fapproved]
 	for site in sites:
 		try:
-			ripper = site(url)
+			ripper = site(url, ip=environ.get('REMOTE_ADDR', '127.0.0.1'))
 			return ripper
 		except Exception, e:
 			# Rippers that aren't made for the URL throw blank Exception
@@ -341,23 +318,13 @@ def get_ripper(url):
 			raise e
 	raise Exception('Ripper can not rip given URL')
 
-""" Updates system 'modified time' for file to current time. """
-def update_file_modified(f):
-	st = stat(f)
-	from time import time
-	atime = int(time())
-	mtime = int(time())
-	try:
-		utime(f, (atime, mtime))
-	except: pass
-
 """ Retrieves key/value pairs from query, puts in dict """
 def get_keys():
 	form = cgi.FieldStorage()
 	keys = {}
 	for key in form.keys():
 		keys[key] = form[key].value
-	if not 'url' in keys and not 'recent' in keys and len(argv) > 1:
+	if not 'url' in keys and not 'recent' in keys and not 'byuser' in keys and len(argv) > 1:
 		keys['url'] = argv[1]
 		keys['start'] = 'true'
 	return keys
@@ -366,25 +333,25 @@ def get_keys():
 	Returns recently-downloaded zips
 """
 def recent(lines):
-	recents = []
-	try:
-		f = open('recent_rips.lst', 'r')
-		recents = tail(f, lines=lines)
-		f.close()
-	except: pass
-	
-	result = []
-	for rec in recents:
-		d = {}
-		try: ripper = get_ripper(rec)
-		except: continue
-		d['url'] = rec
-		d['view_url'] = ripper.working_dir.replace('rips/', 'rips/#')
-		result.append(d)
-		
-	print dumps( { 
-		'recent' : result
+	query = '''
+		select url, album
+			from recent
+			limit %d
+	''' % lines
+	db = DB()
+	cur = db.conn.cursor()
+	curexec = cur.execute(query)
+	results = curexec.fetchall()
+	cur.close()
+	response = []
+	for (url, album) in results:
+		response.append( {
+			'url'      : url,
+			'view_url' : 'rips/#%s' % album
 		} )
+	print dumps( {
+		'recent' : response
+	} )
 
 """ Tail a file and get X lines from the end """
 def tail(f, lines=1, _buffer=4098):
@@ -405,45 +372,27 @@ def tail(f, lines=1, _buffer=4098):
 	result.reverse()
 	return result
 
-""" Adds url to list of recently-downloaded albums """
-def add_recent(url):
-	if path.exists('recent_rips.lst'):
-		already_added = False
-		f = open('recent_rips.lst', 'r')
-		if url in tail(f, lines=10): already_added = True
-		f.close()
-		if already_added: return
-	
-	f = open('recent_rips.lst', 'a')
-	f.write('%s\n' % url)
-	f.close()
-
 def albums_by_ip(ip):
-	albums = []
-	for thedir in listdir('rips'):
-		d = path.join('rips', thedir)
-		if not path.isdir(d): continue
-		iptxt = path.join(d, 'ip.txt')
-		if not path.exists(iptxt): continue
-		f = open(iptxt, 'r')
-		albumip = f.read().strip()
-		f.close()
-		if ip == albumip:
-			jsonalbum = {}
-			jsonalbum['album'] = thedir
-			url = ''
-			thelog = path.join(d, 'log.txt')
-			if path.exists(thelog):
-				f = open(thelog, 'r')
-				lines = f.read().split('\n')
-				f.close()
-				if len(lines) > 0:
-					url = lines[0]
-					url = url[url.rfind(' ')+1:]
-				jsonalbum['url']   = url
-					
-			albums.append(jsonalbum)
-	return albums
+	db = DB()
+	query = '''
+		select album, count, zipsize, source
+			from albums
+			where ip = ?
+	'''
+	cur = db.conn.cursor()
+	curexec = cur.execute(query, [ip])
+	results = curexec.fetchall()
+	cur.close()
+	if results == None: return []
+	response = []
+	for (album, count, zipsize, source) in results:
+		response.append( {
+			'album'  : album,
+			'count'  : count,
+			'size'   : zipsize,
+			'source' : source
+		})
+	return response
 
 def is_supported(url):
 	if not path.exists('unsupported.txt'): return True

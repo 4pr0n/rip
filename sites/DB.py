@@ -4,7 +4,7 @@ SCHEMA = {
 	'albums' :
 		'\n\t' +
 		'id       integer primary key, \n\t' +
-		'path     text unique, \n\t' +
+		'album    text unique, \n\t' +
 		'count    integer, \n\t' +
 		'filesize integer, \n\t' +
 		'zipsize  integer, \n\t' +
@@ -15,7 +15,8 @@ SCHEMA = {
 		'created  integer, \n\t' +
 		'accessed integer, \n\t' +
 		'deleted  integer, \n\t' +
-		'log      string   \n\t',
+		'log      string,  \n\t' +
+		'complete integer  \n\t',
 
 	'images' :
 		'\n\t' +
@@ -34,7 +35,7 @@ SCHEMA = {
 	'recent' :
 		'\n\t' +
 		'url    text,    \n\t' +
-		'path   text,    \n\t' +
+		'album  text,    \n\t' +
 		'time   integer, \n\t' +
 		'ip     text     \n\t',
 
@@ -70,7 +71,6 @@ if not getcwd().endswith('rip'):
 
 class DB:
 	def __init__(self):
-		self.conn = None
 		self.conn = sqlite3.connect(DB_FILE) #TODO CHANGE BACK, encoding='utf-8')
 		self.conn.text_factory = lambda x: unicode(x, "utf-8", "ignore")
 		if SCHEMA != None and SCHEMA != {} and len(SCHEMA) > 0:
@@ -113,32 +113,26 @@ class DB:
 		cur.close()
 		return result[0][0]
 
-	def select_first(self, what, table, where, values=None):
+	def select_first(self, what, table, where, values=[]):
 		cur = self.conn.cursor()
 		query = '''
 			select %s
 				from %s
 			 where %s
 		''' % (what, table, where)
-		if values == None:
-			curexec = cur.execute(query)
-		else:
-			curexec = cur.execute(query, values)
+		curexec = cur.execute(query, values)
 		result = curexec.fetchone()
 		cur.close()
 		if result == None:
 			raise Exception('query did not return anything')
 		return result
 	
-	def select_one(self, what, table, where, values=None):
+	def select_one(self, what, table, where, values=[]):
 		return self.select_first(what, table, where, values)[0]
 
-	def execute(self, statement, values=None):
+	def execute(self, statement, values=[]):
 		cur = self.conn.cursor()
-		if values == None:
-			result = cur.execute(statement)
-		else:
-			result = cur.execute(statement, values)
+		result = cur.execute(statement, values)
 		return result
 	
 	def delete_album(self, album, blacklist=False, delete_files=True):
@@ -155,7 +149,7 @@ class DB:
 				remove(zipfile)
 
 		try:
-			albumid = self.select_one('id', 'albums', 'path = "%s"' % album)
+			albumid = self.select_one('id', 'albums', 'album = "%s"' % album)
 		except:
 			# Album doesn't exist in DB
 			return
@@ -183,30 +177,43 @@ class DB:
 		# update album / zip modified times
 		for f in [album, '%s.zip' % album]:
 			try:
-				utime(f, ( int(timetime()), int(timetime())))
+				utime(path.join('rips', f), ( int(timetime()), int(timetime())))
 			except: pass
 		# Update database accessed time
 		query = '''
 			update albums
 				set accessed = %d
-			where path = ?
+			where album = ?
 		''' % int(mktime(gmtime()))
 		cur = self.conn.cursor()
 		curexec = cur.execute(query, [album])
 		cur.close()
 		self.commit()
-	
-	def add_recent(self, url, path, ip):
+
+	def add_recent(self, url, album, ip):
 		values = [
 			url,
-			path,
+			album,
 			int(mktime(gmtime())),
 			ip
 		]
 		self.insert('recent', values)
-	
+
 	def get_album_info(self, album):
 		query = '''
 			select count
 		'''
+	
+	def count(self, what, table, where, values=[]):
+		query = '''
+			select
+				count (%s)
+				from %s
+				where %s
+		''' % (what, table, where)
+		cur = self.conn.cursor()
+		curexec = cur.execute(query, values)
+		count = curexec.fetchone()[0]
+		cur.close()
+		return count
 

@@ -10,7 +10,8 @@ from sites.site_imagearn    import    imagearn
 from sites.site_imagebam    import    imagebam
 from sites.site_imagefap    import    imagefap
 from sites.site_imgur       import       imgur
-from sites.site_webstagram  import   instagram
+#from sites.site_webstagram  import   instagram
+from sites.site_statigram   import   instagram
 from sites.site_photobucket import photobucket
 from sites.site_tumblr      import      tumblr
 from sites.site_twitter     import     twitter
@@ -125,10 +126,10 @@ def usage():
 	print '\n'
 
 """ Returns an appropriate ripper for a URL, or throws exception """
-def get_ripper(url):
+def get_ripper(url, debugging=False, ip='127.0.0.1'):
 	for site in sites:
 		try:
-			ripper = site(url, debugging=False)
+			ripper = site(url, debugging=False, ip=ip)
 			return ripper
 		except Exception, e:
 			# Rippers that aren't made for the URL throw blank Exception

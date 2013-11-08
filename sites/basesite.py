@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from os   import path, mkdir, listdir, sep, walk
+from os   import path, mkdir, listdir, sep, walk, getcwd
 from time import sleep, gmtime, mktime
 from sys  import stderr
 from threading import Thread
@@ -49,12 +49,15 @@ class basesite(object):
 		self.debugging = debugging
 		self.web = Web(debugging=self.debugging) # Web object for downloading/parsing
 		self.base_dir = RIP_DIRECTORY
+		if getcwd().endswith('rips'):
+			self.base_dir = '.'
 		if not path.exists(self.base_dir):
 			mkdir(self.base_dir)
 		self.original_url = url
 		self.url = self.sanitize_url(url)
 		# Directory to store images in
-		self.working_dir  = '%s%s%s' % (self.base_dir, sep, self.get_dir(self.url))
+		self.album_name = self.get_dir(self.url)
+		self.working_dir  = '%s%s%s' % (self.base_dir, sep, self.album_name)
 		self.max_threads  = MAX_THREADS
 		self.thread_count = 0
 		self.image_count  = 0
@@ -105,17 +108,19 @@ class basesite(object):
 	def log(self, text, overwrite=False):
 		if self.first_log:
 			self.first_log = False
-			self.log('http://rip.rarchives.com - file log for URL %s @ %s' % (self.original_url, strftime('%Y-%m-%dT%H:%M:%S GMT'), gmtime()), overwrite=False)
+			self.log('http://rip.rarchives.com - file log for URL %s @ %s' % (self.original_url, strftime('%Y-%m-%dT%H:%M:%S GMT', gmtime())), overwrite=False)
 		if self.debugging:
 			stderr.write('%s\n' % text)
 		text = text.replace('"', '\\"')
-		if overwrite:
-			f = open(self.logfile, 'w')
-		else:
-			f = open(self.logfile, 'a')
-		f.write("%s\n" % text)
-		f.flush()
-		f.close()
+		try:
+			if overwrite:
+				f = open(self.logfile, 'w')
+			else:
+				f = open(self.logfile, 'a')
+			f.write("%s\n" % text)
+			f.flush()
+			f.close()
+		except: pass
 	
 	""" Gets last line(s) from log """
 	def get_log(self, tail_lines=1):
@@ -282,7 +287,8 @@ class basesite(object):
 					count    = ?,
 					filesize = ?,
 					zipsize  = ?,
-					accessed = ?
+					accessed = ?,
+					complete = 1
 				where
 					id = ?
 			'''
@@ -398,7 +404,7 @@ class basesite(object):
 		now = int(mktime(gmtime()))
 		values = [
 				None, # album id
-				self.working_dir, # path
+				self.album_name, # album
 				0,   # image count
 				0,   # size
 				0,   # zipsize
@@ -409,7 +415,8 @@ class basesite(object):
 				now, # created
 				now, # accessed
 				0,   # deleted
-				self.logfile # log
+				self.logfile, # log
+				0    # completed
 			]
 		self.albumid = self.db.insert('albums', values)
 		self.db.commit()
@@ -483,7 +490,9 @@ class basesite(object):
 
 	''' Adds album that already exists on filesystem to database '''
 	def add_existing_album_to_db(self):
-		self.add_album_to_db()
+		try:
+			self.add_album_to_db()
+		except: pass
 		zipfile = '%s.zip' % self.working_dir
 		if not path.exists(zipfile):
 			self.zip()
@@ -495,13 +504,18 @@ class basesite(object):
 		thumbs = []
 		for root, subdirs, files in walk(self.working_dir):
 			for fn in files:
+				if fn.endswith('.txt'): continue
 				if root.endswith('/thumbs'):
 					thumbs.append(path.join(root, fn))
-					continue
-				elif fn in do_not_zip or fn in not_an_image: continue
-				images.append(path.join(root, fn))
+				elif fn not in do_not_zip and fn not in not_an_image:
+					images.append(path.join(root, fn))
 		images.sort()
 		thumbs.sort()
+		if len(images) != len(thumbs):
+			print '# of images != # of thumbs'
+			print images
+			print thumbs
+			return
 		total_size = 0
 		for i in xrange(0, len(images)):
 			self.add_image_to_db(i, images[i], '', thumbs[i])
@@ -513,12 +527,16 @@ class basesite(object):
 					count    = ?,
 					filesize = ?,
 					zipsize  = ?,
-					accessed = ?
+					accessed = ?,
+					complete = 1
 				where
 					id = ?
 			'''
 		self.db.execute(query, [len(images), total_size, zipsize, now, self.albumid])
 		self.db.commit()
+
+	def add_recent(self, ip):
+		self.db.add_recent(self.original_url, self.working_dir, ip)
 
 if __name__ == '__main__':
 	# Test the base site functionality
