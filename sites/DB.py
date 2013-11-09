@@ -107,9 +107,9 @@ class DB:
 		cur.close()
 		return last_row_id
 
-	def count(self, table, where):
+	def count(self, table, where, values=[]):
 		cur = self.conn.cursor()
-		result = cur.execute('''select count(*) from %s where %s''' % (table, where)).fetchall()
+		result = cur.execute('''select count(*) from %s where %s''' % (table, where), values).fetchall()
 		cur.close()
 		return result[0][0]
 
@@ -199,11 +199,6 @@ class DB:
 		]
 		self.insert('recent', values)
 
-	def get_album_info(self, album):
-		query = '''
-			select count
-		'''
-	
 	def count(self, what, table, where, values=[]):
 		query = '''
 			select

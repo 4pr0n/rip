@@ -101,7 +101,6 @@ function loadAlbum(album, start, count, startOver) {
 				}
 				$('#next').html('');
 				$('#albums_table').attr('loading', 'true');
-				// TODO Reverse-encode the album name into a URL. Provide link to URL & Album ripper
 				return;
 			}
 			if (! $('#status_area').is(':visible')) {
@@ -121,7 +120,7 @@ function loadAlbum(album, start, count, startOver) {
 			}
 			$('#album_title').html(album.album + ' (' + album.total + ' images)');
 			
-			if (album.report_reasons != undefined) {
+			if (album.reports != undefined) {
 				showReportsToAdmin(album);
 			} else if ( $('#report').html().indexOf('delete') == -1 ) {
 				// Show report link
@@ -407,14 +406,14 @@ function loadAllAlbums(after, startOver) {
 			$('#albums_table').append(albumstable);
 
 			// Set up next set of albums to load
-			if (json.after == '') {
+			if (json.after == '' || json.remain <= 0) {
 				// No more albums to load
 				$('#next').removeAttr('after')
-					.html(json.total + ' albums loaded');
+					.html('all albums loaded');
 			} else {
-				var remaining = json.total - json.index;
-				$('#next').attr('after', json.after)
-					.html(remaining + ' albums remaining');
+				$('#next')
+					.attr('after', json.after)
+					.html(json.remain + ' albums remaining');
 				$('#albums_table').removeAttr('loading');
 				scrollHandler();
 			}
@@ -436,7 +435,10 @@ function loadNextAlbum() {
 		.append( $('<span />').html('loading...') );
 	// Load next albums after a shot delay
 	setTimeout( function() {
-		loadAllAlbums($('#next').attr('after'), false);
+		loadAllAlbums(
+			$('#next').attr('after'),
+			false
+		);
 	}, 500);
 }
 
@@ -744,7 +746,7 @@ function showReportsToAdmin(album) {
 	$('#report')
 		.html('')
 		.addClass('fontsmall red shadow');
-	if (album.report_reasons.length == 0) {
+	if (album.reports == 0) {
 		// No reports
 		$('<span />')
 			.html('no reports')
@@ -753,23 +755,11 @@ function showReportsToAdmin(album) {
 			.appendTo( $('#report') );
 	} else {
 		// Show reports
-		$('<div />')
-			.addClass('shadow')
-			.html('reports:')
+		$('<span />')
+			.html(album.reports + ' report' + ((album.reports == 1) ? '' : 's'))
+			.addClass('red')
+			.css('padding-left', '5px')
 			.appendTo( $('#report') );
-		var reasonlist = $('<ol />');
-		$.each(album.report_reasons, function(i, reasonattr) {
-			var reason = reasonattr.reason || '[no reason given]';
-			$('<div />')
-				.append( $('<span />').html('ip: ' + reasonattr.user) )
-				.append( $('<br>') )
-				.append( $('<span />').html('reason: ' + reason) )
-				.appendTo( 
-					$('<li />').appendTo( reasonlist )
-				);
-		});
-		$('#report').append( reasonlist );
-
 		$('<a />')
 			.html('clear reports')
 			.attr('href', '')
@@ -923,16 +913,6 @@ function adminRequestHandler(json, $stat) {
 }
 
 function report(album) {
-	var reason = prompt("please enter the reason why this album should be reported", "enter reason here");
-	if (reason == null || reason == '') {
-		return false;
-	}
-	if (reason == "enter reason here") {
-		$('#report')
-			.html('you must enter a valid reason')
-			.removeClass().addClass('red bold shadow');
-		return false;
-	}
 	$('#report')
 		.empty()
 		.append(
@@ -942,7 +922,7 @@ function report(album) {
 				.css('padding-right', '5px')
 		);
 	
-	$.getJSON('view.cgi?report=' + album + '&reason=' + reason)
+	$.getJSON('view.cgi?report=' + album)
 		.fail( adminJsonFailHandler )
 		.done( function(json) { 
 			adminRequestHandler(json, $('#report'))
