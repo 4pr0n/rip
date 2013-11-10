@@ -996,7 +996,7 @@ function banUser(user, length, album, url) {
 		return;
 	}
 	if (album == undefined) album = '?';
-	if (url = undefined)    url = '?';
+	if (url == undefined)    url = '?';
 	if (reason == "enter reason here") {
 		$('#ban_status')
 			.html('you must enter a reason')
