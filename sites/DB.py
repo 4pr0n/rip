@@ -198,6 +198,7 @@ class DB:
 			ip
 		]
 		self.insert('recent', values)
+		self.commit()
 
 	def count(self, what, table, where, values=[]):
 		query = '''
