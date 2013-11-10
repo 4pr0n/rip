@@ -516,16 +516,16 @@ class basesite(object):
 		total_size = 0
 		for i in xrange(0, len(images)):
 			if len(images) == len(thumbs):
-				temp_thumb = thumbs[i]
+				thumb = thumbs[i]
 			else:
-				temp_thumb = 'nothumb.png'
+				thumb = 'nothumb.png'
 				for temp_thumb in thumbs:
-					mthumb = thumbs.replace('/thumbs', '')
+					mthumb = temp_thumb.replace('/thumbs', '')
 					mthumb = mthumb[:mthumb.rfind('.')]
 					if images[i].startswith(mthumb):
 						thumb = temp_thumb
 						break
-			self.add_image_to_db(i, images[i], '', temp_thumb)
+			self.add_image_to_db(i, images[i], '', thumb)
 			total_size += path.getsize(images[i])
 		now = int(mktime(gmtime()))
 		query = '''
