@@ -1,8 +1,13 @@
 #!/usr/bin/python
 
+import cgitb; cgitb.enable() # for debugging
 import cgi
 from urllib import quote
 from os import listdir, path, environ
+
+from sys import path as syspath
+syspath.append('..')
+from sites.DB import DB
 
 def main():
 	keys = get_keys()
@@ -19,22 +24,21 @@ def get_keys():
 	return keys
 
 def get_urls_for_album(album):
+	db = DB()
+	cur = db.conn.cursor()
+	query = '''
+		select path
+			from images
+			where album in
+				(select id from albums where album = ?)
+			order by path
+		'''
+	curexec = cur.execute(query, [album])
+
 	uri = '%s%s' % (environ['SERVER_NAME'], environ['REQUEST_URI'])
 	uri = uri[:uri.find('/rips/')] + '/rips/'
-	album = quote(album)
-	if not path.exists(album):
-		print 'album not found: %s' % album
-		return
-	result = []
-	for f in listdir(album):
-		f = path.join(album, f)
-		if f.endswith('.txt'): continue
-		if path.isdir(f): continue
-		result.append( f )
-	result = sorted(result)
-	for image in result:
-		url = 'http://%s%s' % (uri, image)
-		print url
+	for (image) in curexec.fetchall():
+		print 'http://%s%s' % (uri, image[0])
 		print '<br>'
 
 if __name__ == '__main__':

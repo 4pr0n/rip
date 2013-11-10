@@ -103,7 +103,7 @@ class fourchan(basesite):
 				out += self.file_info(post)
 				out += '<table><tr><td class="reply">'
 				out += '<a href="%s%s" target="_BLANK">' % (post['tim'], post['ext'])
-				out += '<img src="%s%s" width="%d" height="%d">' % (post['tim'], post['ext'], post['tn_w'], post['tn_h'])
+				out += '<img src="thumbs/%s%s" width="%d" height="%d">' % (post['tim'], post['ext'], post['tn_w'], post['tn_h'])
 				out += '</a>'
 				out += '</td><td class="reply">'
 				out += self.post_info(post)
@@ -117,7 +117,7 @@ class fourchan(basesite):
 					# Image
 					out += '<td>'
 					out += '<a href="%s%s" target="_BLANK">' % (post['tim'], post['ext'])
-					out += '<img src="%s%s" width="%d" height="%d">' % (post['tim'], post['ext'], post['tn_w'], post['tn_h'])
+					out += '<img src="thumbs/%s%s" width="%d" height="%d">' % (post['tim'], post['ext'], post['tn_w'], post['tn_h'])
 					out += '</a>'
 					out += '</td>'
 				# Text
@@ -138,6 +138,8 @@ class fourchan(basesite):
 		header += '<div class="postInfo">'
 		if 'sub' in post:
 			header += '<span class="sub">%s</span> ' % self.safe(post['sub'])
+		if not 'name' in post:
+			post['name'] = 'Anonymous'
 		header += '<span class="name">%s</span> ' % self.safe(post['name'])
 		header += '%s No. %d' % (post['now'], post['no'])
 		header += '</div>'

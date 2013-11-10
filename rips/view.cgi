@@ -33,7 +33,7 @@ def main(): # Prints JSON response to query
 	preview = int(keys.get('preview', 10))   # Number of images to retrieve
 	after     = keys.get('after',   '')      # Value of last album retrieved
 	sorting   = keys.get('sort', 'accessed') # Sort order
-	ordering  = keys.get('order', 'asc')     # Ascending/descending
+	ordering  = keys.get('order', 'desc')    # Ascending/descending
 	blacklist = keys.get('blacklist', '')    # Album to blacklist
 
 	# Get from list of all albums
@@ -181,7 +181,7 @@ def get_album(album, start, count, sorting, ordering):
 	if sorting not in ['number', 'path', 'size', 'type']:
 		sorting = 'number'
 	if ordering not in ['asc', 'desc']:
-		ordering = 'asc'
+		ordering = 'desc'
 
 	# Get album
 	try:
@@ -244,6 +244,7 @@ def get_album(album, start, count, sorting, ordering):
 			'height' : height,
 			'type'   : imagetype
 		} )
+	cur.close()
 	# Construct response
 	response = {
 		'images'  : images,
@@ -263,6 +264,8 @@ def get_album(album, start, count, sorting, ordering):
 	if is_admin():
 		response['reports'] = reports
 		response['user'] = ip
+	if start == 0:
+		db.update_album(album)
 	print dumps( {
 		'album' : response
 	} )
@@ -503,10 +506,6 @@ def guess_url(album):
 		elif fields[1] == 'r': # Subreddit
 			return 'http://imgur.com/%s' % '/'.join(fields[1:])
 	return ''
-	
-def update_album(album): # Mark album as recently-viewed
-	db = DB()
-	db.update_album(album)
 	
 def get_cookies():
 	if not 'HTTP_COOKIE' in environ: return {}

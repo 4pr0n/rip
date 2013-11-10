@@ -87,7 +87,7 @@ class basesite(object):
 		except Exception, e:
 			# Album already exists!
 			self.debug('got error on %s: %s' % (self.working_dir, str(e)))
-			self.albumid = int(self.db.select_one('id', 'albums', 'path = "%s"' % self.working_dir))
+			self.albumid = int(self.db.select_one('id', 'albums', 'album = "%s"' % self.album_name))
 	
 	""" Returns true if we hit the image limit, false otherwise """
 	def hit_image_limit(self):
@@ -434,6 +434,9 @@ class basesite(object):
 			# Failed to get dimensions, don't fail completely.
 			pass
 
+		filesize = path.getsize(image)
+		if image.startswith('rips/'): image = './%s' % image[5:]
+		if thumb.startswith('rips/'): thumb = './%s' % thumb[5:]
 		values = [
 				None,    # image id
 				self.albumid, # album id
@@ -442,7 +445,7 @@ class basesite(object):
 				url,     # source
 				width,   # dimensions
 				height,
-				path.getsize(image), # image filesize
+				filesize,# image filesize
 				thumb,   # thumbnail path
 				filetype # image/video/etc
 			]
@@ -498,16 +501,14 @@ class basesite(object):
 			self.zip()
 		zipsize = path.getsize('%s.zip' % self.working_dir)
 		image_count = 0
-		do_not_zip  = ['zipping.txt', 'complete.txt', 'ip.txt', 'reports.txt']
-		not_an_image = ['log.txt']
 		images = []
 		thumbs = []
 		for root, subdirs, files in walk(self.working_dir):
 			for fn in files:
-				if fn.endswith('.txt'): continue
+				if fn.endswith('.txt') or fn.endswith('.html'): continue
 				if root.endswith('/thumbs'):
 					thumbs.append(path.join(root, fn))
-				elif fn not in do_not_zip and fn not in not_an_image:
+				else:
 					images.append(path.join(root, fn))
 		images.sort()
 		thumbs.sort()
@@ -536,17 +537,18 @@ class basesite(object):
 		self.db.commit()
 
 	def add_recent(self, ip):
-		self.db.add_recent(self.original_url, self.working_dir, ip)
+		self.db.add_recent(self.original_url, self.album_name, ip)
 
 if __name__ == '__main__':
 	# Test the base site functionality
+	#url = 'http://seenive.com/u/911429150038953984'
 	url = 'http://imgur.com/a/RdXNa'
-	import site_imgur
+	import site_seenive, site_imgur
 	bs = site_imgur.imgur(url, debugging=True)
 	bs.debug('deleting')
-	bs.db.delete_album(bs.working_dir, blacklist=False, delete_files=False)
-	#bs.debug('adding')
-	#bs.add_existing_album_to_db()
+	bs.db.delete_album(bs.album_name, blacklist=False, delete_files=False)
+	bs.debug('adding')
+	bs.add_existing_album_to_db()
 	'''
 	# Download & zip
 	bs.download()
@@ -565,6 +567,6 @@ if __name__ == '__main__':
 				print field,
 			print ''
 	# Delete album from filesystem and database
-	bs.db.delete_album('rips/imgur_RdXNa', blacklist=True)
+	#bs.db.delete_album(bs.album_name, blacklist=True)
 	'''
 

@@ -7,7 +7,9 @@
 """
 
 import os, time, datetime
+from time import mktime, gmtime
 from shutil import rmtree
+from sites.DB import DB
 
 max_size = 150 * 1024 * 1024 * 1024   # 100 gb
 max_incomplete_time   = 3600 * 2      # 2 hours
@@ -28,16 +30,19 @@ IGNORE = ['imgur_reactiongifsarchive.zip', \
 		'imgur_imouto.zip']
 
 def get_incomplete_albums():
+	db = DB()
+	cur = db.conn.cursor()
+	query = '''
+		select album, created
+			from albums
+			where complete == 0
+	'''
+	curexec = cur.execute(query)
 	empties = []
-	for f in os.listdir('rips'):
-		if f == 'txt': continue
-		fp = os.path.join('rips', f)
-		if os.path.isdir(fp) and not os.path.exists('%s%scomplete.txt' % (fp, os.sep)):
-			# Not completed
-			mtime = os.path.getmtime(fp)
-			now = int(time.strftime('%s'))
-			if now - mtime > (max_incomplete_time):
-				empties.append(fp)
+	now = int(mktime(gmtime()))
+	for (album, created) in curexec.fetchall():
+		if now - created > max_incomplete_time:
+			empties.append(album)
 	return empties
 
 def get_orphan_zips():
@@ -141,14 +146,14 @@ def remove_files(l, reason=''):
 		if os.path.isfile(f):
 			try:
 				log('removing %s (%d)' % (f.rjust(50), os.path.getsize(f)))
-				os.remove(f)
+				#os.remove(f)
 				removed += 1
 			except Exception, err:
 				log('failed to remove %s: %s' % (f, err))
 		elif os.path.isdir(f):
 			try:
 				log('removing %s     (%d)' % (f.rjust(46), get_dir_size(f)))
-				rmtree(f)
+				#rmtree(f)
 				removed += 1
 			except Exception, err:
 				log('failed to remove %s: %s' % (f, err))
