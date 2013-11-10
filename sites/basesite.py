@@ -219,6 +219,7 @@ class basesite(object):
 				return
 		for (index, saveas, url, thumbnail) in self.images_to_add:
 			self.add_image_to_db(index + 1, saveas, url, thumbnail)
+		self.images_to_clear[:] = []
 	
 	""" Returns human-readable filesize for file """
 	def get_size(self, filename):
