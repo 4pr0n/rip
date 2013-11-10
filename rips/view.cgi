@@ -253,7 +253,7 @@ def get_album(album, start, count, sorting, ordering):
 		'album'   : album,
 		'url'     : albumsource,
 		'total'   : total,
-		'size'    : filesize,
+		'size'    : sizeof_fmt(filesize),
 		'zipsize' : zipsize,
 		'created' : created,
 		'accessed': accessed,
@@ -430,6 +430,7 @@ def sizeof_fmt(num):
 		if num < 1024.0:
 			return "%3.1f %s" % (num, x)
 		num /= 1024.0
+	return '?bytes'
 
 # Attempts to guess URL from album name
 def guess_url(album):
