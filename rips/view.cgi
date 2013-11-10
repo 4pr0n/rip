@@ -327,8 +327,12 @@ def delete_album(album, blacklist=''):
 		print_error('you are not an admin: %s' % environ.get('REMOTE_ADDR', '127.0.0.1'))
 		return
 	db = DB()
-	blacklist = False if blacklist == '' else True
-	db.delete_album(album, blacklist=blacklist)
+	blacklist = True if blacklist == 'true' else False
+	try:
+		db.delete_album(album, blacklist=blacklist, delete_files=True)
+	except Exception, e:
+		print_warning(str(e))
+		return
 	response = 'album was deleted'
 	if blacklist:
 		response += ' and blacklisted'

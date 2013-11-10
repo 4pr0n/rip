@@ -136,17 +136,24 @@ class DB:
 		return result
 	
 	def delete_album(self, album, blacklist=False, delete_files=True):
+		del_album = del_zip = was_blacklisted = False
 		if delete_files:
 			from shutil import rmtree
 			from os import path, remove
-			albumpath = path.join('rips', album)
+			albumpath = album
+			if not getcwd().endswith('rips'):
+				albumpath = path.join('rips', album)
 			# Delete directory
 			if path.exists(albumpath):
+				del_album = True
 				rmtree(albumpath)
 			# Delete zip
 			zipfile = '%s.zip' % albumpath
 			if path.exists(zipfile):
+				del_zip = True
 				remove(zipfile)
+			if not del_album or not del_zip:
+				raise Exception('could not delete album/zip, cwd: %s, looked for %s and %s' % (getcwd(), albumpath, zipfile))
 
 		try:
 			albumid = self.select_one('id', 'albums', 'album = "%s"' % album)
@@ -167,11 +174,14 @@ class DB:
 		if blacklist:
 			try:
 				cur.execute('insert into blacklist values (?)', [album])
+				was_blacklisted = True
 			except Exception, e:
 				# Failed to blacklist (already blacklisted?)
 				pass
 		cur.close()
 		self.commit()
+		if not del_album or not del_zip or (not was_blacklisted and blacklist):
+			raise Exception('album was %sdeleted, zip was %sdeleted, album was %sblacklisted' % ('' if del_album else 'not ', '' if del_zip else 'not ', '' if was_blacklisted else 'not '))
 
 	def update_album(self, album):
 		# update album / zip modified times
