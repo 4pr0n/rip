@@ -525,7 +525,7 @@ class basesite(object):
 					if images[i].startswith(mthumb):
 						thumb = temp_thumb
 						break
-			self.add_image_to_db(i, images[i], '', thumb)
+			self.add_image_to_db(i, images[i], '', temp_thumb)
 			total_size += path.getsize(images[i])
 		now = int(mktime(gmtime()))
 		query = '''
