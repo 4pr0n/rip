@@ -66,7 +66,7 @@ except ImportError:
 
 from time import sleep, mktime, gmtime, time as timetime
 DB_FILE = 'db.db'
-if not getcwd().endswith('rip'):
+if getcwd().endswith('sites') or getcwd().endswith('rips'):
 	DB_FILE = '../db.db'
 
 class DB:
