@@ -854,7 +854,7 @@ function showReportsToAdmin(album) {
 			.attr('href', '')
 			.attr('user', album.user)
 			.click( function() {
-				banUser($(this).attr('user'), 'temporary');
+				banUser($(this).attr('user'), 'temporary', album.album, album.url);
 				return false;
 			});
 		var stban = $('<span />')
@@ -872,7 +872,7 @@ function showReportsToAdmin(album) {
 			.attr('href', '')
 			.attr('user', album.user)
 			.click( function() {
-				banUser($(this).attr('user'), 'permanent');
+				banUser($(this).attr('user'), 'permanent', album.album, album.url);
 				return false;
 			});
 		var spban = $('<span />')
@@ -990,11 +990,13 @@ function deleteAllAlbums(user, blacklist) {
 	return false;
 }
 
-function banUser(user, length) {
+function banUser(user, length, album, url) {
 	var reason = prompt("enter reason why user is being banned", "enter reason here");
 	if (reason == null || reason == '') {
 		return;
 	}
+	if (album == undefined) album = '?';
+	if (url = undefined)    url = '?';
 	if (reason == "enter reason here") {
 		$('#ban_status')
 			.html('you must enter a reason')
@@ -1009,7 +1011,13 @@ function banUser(user, length) {
 				.css('border', 'none')
 				.css('padding-right', '5px')
 		);
-	$.getJSON('view.cgi?ban_user=' + user + '&reason=' + reason + '&length=' + length)
+	var req = 'view.cgi?';
+	req += 'ban_user=' + user;
+	req += '&reason=' + reason;
+	req += '&length=' + length;
+	req += '&album=' + album;
+	req += '&url=' + encodeURIComponent(url);
+	$.getJSON(req)
 		.fail( adminJsonFailHandler )
 		.done( function(json) { 
 			adminRequestHandler(json, $('#ban_status_' + length))

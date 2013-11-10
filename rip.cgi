@@ -112,15 +112,10 @@ def rip(url, cached):
 		print_error(str(e))
 		return
 
-	# Check URL against blacklist
-	if path.exists('url_blacklist.txt'):
-		for line in open('url_blacklist.txt', 'r'):
-			line = line.strip().lower()
-			if line == '': continue
-			if line in url.lower() or \
-			   ripper.album_name.lower().endswith(line):
-				print_error('cannot rip: URL is blacklisted')
-				return
+	# Check if album is blacklisted
+	if ripper.is_blacklisted():
+		print_error('cannot rip: URL is blacklisted')
+		return
 
 	# Check if there's already a zip for the album
 	if cached:

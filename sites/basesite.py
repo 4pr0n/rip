@@ -539,6 +539,9 @@ class basesite(object):
 
 	def add_recent(self, ip):
 		self.db.add_recent(self.original_url, self.album_name, ip)
+	
+	def is_blacklisted(self):
+		return self.db.count('*', 'blacklist', 'album = ?', [self.album_name]) > 0
 
 if __name__ == '__main__':
 	# Test the base site functionality

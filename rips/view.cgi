@@ -55,7 +55,7 @@ def main(): # Prints JSON response to query
 	# Delete all albums from a user
 	elif 'delete_user'   in keys: delete_albums_by_user(keys['delete_user'], blacklist)
 	# Permanently ban a user
-	elif 'ban_user'      in keys: ban_user(keys['ban_user'], reason=keys.get('reason', ''), length=keys.get('length', 'temporary'))
+	elif 'ban_user'      in keys: ban_user(keys['ban_user'], reason=keys.get('reason', ''), length=keys.get('length', 'temporary'), album=keys.get('album', '?'), url=keys.get('url', '?'))
 
 	# Unexpected key(s)
 	else: print_error('unsupported method(s)')
@@ -331,7 +331,7 @@ def delete_album(album, blacklist=''):
 	db.delete_album(album, blacklist=blacklist)
 	response = 'album was deleted'
 	if blacklist:
-		response = ' and blacklisted'
+		response += ' and blacklisted'
 	print_ok(response)
 
 def delete_albums_by_user(user, blacklist=''):
@@ -360,7 +360,7 @@ def delete_albums_by_user(user, blacklist=''):
 		'user' : user
 	} )
 
-def ban_user(user, reason='', length='permanent'):
+def ban_user(user, reason='', length='permanent', album='?', url='?'):
 	if not is_admin():
 		print_error('you (%s) are not an admin' % environ.get('REMOTE_ADDR', '127.0.0.1'))
 		return
@@ -401,12 +401,13 @@ def ban_user(user, reason='', length='permanent'):
 	except Exception, e:
 		print_error('failed to ban %s: %s' % (user, str(e)))
 		return
-	# Save ban to log
+	db = DB()
 	try:
-		f = open(path.join('..', 'banned.log'), 'a')
-		f.write('%s %d %s\n' % (user, int(time()), reason))
-		f.close()
-	except: pass
+		db.insert('banned', [user, reason, album, url, length])
+		db.commit()
+	except Exception, e:
+		print_warning('banned, but could not add user to DB: %s' % str(e))
+		return
 	print_ok('%s-banned %s' % (length, user))
 
 ##################
