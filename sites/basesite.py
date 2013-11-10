@@ -513,14 +513,19 @@ class basesite(object):
 					images.append(path.join(root, fn))
 		images.sort()
 		thumbs.sort()
-		if len(images) != len(thumbs):
-			print '# of images != # of thumbs'
-			print images
-			print thumbs
-			return
 		total_size = 0
 		for i in xrange(0, len(images)):
-			self.add_image_to_db(i, images[i], '', thumbs[i])
+			if len(images) == len(thumbs):
+				temp_thumb = thumbs[i]
+			else:
+				temp_thumb = 'nothumb.png'
+				for temp_thumb in thumbs:
+					mthumb = thumbs.replace('/thumbs', '')
+					mthumb = mthumb[:mthumb.rfind('.')]
+					if images[i].startswith(mthumb):
+						thumb = temp_thumb
+						break
+			self.add_image_to_db(i, images[i], '', thumb)
 			total_size += path.getsize(images[i])
 		now = int(mktime(gmtime()))
 		query = '''
