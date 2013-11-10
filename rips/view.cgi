@@ -330,7 +330,7 @@ def delete_album(album, blacklist=''):
 	blacklist = False if blacklist == '' else True
 	db.delete_album(album, blacklist=blacklist)
 	response = 'album was deleted'
-	if blacklisted:
+	if blacklist:
 		response = ' and blacklisted'
 	print_ok(response)
 
