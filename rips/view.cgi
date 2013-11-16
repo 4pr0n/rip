@@ -96,10 +96,15 @@ def get_all_albums(count, preview_size, after, sorting, ordering, textfilter=Non
 		else: where += ' and '
 		where += 'ip = ?'
 		values.append(userfilter)
-	elif reportfilter != None:
+	if reportfilter != None and is_admin():
 		if where == '': where = 'where '
 		else: where += ' and '
 		where += 'reports > 0'
+	else:
+		if where == '': where = 'where '
+		else: where += ' and '
+		where += 'reports < 2'
+		
 
 	# Get list of albums
 	after = ''
