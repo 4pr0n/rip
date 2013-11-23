@@ -21,7 +21,7 @@ LOG_NAME      = 'log.txt'
 RIP_DIRECTORY = 'rips' # Directory to store rips in
 MAX_THREADS   = 3
 MAX_IMAGES    = 500
-MAX_THUMB_DIM = 4000
+MAX_THUMB_DIM = 6000
 MAX_THUMB_SIZE= 5 * 1024 * 1024
 
 """
