@@ -55,6 +55,7 @@ from sites.site_seenive     import     seenive
 from sites.site_vinebox     import     vinebox
 from sites.site_imgchili    import    imgchili
 from sites.site_fapproved   import   fapproved
+from sites.site_gonewild    import    gonewild
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -324,7 +325,8 @@ def get_ripper(url):
 			seenive,     \
 			vinebox,     \
 			imgchili,    \
-			fapproved]
+			fapproved,   \
+			gonewild]
 	for site in sites:
 		try:
 			ripper = site(url)
@@ -452,8 +454,6 @@ def is_supported(url):
 """ Entry point. Print leading/trailing characters, executes main() """
 if __name__ == '__main__':
 	print "Content-Type: application/json"
-	print "Keep-Alive: timeout=900"
-	print "Connection: Keep-Alive"
 	print ""
 	stdout.flush()
 	main()
