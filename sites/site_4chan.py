@@ -101,11 +101,14 @@ class fourchan(basesite):
 				# First post
 				out += '<div class="first">'
 				out += self.file_info(post)
-				out += '<table><tr><td class="reply">'
-				out += '<a href="%s%s" target="_BLANK">' % (post['tim'], post['ext'])
-				out += '<img src="thumbs/%s%s" width="%d" height="%d">' % (post['tim'], post['ext'], post['tn_w'], post['tn_h'])
-				out += '</a>'
-				out += '</td><td class="reply">'
+				out += '<table><tr>'
+				if 'tim' in post and 'ext' in post:
+					out += '<td class="reply">'
+					out += '<a href="%s%s" target="_BLANK">' % (post['tim'], post['ext'])
+					out += '<img src="thumbs/%s%s" width="%d" height="%d">' % (post['tim'], post['ext'], post['tn_w'], post['tn_h'])
+					out += '</a>'
+					out += '</td>'
+				out += '<td class="reply">'
 				out += self.post_info(post)
 				out += self.text_reply(post)
 			else:
@@ -113,7 +116,7 @@ class fourchan(basesite):
 				out += self.post_info(post)
 				out += self.file_info(post)
 				out += '<table><tr>'
-				if 'tim' in post:
+				if 'tim' in post and ext in post:
 					# Image
 					out += '<td>'
 					out += '<a href="%s%s" target="_BLANK">' % (post['tim'], post['ext'])
