@@ -377,7 +377,7 @@ def get_url_for_album(album):
 
 # Return all URLs for an album
 def get_urls_for_album(album):
-	album = quote(album)
+	album = unquote(album)
 	if not path.exists(album):
 		print dumps( { 'urls' : [] } )
 		return
@@ -395,7 +395,7 @@ def get_urls_for_album(album):
 #############
 # REPORT
 def report_album(album, reason=""):
-	album = quote(album)
+	album = unquote(album)
 	if '..' in album or '/' in album or not path.isdir(album):
 		print_error('unable to reported: invalid album specified')
 		return
@@ -451,7 +451,7 @@ def clear_reports(album):
 	if not is_admin():
 		print_error('you are not an admin: %s' % environ['REMOTE_ADDR'])
 		return
-	album = quote(album)
+	album = unquote(album)
 	# Sanitization, check if album
 	if '..' in album or '/' in album or not path.isdir(album):
 		print_error('album is not valid: %s' % album)
@@ -472,7 +472,7 @@ def delete_album(album, blacklist=''):
 	if not is_admin():
 		print_error('you are not an admin: %s' % environ['REMOTE_ADDR'])
 		return
-	album = quote(album)
+	album = unquote(album)
 	# Sanitization, check if album
 	if '..' in album or '/' in album or not path.isdir(album):
 		print_error('album is not valid: %s' % album)
