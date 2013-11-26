@@ -38,6 +38,7 @@ class imagefap(basesite):
 		r = r[r.find('showMoreGalleries'):] # To ignore user icon
 		links = self.web.between(r, 'border=0 src="', '"')
 		for (index, link) in enumerate(links):
+			link = 'http://%s' % link[link.find('.')+1:].replace('/images/thumb/', '/images/full/')
 			self.download_image(link, index + 1, total=len(links))
 			if self.hit_image_limit(): break
 		self.wait_for_threads()
