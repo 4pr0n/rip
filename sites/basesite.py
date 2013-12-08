@@ -161,6 +161,7 @@ class basesite(object):
 			text = 'no Content-Type found at URL %s' % (url)
 		elif ('image'        not in m['Content-Type'] and \
 		      'video'        not in m['Content-Type'] and \
+					'audio'        not in m['Content-Type'] and \
 		      'octet-stream' not in m['Content-Type']):
 			text = 'no image/video/octet-stream in Content-Type (found "%s") for URL %s' % (m['Content-Type'], url)
 		else:

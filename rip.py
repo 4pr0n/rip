@@ -46,6 +46,7 @@ from sites.site_imgchili    import    imgchili
 from sites.site_fapproved   import   fapproved
 from sites.site_gonewild    import    gonewild
 from sites.site_vidble      import      vidble
+from sites.site_soundcloud  import  soundcloud
 # No longer supported
 from sites.site_occ         import         occ
 from sites.site_gonearch    import    gonearch
@@ -91,8 +92,9 @@ sites = [        \
 		vinebox,     \
 		imgchili,    \
 		fapproved,   \
-		gonewild],   \
-		vidble
+		gonewild,    \
+		vidble,      \
+		soundcloud]
 
 def main():
 	print '\nrarchives\' album ripper\n'
