@@ -4,6 +4,7 @@ from sys import stdout, exit
 from time import mktime, strptime, strftime, localtime, time
 from json import dumps, loads
 from os import path, mkdir, remove
+from commands import getstatusoutput
 
 LOG_FILE = open('.LOG_FILE', 'r').read().strip() # ~/logs/<site>/http/access.log
 STAT_DIR = open('.STAT_DIR', 'r').read().strip() # logs
@@ -206,7 +207,18 @@ def cleanup_old_logs():
 		remove(f)
 		log('    removed: %s' % f)
 
+def exit_if_already_started():
+	(status, output) = getstatusoutput('ps aux')
+	running_processes = 0
+	for line in output.split('\n'):
+		if 'python' in line and 'generate-tsd.py' in line and not '/bin/sh -c' in line:
+			running_processes += 1
+	if running_processes > 1:
+		print "process is already running, exiting"
+		exit(0) # Quit if the bot is already running
+
 if __name__ == '__main__':
+	exit_if_already_started()
 	log('starting...')
 	cleanup_old_logs()
 
