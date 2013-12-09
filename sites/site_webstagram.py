@@ -33,7 +33,7 @@ class instagram(basesite):
 		self.init_dir()
 		r = self.web.get(self.url)
 		totals = self.web.between(r, 'font-size:123.1%;">', '<')
-		if len(totals) > 0: total = int(totals[1])
+		if len(totals) > 0: total = int(totals[-1])
 		else: total = -1
 		index = 0
 		while True:
