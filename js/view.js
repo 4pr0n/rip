@@ -30,6 +30,13 @@ function init() {
 		if (window.getSelection)     window.getSelection().removeAllRanges();
 		else if (document.selection) document.selection.empty();
 	}
+
+	$('#bottom_bar').hide();
+	$('div#alert')
+		.hide()
+		.slideDown(1000, function() {
+			$('#bottom_bar').slideDown(1000)
+		});
 }
 
 
@@ -469,7 +476,7 @@ function scrollHandler() {
 function loadImage($thumbnail) {
 	// If the image type isn't supported, open in a new tab
 	var unsupported = false;
-	$.each(Array('.mp4', '.html'), function(i, extension) {
+	$.each(Array('.mp4', '.html', '.m4a'), function(i, extension) {
 		var full = $thumbnail.attr('full');
 		if (full.indexOf(extension) == full.length - extension.length) {
 			window.open(full);

@@ -99,6 +99,12 @@ function init() { // Executes when DOM is ready
 	refreshRecent();
 
 	loadUserRips(); // Load user rips, check if limit is exceeded
+	$('#bottom_bar').hide();
+	$('div#alert')
+		.hide()
+		.slideDown(1000, function() {
+			$('#bottom_bar').slideDown(1000)
+		});
 }
 
 function refreshRecent() { // Refresh list of "recent rips"
@@ -257,7 +263,8 @@ function ripFailHandler(x, s, e) {
 				.hide()
 				.addClass('center')
 				.append( $('<h3 />').html('error occurred while trying to rip') )
-				.append( $('<div />').html('this sometimes happens. try to rip again.') )
+				.append( $('<div />').html('this happens a lot lately. you can try again but it will probably not work.') )
+				/*
 				.append( 
 					$('<div />')
 						.css('padding-top', '10px')
@@ -277,6 +284,7 @@ function ripFailHandler(x, s, e) {
 								.attr('target', '_BLANK')
 							)
 					)
+				*/
 				.slideDown(750)
 				.css('opacity', '0')
 				.animate(

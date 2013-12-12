@@ -372,7 +372,7 @@ div.date {
 	width: 100%;
 	position: fixed;
 	left: 0px;
-	top: 0px;
+	top: 24px;
 	border-bottom-left-radius: 10px;
 	border-bottom-right-radius: 10px;
 	box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.6);
@@ -455,4 +455,19 @@ div.warning {
 	padding: 30px;
 	padding-top: 0px;
 	border-radius: 20px;
+}
+
+div#alert {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	padding: 5px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	width: 100%;
+	text-align: center;
+	background-color: #a33;
+	font-weight: bold;
+	font-size: 0.9em;
+	height: 20px;
 }
