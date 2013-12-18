@@ -372,7 +372,7 @@ div.date {
 	width: 100%;
 	position: fixed;
 	left: 0px;
-	top: 24px;
+	top: 0px;
 	border-bottom-left-radius: 10px;
 	border-bottom-right-radius: 10px;
 	box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.6);
@@ -470,4 +470,5 @@ div#alert {
 	font-weight: bold;
 	font-size: 0.9em;
 	height: 20px;
+	display: none;
 }

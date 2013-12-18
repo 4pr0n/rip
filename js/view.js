@@ -31,12 +31,20 @@ function init() {
 		else if (document.selection) document.selection.empty();
 	}
 
-	$('#bottom_bar').hide();
-	$('div#alert')
-		.hide()
-		.slideDown(1000, function() {
-			$('#bottom_bar').slideDown(1000)
-		});
+	if ( $('div#alert').html() === '') {
+		$('#bottom_bar')
+			.hide()
+			.css('top', '0px')
+			.slideDown(500);
+	} else {
+		$('div#alert')
+			.hide()
+			.slideDown(1000, function() {
+				$('#bottom_bar')
+					.css('top', '24px')
+					.slideDown(1000)
+			});
+	}
 }
 
 

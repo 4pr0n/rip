@@ -100,11 +100,19 @@ function init() { // Executes when DOM is ready
 
 	loadUserRips(); // Load user rips, check if limit is exceeded
 	$('#bottom_bar').hide();
-	$('div#alert')
-		.hide()
-		.slideDown(1000, function() {
-			$('#bottom_bar').slideDown(1000)
-		});
+	if ( $('div#alert').html() === '') {
+		$('#bottom_bar')
+			.css('top', '0px')
+			.slideDown(1000)
+	} else {
+		$('div#alert')
+			.hide()
+			.slideDown(1000, function() {
+				$('#bottom_bar')
+				.css('top', '24px')
+				.slideDown(1000)
+			});
+	}
 }
 
 function refreshRecent() { // Refresh list of "recent rips"
