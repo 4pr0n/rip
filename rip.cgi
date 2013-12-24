@@ -240,7 +240,11 @@ def passes_pre_rip_check(url):
 	# Check if user passed max albums allowed
 	if not is_contributor():
 		ip = environ.get('REMOTE_ADDR', '127.0.0.1')
-		if len(albums_by_ip(ip)) >= MAX_ALBUMS_PER_USER:
+		count = 0
+		for album in albums_by_ip(ip):
+			if not album['album'].startswith('gonewild_'):
+				count += 1
+		if count >= MAX_ALBUMS_PER_USER:
 			print_error('users are only allowed to rip %d albums at a time' % MAX_ALBUMS_PER_USER)
 			return False
 	return True
