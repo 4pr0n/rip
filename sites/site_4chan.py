@@ -116,7 +116,7 @@ class fourchan(basesite):
 				out += self.post_info(post)
 				out += self.file_info(post)
 				out += '<table><tr>'
-				if 'tim' in post and ext in post:
+				if 'tim' in post and 'ext' in post:
 					# Image
 					out += '<td>'
 					out += '<a href="%s%s" target="_BLANK">' % (post['tim'], post['ext'])
