@@ -63,10 +63,10 @@ def parse_log(logfile, data, last_line=None):
 	almost_there = there_yet = False
 	try:
 		for linenumber, line in enumerate(open(logfile, 'r')):
-			#if linenumber % 251 == 0:
-			#	stdout.write('\r%d\r' % linenumber)
-			#	stdout.flush()
 			if not there_yet:
+				if linenumber % 251 == 0:
+					stdout.write('\r%d\r' % linenumber)
+					stdout.flush()
 				if last_line == '' or not almost_there and last_line in line:
 					almost_there = True
 				if last_line == '' or almost_there and last_line not in line:
@@ -76,13 +76,18 @@ def parse_log(logfile, data, last_line=None):
 				almost_there = False
 				log('resuming from line #%d' % linenumber)
 			# We should parse this line and below
-			try:
-				(ip, epoch, url, status, size, referer, useragent) = parse_line(line)
-				interpret_data(data, epoch, url, size, status, ip)
-			except: pass
+			#try:
+			(ip, epoch, url, status, size, referer, useragent) = parse_line(line)
+			interpret_data(data, epoch, url, size, status, ip)
+			if linenumber % 251 == 0:
+				stdout.write('\r%d - %s\r' % (linenumber, strftime('%Y-%m-%d %H:%M:%S', localtime(epoch))))
+				stdout.flush()
+			#except: pass
 	except KeyboardInterrupt:
 		log('         \ninterrupted', level='WARN')
-		exit(1)
+		if not there_yet:
+			exit(1)
+		save_last_line(line) 
 		return
 	except Exception, e:
 		log('', level='WARN')
@@ -228,6 +233,9 @@ if __name__ == '__main__':
 			'5min' : {'seconds' : 300},
 		}
 	parse_log(LOG_FILE, data)
+	log('----- finished parsing -----')
+	for timekey in data.keys():
+		log('key: %s, length: %d' % (str(timekey), len(data[timekey])))
 	for timekey in data.keys():
 		for k in sorted(data[timekey].keys()):
 			if k == 'seconds': continue
