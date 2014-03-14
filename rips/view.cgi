@@ -568,7 +568,7 @@ def ban_user(user, reason='', length='temporary'):
 	if not is_admin():
 		print_error('you (%s) are not an admin' % environ['REMOTE_ADDR'])
 		return
-	if user.count(".") != 4 or not user.replace(".").isdigit():
+	if user.count(".") != 4 or not user.replace(".", "").isdigit():
 		print_error('unable to ban: not a valid ipv4 IP address: %s' % user)
 		return
 	if IP_TABLES:
