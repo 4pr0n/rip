@@ -568,20 +568,20 @@ def ban_user(user, reason='', length='temporary'):
 	if not is_admin():
 		print_error('you (%s) are not an admin' % environ['REMOTE_ADDR'])
 		return
-	if user.count(".") != 4 or not user.replace(".", "").isdigit():
+	if user.count(".") != 3 or not user.replace(".", "").isdigit():
 		print_error('unable to ban: not a valid ipv4 IP address: %s' % user)
 		return
 	if IP_TABLES:
 		from commands import getstatusoutput
 		(stat,output) = getstatusoutput("iptables -L INPUT -v -n --line-numbers")
 		for line in output.split('\n'):
-			if line.contains(user):
+			if user in line:
 				print_warning('user is already permanently banned')
 				return
 		if length == 'temporary':
 			print_error('unable to temporarily ban users with iptables')
 			return
-		(stat,output) = getstatusoutput("iptables -A INPUT -s % -p tcp --dport 80 -j DROP" % user)
+		(stat,output) = getstatusoutput("iptables -A INPUT -s %s -p tcp --dport 80 -j DROP" % user)
 		if stat != 0:
 			print_warning("may not have banned user %s! status:%d output:'%s'" % (user, status, output))
 		else:
