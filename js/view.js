@@ -584,6 +584,8 @@ function thumbLoadHandler($thumb, $thumbnail) {
 				easing: 'swing'
 			}
 		)
+		.hide()
+		.fadeIn(300)
 		.show();
 
 	// Remove existing image
@@ -618,7 +620,8 @@ function thumbLoadHandler($thumb, $thumbnail) {
 		)
 		//.load(function() { imageLoadHandler($thumb, 'load') })
 		.attr('src', $thumbnail.attr('full'))
-		.show()
+		.hide()
+		.fadeIn(300)
 		.imagesLoaded( function() { imageLoadHandler($thumb, 'load') } );
 }
 
