@@ -9,34 +9,7 @@
 	</head>
 	<body>
 		<table id="maintable">
-			<!-- Page title & subheader -->
-			<tr><td class="top">
-					<div style="float: left; width: 50%;">
-						<table class="page header clickable" width="100%">
-							<tr>
-								<td>
-									<a class="header" href="./">
-										<div class="supheader center">rarchives.com</div>
-										<div class="header center">album viewer</div>
-									</a>
-								</td>
-							</tr>
-						</table>
-					</div>
-			
-			<!-- Disclaimer -->
-				<div class="center fontmed" style="float: right; width: 50%; font-size: 0.9em">
-					<h3>note: these albums will be deleted soon</h3>
-					<div>
-						the server stores 100GB of rips.<br>
-						the least-recently viewed albums are deleted first.<br>
-						backup accordingly<br>
-						<br>
-					</div>
-				</div>
-					
-				
-			</td></tr><tr><td id="albums_area" style="display: none;" colspan="2">
+			</td></tr><tr valign="bottom"><td id="albums_area" style="display: none;" colspan="2">
 				<div id="albums_table"></div>
 				
 			</td></tr><tr><td class="page" id="status_area" style="display: none;" colspan="2">
@@ -60,27 +33,22 @@
 					</table>
 				</div>
 		
-		</td></tr><tr><td style="padding-top: 15px">
-		</td></tr><tr><td class="page" id="thumbs_area" style="display: none" colspan="2">
+			</td><td class="page" id="thumbs_area" style="display: none" colspan="2">
 				<table class="thumbs" id="thumbs_table">
 
 				</table>
-				
 
-			</td></tr><tr><td colspan="2">
-				<div style="padding-top: 20px; padding-left: 20px; text-align: center; width: 100%;">
-					<span id="nav_info"></span><br>
-					<div class="load_content" id="next"></div>
-					<br><br>
+			<tr><td>
+				<div id="bottom_navbar">
+					<span class="load_content" id="next"></span>
 				</div>
+
 			</td></tr>
 		</table>
 		
 		<div id="bgimage" style="display: none"></div>
 		<img id="fgimage" style="display: none" />
 		<img id="fgthumb" style="display: none" />
-
-		<br>
 
 		<div id="bottom_bar">
 			<table class="bottom">
@@ -125,6 +93,7 @@
 		<div id="alert"></div>
 
 		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/jquery.mousewheel.js"></script>
 		<script type="text/javascript" src="../js/view.js"></script>
 	</body>
 </html>

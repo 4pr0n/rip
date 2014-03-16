@@ -7,9 +7,6 @@ var IMAGES_PER_PAGE           = 12; // Thumbnails per page
 
 // Executes when document has loaded
 function init() {
-	if (over18()) {
-		return;
-	}
 	var url = String(window.location);
 	if (!window.location.hash || window.location.hash.indexOf('_') == -1) {
 		// Viewing all albums
@@ -45,11 +42,41 @@ function init() {
 					.slideDown(1000)
 			});
 	}
+	$(window).mousewheel(function(ev, delta) {
+		$(window).scrollLeft($(window).scrollLeft() - (delta * 3));
+		if ($(window).scrollLeft() > 0 || delta <= 0) {
+			ev.preventDefault();
+		}
+	});
+	$(document).keydown(function(ev) {
+		switch (ev.keyCode) {
+			case 37:
+				IMAGE_INDEX--;
+				if (IMAGE_INDEX < 0) {
+					IMAGE_INDEX = IMAGES.length - 1;
+				}
+				break;
+			case 39:
+				IMAGE_INDEX++;
+				if (IMAGE_INDEX >= IMAGES.length) {
+					IMAGE_INDEX = 0;
+				}
+				break;
+			default:
+				return;
+		}
+		var $img = $(IMAGES[IMAGE_INDEX]);
+		loadImage($img);
+	});
 }
 
 
 //////////////////////
 // LOAD SINGLE ALBUM
+
+var $SINGLE_ALBUM_ROW = null;
+var IMAGES = [];
+var IMAGE_INDEX = 0;
 
 function loadAlbum(album, start, count, startOver) {
 	if (album == null) { return; }
@@ -120,18 +147,7 @@ function loadAlbum(album, start, count, startOver) {
 				return;
 			}
 			if (! $('#status_area').is(':visible')) {
-				$('#status_area')
-					.fadeIn()
-					.css('padding-top', '0')
-					.css('padding-bottom', '0')
-					.animate( { 
-						'padding-top' : '10',
-						'padding-bottom' : '10'
-						}, {
-							queue: false,
-							duration: 500
-						}
-					);
+				$('#status_area').fadeIn();
 				$('#thumbs_area').fadeIn();
 			}
 			$('#album_title').html(album.album + ' (' + album.total + ' images)');
@@ -183,36 +199,48 @@ function loadAlbum(album, start, count, startOver) {
 				.appendTo( $('#get_urls') );
 			
 			// Append thumbnails to table in rows
-			var $thumbrow = $('<tr />');
+			if ($SINGLE_ALBUM_ROW == null) {
+				$SINGLE_ALBUM_ROW = $('<tr />')
+					.show()
+					.appendTo( $('#thumbs_table') );
+
+			}
 			$.each(album.images, function(i, image) {
 				var thumbtd = $('<td />')
 					.addClass('image');
 				
-				var thumba = $('<a />')
-					.attr('href', image.image)
-					.click( function() { return false } );
+				var $thumba = $('<a />')
+					.attr('href', image.image);
 				
-				$('<img />')
+				var $theimg = $('<img />')
 					.attr('src', image.thumb)
-					.css('visibility', 'hidden')
 					.attr('full', image.image)
+					.css('visibility', 'hidden')
+					.data("image_index", IMAGES.length)
 					.load( function() {
 						$(this).css('visibility', 'visible');
 					})
-					.click( function() { 
-						loadImage ( $(this) )
-					})
-					.appendTo(thumba);
-				thumbtd.append(thumba)
-					.appendTo($thumbrow);
+					.click( function($ev) { 
+						if ($ev.which === 1) {
+							IMAGE_INDEX = $(this).data("image_index");
+							loadImage ( $(this) );
+							return false;
+						}
+					});
+				$theimg.appendTo($thumba);
+				IMAGES.push($theimg);
+				thumbtd.append($thumba)
+					.appendTo($SINGLE_ALBUM_ROW);
+				/*
 				if ((i + 1) % SINGLE_ALBUM_IMAGE_BREAKS == 0 || i == album.images.length - 1) {
-					$thumbrow
+					$SINGLE_ALBUM_ROW
 						.hide()
 						.appendTo( $('#thumbs_table') )
 						.fadeIn(1000)
 						.css('display', 'table-row');
-					$thumbrow = $('<tr />');
+					$SINGLE_ALBUM_ROW = $('<tr />');
 				}
+				*/
 			
 		});
 		
@@ -240,7 +268,7 @@ function loadMoreImages() {
 	// Load more images
 	$('#albums_table').attr('loading', 'true');
 	setTimeout(function() {
-		$('#next').html($('#next').html() + '<br>loading...'); // Give them hope
+		$('#next').html($('#next').html() + '&nbsp;loading...'); // Give them hope
 	}, 100);
 	
 	setTimeout(function() {
@@ -274,6 +302,8 @@ function getAllAlbumUrl(after) {
 	return req;
 }
 
+var $ALL_ALBUM_ROW = null;
+
 function loadAllAlbums(after, startOver) {
 	if (after == undefined) after = '';
 	$('#albums_area').show();
@@ -289,19 +319,16 @@ function loadAllAlbums(after, startOver) {
 		.done( function(json) {
 			var albumstable = $('<table />')
 				.css('width', '100%');
-			var albumsrow = $('<tr />');
+			if ($ALL_ALBUM_ROW === null) {
+				$ALL_ALBUM_ROW = $('<tr />');
+				albumstable.append($ALL_ALBUM_ROW);
+			}
 			// Iterate over every album
 			$.each(json.albums, function (album_index, album) {
 				var albumscell = $('<td />')
-					.css('vertical-align', 'top')
+					.css('vertical-align', 'bottom')
 					.css('width', '50%');
-				if (album_index % 2 == 0) {
-					albumscell.css('text-align', 'left')
-				} else {
-					albumscell.css('text-align', 'right')
-						.css('padding-left', '20px');
-				}
-					
+
 				var $imgtable = $('<table />')
 					.addClass('page album clickable')
 					.attr('id', album.album.replace('%20', '_'))
@@ -337,15 +364,9 @@ function loadAllAlbums(after, startOver) {
 					});
 				var $titletext = $('<span />')
 					.html(truncate(album.album, 12) + ' (' + album.total + ' images)');
-				if (album_index % 2 == 0) {
-					$titletd
-						.append($titlezip)
-						.append($titletext);
-				} else {
-					$titletd
-						.append($titletext)
-						.append($titlezip);
-				}
+				$titletd
+					.append($titlezip)
+					.append($titletext);
 				$title.append($titletd);
 				$imgtable.append($title);
 				
@@ -378,19 +399,25 @@ function loadAllAlbums(after, startOver) {
 						.mouseleave( function() {
 							$('#' + $(this).attr('album')).attr('show_album', 'true').addClass('clickable');
 						});
-					$('<img />')
+					var $theimg = $('<img />')
 						.addClass('image_small')
 						.attr('src', image.thumb)
 						.attr('full', image.image)
 						.css('visibility', 'hidden')
+						.data("image_index", IMAGES.length)
 						.load( function() {
 							$(this).css('visibility', 'visible')
 								.attr('onload', '').unbind('load'); // Prevent future loads from resizing
 						})
-						.click( function() { 
-							loadImage ( $(this) )
-						})
-						.appendTo(imga);
+						.mousedown( function(ev) { 
+							if (ev.which === 1) {
+								IMAGE_INDEX = $(this).data("image_index");
+								loadImage ( $(this) );
+							}
+							return true;
+						});
+					$theimg.appendTo(imga);
+					IMAGES.push($theimg);
 						
 					$('<td />')
 						.addClass('image_small')
@@ -403,21 +430,21 @@ function loadAllAlbums(after, startOver) {
 					}
 					$imgtable.append(imgrow);
 				}); // End of for-each-image
-				albumstable.append(
-					albumsrow.append(
-						albumscell.append(
-							$imgtable)
-						)
+				$ALL_ALBUM_ROW.append(
+					albumscell.append(
+						$imgtable)
 					);
 
-				// Slide up
-				$imgtable.css('margin-top', '+100px');
-				$imgtable.animate({'margin-top': '-=100'}, 750, 'swing');
+				// Slide in from the left
+				$imgtable.css('margin-right', '+100px');
+				$imgtable.animate({'margin-right': '-=100'}, 750, 'swing');
 
+				/*
 				if ( (album_index + 1) % 2 == 0 && 
 							album_index < json.albums.length - 1 ) {
-					albumsrow = $('<tr />');
+					ALL_ALBUM_ROW = $('<tr />');
 				}
+				*/
 			}); // End of for-each-album
 			$('#albums_table').append(albumstable);
 
@@ -425,7 +452,7 @@ function loadAllAlbums(after, startOver) {
 			if (json.after == '') {
 				// No more albums to load
 				$('#next').removeAttr('after')
-					.html(json.total + ' albums loaded');
+					.html(json.total + ' albums');
 			} else {
 				var remaining = json.total - json.index;
 				$('#next').attr('after', json.after)
@@ -447,8 +474,7 @@ function loadNextAlbum() {
 	}
 	$('#albums_table').attr('loading', 'true');
 	$('#next').html( $('#next').html() )
-		.append( $('<br>') )
-		.append( $('<span />').html('loading...') );
+		.append( $('<span />').html('&nbsp;(loading...)') );
 	// Load next albums after a shot delay
 	setTimeout( function() {
 		loadAllAlbums($('#next').attr('after'), false);
@@ -461,9 +487,9 @@ function loadNextAlbum() {
 
 function scrollHandler() {
 	// Heights
-	var page     = $(document).height(); // Height of document
-	var viewport = $(window).height();   // Height of viewing window
-	var scroll   = $(document).scrollTop() || window.pageYOffset; // Scroll position (top)
+	var page     = $(document).width(); // Height of document
+	var viewport = $(window).width();   // Height of viewing window
+	var scroll   = $(document).scrollLeft() || window.pageXOffset; // Scroll position (top)
 	var remain = page - (viewport + scroll);
 	if (viewport > page || // Viewport is bigger than entire page
 	    remain < 300) {    // User has scrolled down far enough
@@ -489,16 +515,10 @@ function loadImage($thumbnail) {
 		if (full.indexOf(extension) == full.length - extension.length) {
 			window.open(full);
 			unsupported = true;
-			return;
+			return false;
 		}
 	});
-	if (unsupported) { return; }
-
-	// Dim background
-	$('#bgimage')
-		.stop()
-		.fadeIn()
-		.click( imageClickHandler );
+	if (unsupported) { return false; }
 
 	// Remove/create/show thumbnail
 	$('#fgthumb')
@@ -509,11 +529,15 @@ function loadImage($thumbnail) {
 		.attr('id', 'fgthumb')
 		.hide()
 		.appendTo( $(document.body) )
-		.click(imageClickHandler)
 		.load( function() { thumbLoadHandler($(this), $thumbnail); } )
 		.attr('src', $thumbnail.attr('src')); // Start loading thumbnail
 	
-	return false;
+	$('html,body')
+		.stop()
+		.animate({
+			scrollLeft: $thumbnail.offset().left + ($thumbnail.width() / 2) - ($(window).width() / 2)
+		}, 300);
+	return true;
 }
 
 // Return css dict for image expanded to fit the screen
@@ -538,8 +562,8 @@ function thumbLoadHandler($thumb, $thumbnail) {
 	$thumb.unbind('load');
 	// Old thumbnail dimensions
 	var oldDim = {
-		'top'    : parseInt($thumbnail.position().top),
-		'left'   : parseInt($thumbnail.position().left),
+		'top'    : parseInt($thumbnail.offset().top),
+		'left'   : parseInt($thumbnail.offset().left - $(document).scrollLeft()),
 		'height' : parseInt($thumbnail.height()) + 'px',
 		'width'  : parseInt($thumbnail.width()) + 'px',
 	};
@@ -550,14 +574,13 @@ function thumbLoadHandler($thumb, $thumbnail) {
 		.css(oldDim)
 		.css({
 			'position' : 'fixed',
-			'z-index': 45,
-			'top' : oldDim['top'] - $(document).scrollTop(),
+			'top' : oldDim['top'],
 		})
 		.animate( 
 			newDim,
 			{
 				queue: false,
-				duration: 300,
+				duration: 0,
 				easing: 'swing'
 			}
 		)
@@ -575,12 +598,15 @@ function thumbLoadHandler($thumb, $thumbnail) {
 		.appendTo( $(document.body) )
 		.css({
 			'position' : 'fixed',
-			'z-index': 50,
 		})
 		.attr(oldDim)
-		.css(oldDim)
-		.css('top', oldDim['top'] - $(document).scrollTop())
-		.click(imageClickHandler)
+		.css(newDim)
+		.mouseenter( function() {
+			$(this).css("z-index", 3);
+		})
+		.mouseleave( function() {
+			$(this).css("z-index", 1);
+		})
 		.animate( 
 			newDim,
 			{
@@ -613,62 +639,12 @@ function imageLoadHandler($thumb, loaded_from) {
 	var newDim = getFSDimensionsForImage($image);
 	$image
 		.css('top', top)
-		.css('left', left)
+		.css('left', left - $(document).scrollLeft())
 		.css('width',  width  + 'px')
 		.css('height', height + 'px');
 	$image
-		.animate(
-				newDim, 
-				{
-					queue: false,
-					duration: 300,
-					easing: 'swing',
-					complete: function() {
-						//$thumb.hide()
-					},
-				})
-		.show();
+		.show(0);
 }
-
-function imageClickHandler() { // Hide the image
-	$('#bgimage')
-		.unbind('click')
-		.fadeOut(100);
-	$('#fgimage')
-		.stop(true, false)
-		.unbind('click')
-		.unbind('load');
-	$('#fgthumb')
-		.stop(true, false)
-		.unbind('click')
-		.unbind('load');
-	$('#fgthumb')
-		.hide()
-		.remove();
-	var $fg = $('#fgimage');
-	$fg
-		.attr('stopping', 'true')
-		.fadeOut(300)
-		.animate( 
-			{ 
-				'top'    : $fg.attr('top') - $(document).scrollTop(),
-				'left'   : $fg.attr('left'),
-				'height' : $fg.attr('height'),
-				'width'  : $fg.attr('width'),
-			},
-			{
-				queue: false,
-				duration: 300,
-				easing: 'swing'
-			},
-			function() { 
-				$fg
-					.removeAttr('src')
-					.hide();
-			}
-		);
-}
-
 
 
 ///////////////////////////
@@ -684,71 +660,6 @@ function getCookie(key) {
 			return pair[1];
 	}
 	return "";
-}
-
-var TOS_VERSION = '1';
-function over18() {
-	if (getCookie('rip_tos_v' + TOS_VERSION) === 'true') { return false; }
-	// User hasn't agreed to TOS or verified age.
-	$('#maintable').hide();
-	$('#albums_table').attr('loading', 'true');
-	var $tos = $('<div />')
-		.append( $('<h1 />').html('Warning: This site may contain explicit content') )
-		.addClass('warning')
-		.attr('id', 'maindiv')
-		.css('margin', '20px')
-		.css('padding-top', '5px');
-		
-	$('<div />')
-		.html(
-			'This website may contain adult content which is not appropriate for persons under the age of 18.' +
-			'<p>' +
-			'By entering this site, you agree to the following terms of use:')
-		.appendTo($tos);
-	
-	$('<ul />') // LIST OF TOS
-		.append( $('<li />').html('I am over eighteen years old') )
-		.append( $('<li />').html('I will not use this site to acquire illegal material in any way. This includes:') )
-		.append( $('<li />').html('<b>"Jailbait"</b> or any sexual content depicting persons under the age of 18 (including non-nude)').css('margin-left', '20px') )
-		.append( $('<li />').html('<b>Beastiality</b>').css('margin-left', '20px') )
-		.append( $('<li />').html('<b>Incest</b> (even implied)').css('margin-left', '20px') )
-		.append( $('<li />').html('<b>Copyrighted content</b>').css('margin-left', '20px') )
-		.append( $('<li />').html('<b>Gore/violent imagery</b> intended to shock or disturb').css('margin-left', '20px') )
-		.append( $('<li />').html('I will report illegal content found on the site immediately') )
-		.append( $('<li />').html('Each album has a <b class="red">report</b> button').css('margin-left', '20px') )
-		.append( $('<li />').html('I will not rip more than 20 albums per day.') )
-		.append( $('<li />').html('I am aware that the albums I rip are visible to others.') )
-		.appendTo($tos);
-
-	$('<div />')
-		.html('<b>Failure to follow the above rules will result in a ban</b>')
-		.css('margin-bottom', '20px')
-		.appendTo($tos);
-
-	$('<input />') // AGREE
-		.attr('type', 'button')
-		.val('Agree & Enter')
-		.addClass('button')
-		.click(function() { i_agree() })
-		.appendTo($tos);
-	$('<input />') // DISAGREE
-		.attr('type', 'button')
-		.val('Leave')
-		.addClass('button')
-		.css('margin-left', '20px')
-		.click(function() { window.location.href = 'about:blank' })
-		.appendTo($tos);
-	
-	$(document.body).append($tos);
-	return true;
-}
-
-function i_agree() {
-	setCookie('rip_tos_v' + TOS_VERSION, 'true');
-	$('#maintable').show();
-	$('#maindiv').hide();
-	$('#albums_table').removeAttr('loading');
-	init(); // Load the page
 }
 
 ////////////////////////
@@ -952,7 +863,7 @@ function report(album) {
 		.empty()
 		.append(
 			$('<img />')
-				.attr('src', '../spinner_dark.gif')
+				.attr('src', '../images/spinner_dark.gif')
 				.css('border', 'none')
 				.css('padding-right', '5px')
 		);
@@ -980,7 +891,7 @@ function deleteAlbum(album, blacklist) {
 		.empty()
 		.append(
 			$('<img />')
-				.attr('src', '../spinner_dark.gif')
+				.attr('src', '../images/spinner_dark.gif')
 				.css('border', 'none')
 				.css('padding-right', '5px')
 		);
@@ -998,7 +909,7 @@ function deleteAllAlbums(user, blacklist) {
 		.empty()
 		.append(
 			$('<img />')
-				.attr('src', '../spinner_dark.gif')
+				.attr('src', '../images/spinner_dark.gif')
 				.css('border', 'none')
 				.css('padding-right', '5px')
 		);
@@ -1040,7 +951,7 @@ function banUser(user, length) {
 		.empty()
 		.append(
 			$('<img />')
-				.attr('src', '../spinner_dark.gif')
+				.attr('src', '../images/spinner_dark.gif')
 				.css('border', 'none')
 				.css('padding-right', '5px')
 		);

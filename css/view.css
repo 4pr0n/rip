@@ -1,9 +1,16 @@
 body {
-	padding: 20px;
-	padding-top: 40px;
+	overflow-x: scroll;
+	overflow-y: hidden;
 	background-color: #666;
 	color: #eee;
 	font-family: Verdana, monospace;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
 }
 
 a {
@@ -63,19 +70,39 @@ li {
 
 #maintable {
 	width: 100%;
+	position: absolute;
+	bottom: 0px;
+	z-index: 3;
+	margin-right: 90px;
+}
+
+#bottom_navbar {
+	font-size: 0.6em;
+	background-color: #555;
+	border-radius: 5px;
+	position: fixed;
+	left: 20px;
+	bottom: 0px;
+	padding: 4px;
+	margin: 0px;
+	text-align: right;
 }
 
 .page {
-	background-color: #444;
-	border-radius: 30px;
-	padding-right: 20px;
-	padding: 15px;
+	background-color: rgba(0,0,0,0.0);
+	border-radius: 20px;
+	padding: 10px;
 	padding-top: 0px;
+	padding-bottom: 0px;
 	box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.6);
-	margin-bottom: 20px;
 }
 .clickable:active {
 	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.6);
+}
+#status_area, #status_div {
+	z-index: -1;
+	width: auto;
+	font-size: 0.8em;
 }
 
 table.header {
@@ -129,7 +156,6 @@ div.subheader {
 }
 .download_box:hover {
 	cursor: pointer;
-	color: #fff;
 	text-decoration: none;
 	box-shadow: 6px  0px 10px rgba(150, 150, 150, 0.8),
 	            0px  6px 10px rgba(150, 150, 150, 0.8),
@@ -164,7 +190,6 @@ a.box {
 }
 a.box:hover {
 	color: #fff;
-	background-color: #222;
 	text-decoration: none;
 	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.6),
 	            0px  4px 10px rgba(150, 150, 150, 0.6),
@@ -178,31 +203,36 @@ a.box:hover {
 	padding: 10px;
 	padding-left: 15px;
 	margin-bottom: 10px;
-	font-size: 1.2em;
-	font-weight: bold;
+	font-size: 1.4em;
 	letter-spacing: 0.01em;
+	white-space: nowrap;
 }
 .section_text {
 	padding-left: 15px;
 	font-size: 1.0em;
 	font-weight: normal;
+	white-space: nowrap;
 }
 .all_album_title {
-	padding: 10px;
+	padding: 5px;
 	padding-left: 15px;
-	margin-bottom: 10px;
-	font-size: 1.0em;
-	font-weight: bold;
+	margin: 0px;
+	font-size: 0.9em;
 	letter-spacing: 0.01em;
+	text-shadow:  4px  0px 10px rgba(0, 0, 0, 0.6),
+	              0px  4px 10px rgba(0, 0, 0, 0.6),
+	             -4px  0px 10px rgba(0, 0, 0, 0.6),
+	              0px -4px 10px rgba(0, 0, 0, 0.6);
 }
 
 img {
 	visibility: visible;
 	display: inline;
-	margin: 2px;
+	margin: 0px;
 	margin-bottom: 0px;
 	margin-top: 0px;
 	border: 2px solid white;
+	border-radius: 5px;
 	box-shadow: 1px  0px 10px rgba(150, 150, 150, 0.3),
 	            0px  1px 10px rgba(150, 150, 150, 0.3),
 	           -1px  0px 10px rgba(150, 150, 150, 0.3),
@@ -217,22 +247,22 @@ img:hover {
 }
 
 table.album {
-	height: 200px;
 	width: 100%;
+	text-align: left;
 }
 table.album:hover {
 	cursor: pointer;
-	background-color: #555;
+	box-shadow: 4px  0px 10px rgba(150, 150, 150, 0.2),
+	            0px  4px 10px rgba(150, 150, 150, 0.2),
+	           -4px  0px 10px rgba(150, 150, 150, 0.2),
+	            0px -4px 10px rgba(150, 150, 150, 0.2),
+	            5px  5px  5px rgba( 10,  10,  10, 0.2);
 }
 
 td.image {
-	vertical-align: middle;
+	vertical-align: bottom;
 	text-align: center;
-	min-width: 200px;
-	min-height: 200px;
 	padding: 0px;
-	padding-bottom: 5px;
-	padding-top: 5px;
 	margin: 0px;
 }
 
@@ -250,7 +280,7 @@ img.image_small {
 }
 
 div.load_content {
-	font-size: 1.2em;
+	font-size: 0.2em;
 	text-shadow:  4px  0px 10px rgba(150, 150, 150, 0.6),
 	              0px  4px 10px rgba(150, 150, 150, 0.6),
 	             -4px  0px 10px rgba(150, 150, 150, 0.6),
@@ -259,7 +289,7 @@ div.load_content {
 
 #bgimage {
 	display: none;
-	z-index: 2;
+	z-index: 0;
 	position: fixed;
 	top: 0px;
 	left: 0px;
@@ -272,7 +302,7 @@ div.load_content {
 
 #fgimage {
 	display: none;
-	z-index: 3;
+	z-index: 1;
 	position: fixed;
 	top: 0px;
 	left: 0px;
@@ -296,9 +326,6 @@ div.load_content {
 }
 
 .thumbs {
-	padding: 20px;
-	padding-top: 30px;
-	margin-top: 30px;
 	width: 100%;
 }
 
@@ -339,6 +366,7 @@ input.button:active {
 	border-bottom-left-radius: 10px;
 	border-bottom-right-radius: 10px;
 	box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.6);
+	z-index: 2;
 }
 table.bottom {
 	max-height: 10px;
