@@ -30,19 +30,16 @@ def main(): # Prints JSON response to query
 	after   =     keys.get('after',   '')   # Next album to retrieve
 	blacklist =   keys.get('blacklist', '') # Album to blacklist
 
-	# Get from list of all albums
-	if  'view_all' in keys: get_all_albums(count, preview, after)
+	if  'view_all'       in keys: get_all_albums(count, preview, after)
+	elif 'user'          in keys: get_all_albums(count, preview, after, user=keys['user'])
+	elif 'get_report'    in keys: get_all_albums(count, preview, after, reported=True)
 
 	# Get images from one album
 	elif 'view'          in keys: get_album(keys['view'].replace(' ', '%20'), start, count)
 	# Get URLs for an album
 	elif 'urls'          in keys: get_urls_for_album(keys['urls'])
-	# Get albums ripped by a user
-	elif 'user'          in keys: get_albums_for_user(keys['user'], count, preview, after)
 	# Report an album
 	elif 'report'        in keys: report_album(keys['report'], reason=keys.get('reason', ''))
-	# Get from list of reported album
-	elif 'get_report'    in keys: get_reported_albums(count, preview, after)
 	# Remove all reports or an album
 	elif 'clear_reports' in keys: clear_reports(keys['clear_reports'])
 	# Delete an album, add to blacklist
@@ -59,84 +56,80 @@ def main(): # Prints JSON response to query
 ###################
 # ALBUMS
 
-def get_all_albums(count, preview_size, after):
+def get_all_albums(count, preview_size, after, user=None, reported=False):
 	found_after = False # User-specified 'after' was found in list of directories
-	# Get directories and timestamps
+	# Get directories and key to sort on
 	thedirs = []
 	for f in listdir('.'):
 		if not path.isdir(f): continue
 		if not path.exists('%s.zip' % f): continue
 		if not found_after and after != '' and f == after: found_after = True
-		thedirs.append( (f, path.getmtime(f) ) )
-	# Sort by most recent
-	thedirs = sorted(thedirs, key=lambda k: k[1], reverse=True)
-	
-	# Strip out timestamp
-	for i in xrange(0, len(thedirs)):
-		thedirs[i] = thedirs[i][0]
-	
-	# Filter results
-	filter_albums(thedirs, count, preview_size, after, found_after)
+		if reported:
+			reportstxt = path.join(f, 'reports.txt')
+			if not path.exists(reportstxt): continue
+			fil = open(reportstxt, 'r')
+			reports = fil.read().count('\n')
+			fil.close()
+			thedirs.append({
+				'path': f,
+				'sort': reports
+			})
+			continue
+		elif user != None:
+			iptxt = path.join(f, 'ip.txt')
+			if not path.exists(iptxt): continue
+			fil = open(iptxt, 'r')
+			ip = fil.read().strip()
+			fil.close()
+			if user == 'me' and ip != environ['REMOTE_ADDR']: continue
+			if user != 'me' and ip != user: continue
+		thedirs.append( {
+			'path': f,
+			'sort': path.getmtime(f)
+		})
 
-
-def get_albums_for_user(user, count, preview_size, after):
-	found_after = False # User-specified 'after' was found in list of directories
-	# Get directories and timestamps
-	thedirs = []
-	for f in listdir('.'):
-		if not path.isdir(f): continue
-		if not path.exists('%s.zip' % f): continue
-		if not found_after and after != '' and f == after: found_after = True
-		iptxt = path.join(f, 'ip.txt')
-		if not path.exists(iptxt): continue
-		fil = open(iptxt, 'r')
-		ip = fil.read().strip()
-		fil.close()
-		if user == 'me' and ip != environ['REMOTE_ADDR']: continue
-		if user != 'me' and ip != user: continue
-		thedirs.append( (f, path.getmtime(f) ) )
-	
-	# Sort by most recent
-	thedirs = sorted(thedirs, key=lambda k: k[1], reverse=True)
-	
-	# Strip out timestamp
-	for i in xrange(0, len(thedirs)):
-		thedirs[i] = thedirs[i][0]
-	
-	# Filter results
-	filter_albums(thedirs, count, preview_size, after, found_after)
-	
-
-def get_reported_albums(count, preview_size, after):
-	if not is_admin():
-		print_error('')
-		return
-	
-	found_after = False # User-specified 'after' was found in list of directories
-	# Get reported directories & number of reports
-	thedirs = []
-	for f in listdir('.'):
-		if not path.isdir(f): continue
-		reportstxt = path.join(f, 'reports.txt')
-		if not path.exists(reportstxt): continue
-		if not found_after and after != '' and f == after: found_after = True
-		fil = open(reportstxt, 'r')
-		reports = fil.read().split('\n')
-		fil.close()
-		thedirs.append( (f, len(reports) ) )
-	
-	# Sort by most recent
-	thedirs = sorted(thedirs, key=lambda k: int(k[1]), reverse=True)
-	
-	# Strip out timestamp
-	for i in xrange(0, len(thedirs)):
-		thedirs[i] = thedirs[i][0]
+	# Sort by most recent, strip out timestamps
+	thedirs = [x['path'] for x in sorted(thedirs, key=lambda k: k['sort'], reverse=True)]
 	
 	# Filter results
 	filter_albums(thedirs, count, preview_size, after, found_after)
 
 
 def filter_albums(thedirs, count, preview_size, after, found_after):
+	albums = []
+
+	if found_after:
+		start_index = thedirs.index(after)
+	else:
+		start_index = 0
+
+	for i in xrange(start_index, min(start_index + count, len(thedirs))):
+		album = thedirs[i]
+		last_after = album
+		images_dict = get_images_for_album(album, 0, 4)
+		album_result = {
+			'album'  : album,
+			'images' : images_dict['images'],
+			'total'  : images_dict['total'],
+			'time'   : path.getmtime(album)
+		}
+		albums.append(album_result)
+
+	if start_index + count >= len(thedirs):
+		last_after = ''
+	else:
+		last_after = thedirs[min(start_index + count, len(thedirs))]
+
+	# Dump response
+	print dumps( { 
+		'albums' : albums,
+		'total'  : len(thedirs),
+		'after'  : last_after,
+		'index'  : start_index + len(albums),
+		'count'  : count
+		} )
+
+def filter_albums2(thedirs, count, preview_size, after, found_after):
 	dcount = 0 # Number of albums retrieved & returned to user
 	dtotal = 0 # Total number of albums
 	dindex = 0 # Current index of last_after
@@ -221,10 +214,10 @@ def filter_albums(thedirs, count, preview_size, after, found_after):
 
 
 def sizeof_fmt(num):
-    for x in ['bytes','KB','MB','GB','TB']:
-        if num < 1024.0:
-            return "%3.1f %s" % (num, x)
-        num /= 1024.0
+	for x in ['bytes','KB','MB','GB','TB']:
+		if num < 1024.0:
+			return "%3.1f %s" % (num, x)
+		num /= 1024.0
 
 # Attempts to guess URL from album name
 def guess_url(album):
